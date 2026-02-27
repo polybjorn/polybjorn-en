@@ -1,0 +1,152 @@
+---
+import '@fontsource/piazzolla/400.css';
+import '@fontsource/piazzolla/700.css';
+import '@fontsource/piazzolla/400-italic.css';
+const { lang = 'en', title, description, image } = Astro.props;
+const otherLang = lang === 'en' ? 'no' : 'en';
+const otherUrl = lang === 'en' ? '/no' : '/';
+const path = Astro.url.pathname;
+const canonicalUrl = `https://polybjorn.com${path === '/' ? '' : path}`;
+const enUrl = lang === 'en' ? canonicalUrl : `https://polybjorn.com${path.replace(/^\/no/, '') || '/'}`;
+const noUrl = lang === 'no' ? canonicalUrl : `https://polybjorn.com/no${path === '/' ? '' : path}`;
+const ogImage = image ?? 'https://res.cloudinary.com/det9ftymo/image/upload/c_pad,b_rgb:1e2228,w_1200,h_630/v1725405810/photo_jn86fv.jpg';
+---
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" type="image/png" sizes="48x48" href="/favicon-48x48.png" />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="author" content="Bjørn Andreas Andersen" />
+    <link rel="canonical" href={canonicalUrl} />
+    <link rel="alternate" hreflang="en" href={enUrl} />
+    <link rel="alternate" hreflang="no" href={noUrl} />
+    <link rel="alternate" hreflang="x-default" href="https://polybjorn.com" />
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImage} />
+    <!-- Twitter/X Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+    <!-- JSON-LD -->
+    <script type="application/ld+json" set:html={JSON.stringify([{
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "name": "Bjørn A. Andersen",
+      "alternateName": "Bjørn Andreas Andersen",
+      "url": "https://polybjorn.com",
+      "image": "https://res.cloudinary.com/det9ftymo/image/upload/c_pad,b_gen_fill,w_360,h_360/v1725405810/photo_jn86fv.jpg",
+      "sameAs": [
+        "https://grabcad.com/bjorn.a.andersen-1",
+        "https://social.polybjorn.com/@bjanda"
+      ],
+      "jobTitle": "3D Designer & Instructor",
+      "description": "3D modelling, 3D printing, fabrication, electronics and design services in Haugesund and Haugalandet, Norway.",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Haugesund",
+        "addressRegion": "Rogaland",
+        "addressCountry": "NO"
+      },
+      "knowsAbout": ["3D modelling", "3D printing", "Additive manufacturing", "Graphic design", "Electronics", "Fabrication"]
+    }, {
+      "@context": "https://schema.org",
+      "@type": "Service",
+      "name": "3D Printing & Design Services",
+      "description": "3D modelling, 3D printing, fabrication and hands-on courses in Haugesund and Haugalandet, Norway.",
+      "areaServed": ["Haugesund", "Haugalandet", "Rogaland"],
+      "provider": {
+        "@type": "Person",
+        "name": "Bjørn A. Andersen",
+        "alternateName": "Bjørn Andreas Andersen",
+        "url": "https://polybjorn.com"
+      }
+    }])} />
+    <slot name="head" />
+    <style>
+      html, body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        overflow-x: hidden;
+      }
+      html {
+        scrollbar-gutter: stable;
+      }
+      .lang-toggle {
+        position: fixed;
+        top: 1rem;
+        right: 1rem;
+        display: inline-block;
+        text-decoration: none;
+        z-index: 100;
+        opacity: 0.75;
+        transition: opacity 0.3s, transform 0.3s;
+        line-height: 0;
+        font-size: 0;
+      }
+      .lang-toggle:hover { opacity: 1; }
+      .lang-toggle.hidden {
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(-0.5rem);
+      }
+    </style>
+  </head>
+  <body>
+    <a class="lang-toggle" href={otherUrl} title={otherLang === 'no' ? 'Norsk' : 'English'}>
+      {otherLang === 'no' ? (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 20" style="width:28px;height:20px;display:block;border-radius:4px;">
+          <rect width="28" height="20" fill="#ef2b2d"/>
+          <rect x="7" width="5" height="20" fill="#fff"/>
+          <rect y="7" width="28" height="5" fill="#fff"/>
+          <rect x="8" width="3" height="20" fill="#002868"/>
+          <rect y="8" width="28" height="3" fill="#002868"/>
+        </svg>
+      ) : (
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 20" style="width:28px;height:20px;display:block;border-radius:4px;">
+          <rect width="28" height="20" fill="#003399"/>
+          <g fill="#fc0">
+            <polygon points="14.000,1.600 14.429,2.909 15.807,2.913 14.694,3.726 15.117,5.037 14.000,4.230 12.883,5.037 13.306,3.726 12.193,2.913 13.571,2.909"/>
+            <polygon points="17.250,2.471 17.679,3.780 19.057,3.784 17.944,4.596 18.367,5.908 17.250,5.101 16.133,5.908 16.556,4.596 15.443,3.784 16.821,3.780"/>
+            <polygon points="19.629,4.850 20.058,6.159 21.436,6.163 20.323,6.976 20.746,8.287 19.629,7.480 18.512,8.287 18.935,6.976 17.822,6.163 19.200,6.159"/>
+            <polygon points="20.500,8.100 20.929,9.409 22.307,9.413 21.194,10.226 21.617,11.537 20.500,10.730 19.383,11.537 19.806,10.226 18.693,9.413 20.071,9.409"/>
+            <polygon points="19.629,11.350 20.058,12.659 21.436,12.663 20.323,13.476 20.746,14.787 19.629,13.980 18.512,14.787 18.935,13.476 17.822,12.663 19.200,12.659"/>
+            <polygon points="17.250,13.729 17.679,15.039 19.057,15.042 17.944,15.855 18.367,17.166 17.250,16.359 16.133,17.166 16.556,15.855 15.443,15.042 16.821,15.039"/>
+            <polygon points="14.000,14.600 14.429,15.909 15.807,15.913 14.694,16.726 15.117,18.037 14.000,17.230 12.883,18.037 13.306,16.726 12.193,15.913 13.571,15.909"/>
+            <polygon points="10.750,13.729 11.179,15.039 12.557,15.042 11.444,15.855 11.867,17.166 10.750,16.359 9.633,17.166 10.056,15.855 8.943,15.042 10.321,15.039"/>
+            <polygon points="8.371,11.350 8.800,12.659 10.178,12.663 9.065,13.476 9.488,14.787 8.371,13.980 7.254,14.787 7.677,13.476 6.564,12.663 7.942,12.659"/>
+            <polygon points="7.500,8.100 7.929,9.409 9.307,9.413 8.194,10.226 8.617,11.537 7.500,10.730 6.383,11.537 6.806,10.226 5.693,9.413 7.071,9.409"/>
+            <polygon points="8.371,4.850 8.800,6.159 10.178,6.163 9.065,6.976 9.488,8.287 8.371,7.480 7.254,8.287 7.677,6.976 6.564,6.163 7.942,6.159"/>
+            <polygon points="10.750,2.471 11.179,3.780 12.557,3.784 11.444,4.596 11.867,5.908 10.750,5.101 9.633,5.908 10.056,4.596 8.943,3.784 10.321,3.780"/>
+          </g>
+        </svg>
+      )}
+    </a>
+    <slot />
+    <script define:vars={{ lang }}>
+      if (lang === 'en' && !localStorage.getItem('lang')) {
+        if (navigator.language.startsWith('no')) {
+          localStorage.setItem('lang', 'no');
+          window.location.replace('/no');
+        }
+      }
+      document.querySelector('.lang-toggle').addEventListener('click', () => {
+        localStorage.setItem('lang', {lang} === 'en' ? 'no' : 'en');
+      });
+
+      const flag = document.querySelector('.lang-toggle');
+      window.addEventListener('scroll', () => {
+        flag.classList.toggle('hidden', window.scrollY > 60);
+      }, { passive: true });
+    </script>
+  </body>
+</html>

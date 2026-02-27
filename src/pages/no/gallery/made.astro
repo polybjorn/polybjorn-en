@@ -1,0 +1,219 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import { projects, cloudinaryUrl } from '../../../data/made.js';
+import { ArrowUp, ArrowLeft } from 'lucide-astro';
+
+const lang = 'no';
+const flat = projects.flatMap(p => p.images.map(img => ({ ...img, project: p.title })));
+const seed = 42;
+const seeded = (n) => { let x = Math.sin(n + seed) * 10000; return x - Math.floor(x); };
+const allImages = flat.map((img, i) => ({ img, sort: seeded(i) })).sort((a, b) => a.sort - b.sort).map(x => x.img);
+---
+
+<Layout lang={lang} title="Gallery – Bjørn A. Andersen" description="Gallery of 3D models, prints, and renders by Bjørn A. Andersen.">
+  
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #1e2228;
+      color: #eee;
+      font-family: 'Piazzolla', serif;
+    }
+
+    .wrap {
+      max-width: 1600px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 4rem;
+    }
+
+    .back {
+      display: inline-block;
+      margin-bottom: 0rem;
+      color: #ccc;
+      text-decoration: none;
+      font-size: 0.85rem;
+      letter-spacing: 0.05em;
+      transition: color 0.2s;
+    }
+    .back:hover { color: #fff; }
+
+    .back-home {
+      position: fixed;
+      top: calc(1rem - 4px);
+      left: max(1rem, env(safe-area-inset-left, 0px) + 0.5rem);
+      color: #ccc;
+      text-decoration: none;
+      z-index: 100;
+      opacity: 0.75;
+      transition: opacity 0.3s, transform 0.3s;
+      line-height: 1;
+    }
+    .back-home:hover { opacity: 1; color: #fff; }
+    .back-home.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-0.5rem);
+    }
+
+    .scroll-top {
+      display: flex;
+      justify-content: center;
+      padding: 1.5rem 0 0;
+      color: #ccc;
+      text-decoration: none;
+      opacity: 0.75;
+      transition: opacity 0.3s, color 0.3s;
+      line-height: 1;
+    }
+    .scroll-top:hover { opacity: 1; color: #fff; }
+
+    .current {
+      color: #fff;
+      pointer-events: none;
+      border-bottom: 1px solid #fff;
+    }
+
+    @media (max-width: 700px) {
+      .back {
+        font-size: 1rem;
+        color: #ccc;
+      }
+    }
+
+    .grid {
+      columns: 4;
+      gap: 1rem;
+      opacity: 0;
+      transition: opacity 0.6s ease;
+    }
+
+    .grid.ready {
+      opacity: 1;
+    }
+
+    .grid-item {
+      position: relative;
+      margin-bottom: 1rem;
+      break-inside: avoid;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .grid-item img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .grid-item.opaque img { background: #1e2228; }
+
+.overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 0.75rem;
+  display: flex;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s;
+  background: none;
+}
+
+    .grid-item:hover .overlay { opacity: 1; }
+
+.overlay-title {
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #fff;
+  background: rgba(0,0,0,0.5);
+  padding: 3px 10px;
+  border-radius: 4px;
+}
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      overflow: hidden;
+      clip: rect(0,0,0,0);
+      white-space: nowrap;
+      border: 0;
+    }
+    @media (max-width: 700px) {
+      .grid { columns: 1; }
+      .overlay { opacity: 1; background: none; }
+      .overlay-title { display: none; }
+    }
+
+    @media (max-width: 400px) {
+      .grid { columns: 1; }
+    }
+  </style>
+
+  <a class="back-home" href="/no" aria-label="Tilbake til forsiden"><ArrowLeft size={28} strokeWidth={1.5} /></a>
+  <main>
+  <div class="wrap">
+    <div style="display:flex;justify-content:center;gap:3rem;margin-bottom:2rem;">
+      <span class="back current">Laget</span>
+      <a class="back" href="/no/gallery/found">Funnet</a>
+    </div>
+    <h1 class="sr-only">Laget</h1>
+    <div class="grid" id="grid">
+      {allImages.map(img => (
+        <div class={`grid-item ${img.transparent ? 'transparent' : 'opaque'}`}>
+          {img.link
+            ? <a href={img.link} target="_blank" rel="noopener" aria-label={img.title}><img src={cloudinaryUrl(img.url, { width: 600 })} alt="" loading="lazy" /></a>
+            : <img src={cloudinaryUrl(img.url, { width: 600 })} alt={img.alt} loading="lazy" />
+          }
+          <div class="overlay">
+            <span class="overlay-title">{img.title}</span>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+  <div style="max-width:1600px;width:100%;margin:0 auto;padding:0 1.5rem 3rem;">
+    <img src="https://res.cloudinary.com/djpkffk5u/image/upload/v1772447680/Panorama_wk07xx.jpg" alt="Workshop" style="width:100%;border-radius:6px;display:block;" loading="lazy" />
+  </div>
+  <a class="scroll-top" href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});this.classList.remove('visible');return false;" aria-label="Til toppen"><ArrowUp size={28} strokeWidth={1.5} /></a>
+  <div style="display:flex;justify-content:center;gap:3rem;padding:2rem 0 3rem;">
+    <span class="back current">Laget</span>
+    <a class="back" href="/no/gallery/found">Funnet</a>
+  </div>
+  </main>
+
+  <script>
+    const backHome = document.querySelector('.back-home');
+    const scrollTop = document.querySelector('.scroll-top');
+    window.addEventListener('scroll', () => {
+      backHome.classList.toggle('hidden', window.scrollY > 60);
+    }, { passive: true });
+  </script>
+
+  <script>
+    const grid = document.getElementById('grid');
+    const imgs = Array.from(grid.querySelectorAll('img'));
+    let loaded = 0;
+    const threshold = Math.min(imgs.length, 8);
+
+    const reveal = () => {
+      loaded++;
+      if (loaded >= threshold) {
+        requestAnimationFrame(() => grid.classList.add('ready'));
+      }
+    };
+
+    imgs.slice(0, threshold).forEach(img => {
+      if (img.complete) reveal();
+      else { img.addEventListener('load', reveal); img.addEventListener('error', reveal); }
+    });
+
+    setTimeout(() => grid.classList.add('ready'), 3000);
+  </script>
+</Layout>

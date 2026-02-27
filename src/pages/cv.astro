@@ -1,0 +1,352 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { t } from '../data/translations.js';
+import { cv } from '../data/cv.js';
+import { ArrowUp, ArrowLeft } from 'lucide-astro';
+
+const lang = 'en';
+const tr = t[lang];
+---
+
+<Layout lang={lang} title="CV – Bjørn A. Andersen" description="Curriculum vitae for Bjørn A. Andersen: 3D modelling, additive manufacturing, graphic design, and 3D printing courses.">
+  
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #1e2228;
+      color: #eef0f3;
+      font-family: 'Piazzolla', serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .cv-wrap {
+      max-width: 720px;
+      width: 100%;
+      padding: 4rem 2rem 4rem;
+    }
+
+    .cv-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1.5rem;
+      gap: 2rem;
+    }
+
+    .cv-avatar {
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+
+    .back {
+      display: inline-block;
+      color: #ccc;
+      text-decoration: none;
+      font-size: 0.85rem;
+      letter-spacing: 0.05em;
+      transition: color 0.2s;
+    }
+    .back:hover { color: #fff; }
+
+    .back-home {
+      position: fixed;
+      top: calc(1rem - 4px);
+      left: 1rem;
+      color: #ccc;
+      text-decoration: none;
+      z-index: 100;
+      opacity: 0.75;
+      transition: opacity 0.3s, transform 0.3s;
+      line-height: 1;
+    }
+    .back-home:hover { opacity: 1; color: #fff; }
+    .back-home.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-0.5rem);
+    }
+
+    .scroll-top {
+      position: fixed;
+      bottom: 1rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(0.5rem);
+      color: #ccc;
+      text-decoration: none;
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s, transform 0.3s;
+      line-height: 1;
+    }
+    .scroll-top.visible {
+      opacity: 0.75;
+      pointer-events: auto;
+      transform: translateX(-50%) translateY(0);
+    }
+    .scroll-top:hover { opacity: 1; color: #fff; }
+
+    h1 {
+      font-family: 'Piazzolla', serif;
+      font-size: 2.2rem;
+      color: #fff;
+      margin-bottom: 0.2rem;
+    }
+
+    .cv-sub {
+      color: #8a8f99;
+      font-size: 0.85rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    section {
+      margin-bottom: 3rem;
+      margin-top: 1.5rem;
+    }
+
+    h2 {
+      font-family: 'Piazzolla', serif;
+      font-size: 1.1rem;
+      font-weight: normal;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #888;
+      border-bottom: 1px solid #2a2e35;
+      padding-bottom: 0.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .entry {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      gap: 0.5rem 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .period {
+      color: #8a8f99;
+      font-size: 0.85rem;
+      padding-top: 0.15rem;
+    }
+
+    .entry-content .title {
+      color: #fff;
+      font-weight: bold;
+      font-size: 1rem;
+    }
+
+    .entry-content .org {
+      color: #8a8f99;
+      font-size: 0.9rem;
+      margin-bottom: 0.3rem;
+    }
+
+    .entry-content .desc {
+      color: #dde1e7;
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
+    .entry-content .org a {
+      color: #6aaeee;
+      text-decoration: none;
+    }
+
+    .entry-content .org a:hover {
+      text-decoration: underline;
+    }
+
+    .entry-content .org .insta-link {
+      display: inline-flex;
+      align-items: center;
+      margin-left: 0.4rem;
+      color: #c084fc;
+      vertical-align: middle;
+      transition: opacity 0.2s;
+    }
+
+    .entry-content .org .insta-link:hover {
+      opacity: 0.8;
+    }
+
+    .entry-content .org .fb-link {
+      display: inline-flex;
+      align-items: center;
+      margin-left: 0.4rem;
+      color: #4a9edd;
+      vertical-align: middle;
+      transition: opacity 0.2s;
+    }
+
+    .entry-content .org .fb-link:hover {
+      opacity: 0.8;
+    }
+
+    .skills-list {
+      list-style: none;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .skills-list li {
+      background: #2a2e35;
+      color: #eef0f3;
+      font-size: 0.85rem;
+      padding: 0.3rem 0.8rem;
+      border-radius: 4px;
+    }
+
+    .software-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .software-group h3 {
+      font-size: 0.8rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #8a8f99;
+      margin-bottom: 0.6rem;
+      font-weight: normal;
+    }
+
+    .software-list {
+      list-style: none;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .software-list li {
+      background: #2a2e35;
+      color: #eef0f3;
+      font-size: 0.8rem;
+      padding: 0.25rem 0.7rem;
+      border-radius: 4px;
+    }
+
+    .references {
+      color: #ccc;
+      font-size: 0.8rem;
+      letter-spacing: 0.05em;
+      text-align: center;
+      margin-top: 0.5rem;
+    }
+
+    @media (max-width: 480px) {
+      .entry {
+        grid-template-columns: 1fr;
+        gap: 0.2rem;
+      }
+      .period {
+        font-size: 0.8rem;
+      }
+      .cv-wrap {
+        padding: 2rem 1.5rem 3rem;
+      }
+    }
+  </style>
+
+  <a class="back-home" href="/" aria-label="Back to home"><ArrowLeft size={28} strokeWidth={1.5} /></a>
+  <main>
+  <div class="cv-wrap">
+    <div class="cv-header">
+      <div>
+        <h1>Bjørn A. Andersen</h1>
+        <p class="cv-sub">{tr.cv_title}</p>
+      </div>
+      <img
+        class="cv-avatar"
+        src="https://res.cloudinary.com/djpkffk5u/image/upload/v1772287930/profile-img_pr1q8o.png"
+        alt="Bjørn A. Andersen"
+      />
+    </div>
+
+    <section>
+      <h2>{tr.experience}</h2>
+      {cv.experience.map(entry => (
+        <div class="entry">
+          <div class="period">{entry.period}</div>
+          <div class="entry-content">
+            <div class="title">{entry[lang].title}</div>
+            <div class="org">
+              {entry.links?.website
+                ? <a href={entry.links.website} target="_blank" rel="noopener">{entry[lang].org}</a>
+                : entry[lang].org}
+              {entry.links?.instagram && (
+                <a href={entry.links.instagram} target="_blank" rel="noopener" class="insta-link" aria-label="Instagram">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+                  </svg>
+                </a>
+              )}
+              {entry.links?.facebook && (
+                <a href={entry.links.facebook} target="_blank" rel="noopener" class="fb-link" aria-label="Facebook">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+                    <path fill="currentColor" stroke="none" d="M13 10h2.5l-.5 2.5H13V18h-2.5v-5.5H9V10h1.5V8.5A2.5 2.5 0 0 1 13 6h2v2.5h-1.5a.5.5 0 0 0-.5.5V10z"/>
+                  </svg>
+                </a>
+              )}
+            </div>
+            <div class="desc">{entry[lang].desc}</div>
+          </div>
+        </div>
+      ))}
+    </section>
+
+    <section>
+      <h2>{tr.education}</h2>
+      {cv.education.map(entry => (
+        <div class="entry">
+          <div class="period">{entry.period}</div>
+          <div class="entry-content">
+            <div class="title">{entry[lang].title}</div>
+            <div class="org">{entry[lang].org}</div>
+          </div>
+        </div>
+      ))}
+    </section>
+
+    <section>
+      <h2>{tr.skills}</h2>
+      <ul class="skills-list">
+        {cv.skills[lang].map(skill => (
+          <li>{skill}</li>
+        ))}
+      </ul>
+    </section>
+
+    <section>
+      <h2>{tr.software}</h2>
+      {Object.entries(cv.software[lang]).map(([group, items]) => (
+        <div class="software-group">
+          <h3>{group}</h3>
+          <ul class="software-list">
+            {items.map(item => <li>{item}</li>)}
+          </ul>
+        </div>
+      ))}
+    </section>
+
+  </div>
+  <a class="scroll-top" href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});this.classList.remove('visible');return false;" aria-label="Back to top"><ArrowUp size={28} strokeWidth={1.5} /></a>
+  </main>
+
+  <script>
+    const backHome = document.querySelector('.back-home');
+    const scrollTop = document.querySelector('.scroll-top');
+    window.addEventListener('scroll', () => {
+      backHome.classList.toggle('hidden', window.scrollY > 60);
+      scrollTop.classList.toggle('visible', window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 200);
+    }, { passive: true });
+  </script>
+</Layout>
