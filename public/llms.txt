@@ -1,0 +1,26 @@
+# Bjørn A. Andersen — Polybjørn
+
+> 3D modelling, additive manufacturing, graphic design, and hands-on 3D printing courses. Based in Røvær, Haugesund, Norway.
+
+## About
+
+Bjørn A. Andersen operates Polybjørn, a sole proprietorship offering 3D modelling, additive manufacturing, and courses in 3D printing. He takes projects from first sketch to finished product and shares editable designs under Creative Commons licenses when possible.
+
+## Services
+
+- 3D modelling and rendering
+- Additive manufacturing / 3D printing
+- Graphic design
+- Hands-on 3D printing courses
+
+## Links
+
+- Website: https://polybjorn.com
+- Gallery: https://polybjorn.com/gallery
+- CV: https://polybjorn.com/cv
+- 3D Models: https://grabcad.com/bjorn.a.andersen-1
+- Mastodon: https://social.polybjorn.com/@bjanda
+
+## Contact
+
+- Signal: https://signal.me/#eu/polybjorn.99

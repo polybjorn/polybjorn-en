@@ -1,0 +1,37 @@
+export const found = [
+  { url: "https://res.cloudinary.com/djpkffk5u/image/upload/v1772377834/Telttur_2-1_oqqjlu.heic", alt: "Camping trip" },
+  { url: "https://res.cloudinary.com/djpkffk5u/image/upload/v1772377832/Sankthans_2_zangti.jpg", alt: "Sankthans" },
+  { url: "https://res.cloudinary.com/djpkffk5u/image/upload/v1772377829/R%C3%B8v%C3%A6r_1_gqrd9x.jpg", alt: "Røvær" },
+  { url: "https://res.cloudinary.com/djpkffk5u/image/upload/v1772377827/Pamphylia_2_pj5yq2.jpg", alt: "Pamphylia" },
+  { url: "https://res.cloudinary.com/djpkffk5u/image/upload/v1772377826/Kjerag_2_t6poau.jpg", alt: "Kjerag" },
+  { url: "https://res.cloudinary.com/djpkffk5u/image/upload/v1772377823/Grensegata_5-1_rjbrzb.jpg", alt: "Grensegata" },
+  { url: "https://res.cloudinary.com/djpkffk5u/image/upload/v1772377822/f144db7d-a478-4549-8bca-0e9f52a0f363_wsk6oz.jpg", alt: "Photo" },
+  { url: "https://res.cloudinary.com/djpkffk5u/image/upload/v1772377820/ed853954-6d8e-4a4e-a248-dd9bc12b066d_d4kf6a.jpg", alt: "Photo" },
+  { url: "https://res.cloudinary.com/djpkffk5u/image/upload/v1772377816/c46d565d-377f-486d-b61f-309acbc49228_uks6ai.heic", alt: "Photo" },
+  { url: "https://res.cloudinary.com/djpkffk5u/image/upload/v1772377817/d99d1264-6d46-42cd-ac05-0c5cd508a69b_hei1pl.png", alt: "Photo" },
+  { url: "https://res.cloudinary.com/djpkffk5u/image/upload/v1772377814/be9ccdbd-c8f9-45ad-a95d-a2d53cb12aae_g3lgtm.jpg", alt: "Photo" },
+  { url: "https://res.cloudinary.com/djpkffk5u/image/upload/v1772377812/a658c3c7-ad46-4fb3-bdb0-dc967d3a5032_dkbwtk.jpg", alt: "Photo" },
+  { url: "https://res.cloudinary.com/djpkffk5u/image/upload/v1772377809/a7fadeed-f8dd-434c-8853-ecf4d1558324_kvvvlw.jpg", alt: "Photo" },
+  { url: "https://res.cloudinary.com/djpkffk5u/image/upload/v1772377807/98821fdf-9ce6-48de-b206-0024a12189fd_ymeohx.jpg", alt: "Photo" },
+  { url: "https://res.cloudinary.com/djpkffk5u/image/upload/v1772377806/68913dc0-c037-4d02-83cb-8d5a0f2bedc7_itdrvs.jpg", alt: "Photo" },
+  { url: "https://res.cloudinary.com/djpkffk5u/image/upload/v1772377804/827ca140-e776-46e8-b0a5-2580d6300fc9_kzibju.jpg", alt: "Photo" },
+  { url: "https://res.cloudinary.com/djpkffk5u/image/upload/v1772377802/91c6f050-3732-4200-8ec8-79fa2182ffee_cjm9lv.heic", alt: "Photo" },
+  { url: "https://res.cloudinary.com/djpkffk5u/image/upload/v1772377799/86e688fb-e8b3-4e42-af85-cfa724cf8377_u27st0.jpg", alt: "Photo" },
+  { url: "https://res.cloudinary.com/djpkffk5u/image/upload/v1772377797/33b0917e-4eb2-4998-a1cc-9355604bb248_ujvabi.heic", alt: "Photo" },
+  { url: "https://res.cloudinary.com/djpkffk5u/image/upload/v1772377775/0aaf85c9-2e37-4462-b954-0a88e335649f_nwdlar.jpg", alt: "Photo" },
+  { url: "https://res.cloudinary.com/djpkffk5u/image/upload/v1772377796/28e64cde-13f0-4a47-aa24-9f9c15cd5660_l0rzxd.heic", alt: "Photo" },
+  { url: "https://res.cloudinary.com/djpkffk5u/image/upload/v1772377793/17bd328c-9968-4516-988b-4d2872a3b068_hsayvf.png", alt: "Photo" },
+  { url: "https://res.cloudinary.com/djpkffk5u/image/upload/v1772377792/013d67d8-85cc-45b3-ab1b-f60d20cdd8d9_e92ocu.heic", alt: "Photo" },
+  { url: "https://res.cloudinary.com/djpkffk5u/image/upload/v1772377790/12fe8dbb-e734-4282-895c-65c31ea83242_aipkct.heic", alt: "Photo" },
+  { url: "https://res.cloudinary.com/djpkffk5u/image/upload/v1772377787/9dc76670-e5bf-4c15-82b1-6eeffe86efa5_cllxke.png", alt: "Photo" },
+  { url: "https://res.cloudinary.com/djpkffk5u/image/upload/v1772377785/8cfd5473-6466-4f3a-a68a-e76c010de26a_labwdr.heic", alt: "Photo" },
+  { url: "https://res.cloudinary.com/djpkffk5u/image/upload/v1772377784/6c937727-ae66-447c-a5dc-cbc23fe6f35f_kai2fy.jpg", alt: "Photo" },
+  { url: "https://res.cloudinary.com/djpkffk5u/image/upload/v1772377781/5bfebbe5-da58-4a5e-8a2a-0706d00bae9f_jf71kt.jpg", alt: "Photo" },
+  { url: "https://res.cloudinary.com/djpkffk5u/image/upload/v1772377779/2aa774fb-640c-45be-b85d-ef0eed02858b_gtobzk.png", alt: "Photo" },
+  { url: "https://res.cloudinary.com/djpkffk5u/image/upload/v1772377777/2a545b20-565d-47c0-9e97-e1af366f258d_ohcida.png", alt: "Photo" },
+  { url: "https://res.cloudinary.com/djpkffk5u/image/upload/v1772377776/0c0da24d-4045-4eeb-8e9e-74fc62dff1bc_cld0vx.jpg", alt: "Photo" },
+];
+
+export function cloudinaryUrl(url, { width = 800, quality = 'auto' } = {}) {
+  return url.replace('/image/upload/', `/image/upload/w_${width},f_auto,q_${quality}/`);
+}

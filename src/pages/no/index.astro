@@ -1,0 +1,345 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { t } from '../../data/translations.js';
+import { cloudinaryUrl } from '../../data/made.js';
+import { Phone, Mail, MessageCircle, ArrowRight, Rss, Music, Github } from 'lucide-astro';
+
+const lang = 'no';
+const tr = t[lang];
+const location = "Røvær, Haugesund";
+
+const featuredImages = [
+  {
+    url: "https://res.cloudinary.com/djpkffk5u/image/upload/v1772366987/GODMORGON_1_zpwoph.jpg",
+    alt: "GODMORGON bathroom cabinets",
+    link: "https://grabcad.com/library/cabinet-fronts-and-inserts-1",
+  },
+  {
+    url: "https://res.cloudinary.com/djpkffk5u/image/upload/v1772294254/Rat_Rig_V-Core_Pro_1.3_with_EVA_2.3.0_Titan_Aero_ljmwp4.png",
+    alt: "Rat Rig V-Core Pro with EVA 2 Titan Aero",
+    link: "https://grabcad.com/library/rat-rig-v-core-pro-1-3-with-eva-2-3-0-titan-aero-1",
+  },
+  {
+    url: "https://res.cloudinary.com/djpkffk5u/image/upload/v1772294718/Serving_boards_e15qaz.jpg",
+    alt: "Serving boards",
+    link: "https://grabcad.com/library/serving-boards-1",
+  },
+];
+---
+
+<Layout lang={lang} title="Bjørn Andreas Andersen — Design & fabrikasjon, Haugesund" description="Bjørn Andreas Andersen (Bjørn A. Andersen) — design, fabrikasjon og rådgivning i Haugesund. 3D-print, 3D-modellering og praktiske kurs på Haugalandet. Holder til på Røvær.">
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #1e2228;
+      color: #dde1e7;
+      font-family: 'Piazzolla', serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .hero {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 20vh;
+      text-align: center;
+      padding: 3rem 2rem 1rem;
+    }
+
+    .hero img.avatar {
+      width: 200px;
+      height: 200px;
+      border-radius: 50%;
+      object-fit: cover;
+      margin-bottom: 1.5rem;
+    }
+
+    h1 {
+      font-family: 'Piazzolla', serif;
+      font-size: 2.8rem;
+      color: #fff;
+      margin-bottom: 0.4rem;
+    }
+
+    .icons {
+      display: flex;
+      width: 100%;
+      max-width: 400px;
+      justify-content: space-evenly;
+      margin-top: 0.8rem;
+      margin-bottom: 1rem;
+    }
+
+    .icon-link {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.15rem;
+      cursor: pointer;
+      position: relative;
+      flex: 1;
+    }
+
+    .icon-link span {
+      font-size: 0.80rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #888;
+      transition: color 0.2s;
+      font-family: 'Piazzolla', serif;
+    }
+
+    .icon-link:hover span { color: #fff; }
+
+    .icon-link a {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.15rem;
+      text-decoration: none;
+    }
+
+    .icon-link a img { transition: opacity 0.2s; }
+    .icon-link a:hover img { opacity: 0.8; }
+
+    .icon-img {
+      width: 48px;
+      height: 48px;
+      object-fit: contain;
+      vertical-align: middle;
+    }
+
+    .content {
+      max-width: 860px;
+      width: 100%;
+      padding: 1rem 2rem 2rem;
+    }
+
+    .bio {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .bio p {
+      font-size: 1.1rem;
+      line-height: 1.8;
+      color: #ccc;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+
+    .bio p:first-child { margin-top: 0; }
+    .bio a { color: #6aaeee; text-decoration: underline; }
+    .bio a:hover { text-decoration: underline; }
+
+    .preview {
+      margin: 3rem 0;
+      text-align: center;
+    }
+
+    .preview-grid {
+      display: flex;
+      flex-direction: row;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: nowrap;
+    }
+
+    .preview-grid img {
+      width: 120px;
+      height: 120px;
+      object-fit: cover;
+      border-radius: 12px;
+      background: #2a2e35;
+    }
+
+    .preview-item { position: relative; }
+    .preview-item a img { transition: opacity 0.2s; }
+    .preview-item a:hover img { opacity: 0.8; }
+
+    .more-arrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #888;
+      text-decoration: none;
+      padding: 0 0.5rem;
+      transition: color 0.2s;
+      align-self: center;
+    }
+
+    .more-arrow:hover { color: #dde1e7; }
+
+    .contact {
+      padding: 1.5rem 0;
+      margin-top: 0;
+      width: 100%;
+    }
+
+    .divider {
+      border-top: 1px solid #2a2e35;
+      margin: 1.5rem 0;
+    }
+
+    .contact h2 {
+      font-family: 'Piazzolla', serif;
+      font-size: 1.3rem;
+      font-weight: normal;
+      margin-bottom: 0.8rem;
+      color: #ccc;
+      text-align: center;
+    }
+
+    .contact-row {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 2rem;
+      color: #bbb;
+      font-size: 1.1rem;
+      flex-wrap: wrap;
+    }
+
+    .contact-row + .contact-row {
+      margin-top: 0.8rem;
+    }
+
+    .contact-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .contact-item a {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      color: #6aaeee;
+      text-decoration: underline;
+    }
+
+    .contact-item svg {
+      position: relative;
+      top: 2px;
+    }
+
+    @media (max-width: 768px) {
+      body { height: auto; }
+      h1 { font-size: 1.8rem; }
+      .hero { min-height: auto; padding: 2rem 1rem 0.5rem; }
+      .hero img.avatar { width: 140px; height: 140px; }
+      .content { padding: 0 1.5rem 2rem; }
+      .bio p { font-size: 1rem; line-height: 1.7; }
+      .bio p:first-child { margin-top: 0; }
+      .icon-img { width: 32px; height: 32px; }
+      .icons { gap: 0; }
+      .icon-link span { color: #fff; }
+      .contact ul { font-size: 0.9rem; }
+      .contact-row { align-items: center; gap: 0.6rem; flex-direction: column; }
+      .contact-row .contact-item:nth-child(1) { order: 1; } /* Phone */
+      .contact-row .contact-item:nth-child(2) { order: 3; } /* Signal */
+      .contact-row .contact-item:nth-child(3) { order: 2; } /* Email */
+      .contact-row span:not(.contact-item) { order: 4; }    /* Location */
+      .preview-grid img { width: 90px; height: 90px; }
+      .bio a, .contact-item a, .preview a { text-decoration: none; }
+    }
+  </style>
+
+<main>
+  <section class="hero">
+    <img
+      class="avatar"
+      src="https://res.cloudinary.com/det9ftymo/image/upload/w_200/v1725405810/photo_jn86fv.jpg"
+      alt="Bjørn A. Andersen"
+    />
+    <h1>Bjørn A. Andersen</h1>
+    <div class="icons">
+      <div class="icon-link">
+        <a href="/no/gallery/found">
+          <img src="https://res.cloudinary.com/djpkffk5u/image/upload/v1772283848/photo-gallery_pe3tke.svg" class="icon-img" alt="" />
+          <span>{tr.gallery}</span>
+        </a>
+      </div>
+      <div class="icon-link">
+        <a href="/no/cv">
+          <img src="https://res.cloudinary.com/djpkffk5u/image/upload/v1772282318/resume_mjdcft.svg" class="icon-img" alt="" />
+          <span>{tr.cv}</span>
+        </a>
+      </div>
+      <div class="icon-link">
+        <a href="https://grabcad.com/bjorn.a.andersen-1">
+          <img src="https://res.cloudinary.com/djpkffk5u/image/upload/v1772282528/3D_printer_dbzhhj.svg?v=2" class="icon-img" alt="" />
+          <span>{tr.models}</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <div class="content">
+    <div class="bio">
+      <p>{tr.bio1}</p>
+      <p>{tr.bio4}</p>
+    </div>
+
+    <div class="contact">
+      <p style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;">3D-printing · 3D-modellering · Fabrikasjon · Design · Haugesund · Haugalandet · Rogaland</p>
+      <div class="contact-row">
+        <span class="contact-item"><Phone size={18} strokeWidth={1.5} style="color: #4CAF82;" /> <span id="phone"></span></span>
+        <span class="contact-item">
+          <MessageCircle size={18} strokeWidth={1.5} style="color: #6aaeee;" />
+          <a href="https://signal.me/#eu/bjanda.60">{tr.signal}</a>
+        </span>
+        <span class="contact-item"><Mail size={18} strokeWidth={1.5} style="color: #E8A838;" /> <span id="email"></span></span>
+      </div>
+
+    </div>
+
+    <div class="divider"></div>
+    <div class="preview">
+      <div class="preview-grid">
+        {featuredImages.map((img) => (
+          <div class="preview-item">
+            {img.link
+              ? <a href={img.link} target="_blank" rel="noopener"><img src={cloudinaryUrl(img.url, { width: 120 })} alt={img.alt} loading="lazy" /></a>
+              : <img src={cloudinaryUrl(img.url, { width: 120 })} alt={img.alt} loading="lazy" />
+            }
+          </div>
+        ))}
+        <a href="/no/gallery/made" class="more-arrow" title="Se alle modeller">
+          <ArrowRight size={36} strokeWidth={1.5} />
+        </a>
+      </div>
+      <p style="margin-top:1rem;font-size:0.85rem;color:#999;">Jeg deler redigerbare design under en fri og <a href="https://creativecommons.org/licenses/by-sa/4.0" style="color:#6aaeee;text-decoration:underline;">åpen lisens</a> når det er mulig.</p>
+    </div>
+    <div class="divider"></div>
+
+    <div class="contact">
+      <div class="contact-row">
+        <span class="contact-item">
+          <Music size={18} strokeWidth={1.5} style="color: #EB743B;" />
+          <a href="https://listenbrainz.org/user/driveway4514/stats/?range=this_year" target="_blank" rel="noopener">{tr.musicStats}</a>
+        </span>
+        <span class="contact-item">
+          <Github size={18} strokeWidth={1.5} style="color: #fff;" />
+          <a href="https://github.com/polybjorn/polybjorn.github.io" target="_blank" rel="noopener">GitHub</a>
+        </span>
+      </div>
+    </div>
+  </div>
+</main>
+
+  <script>
+    const phone = atob('KzQ3IDk2OSAxMSA1ODc=');
+    const email = atob('YmphbmRhQHBtLm1l');
+    document.getElementById('phone').textContent = phone;
+    document.getElementById('email').textContent = email;
+  </script>
+</Layout>
