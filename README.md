@@ -6,7 +6,7 @@ This is my personal portfolio and contact point. It lists who I am, what I do, w
 
 ## Stack
 
-- **[Astro](https://astro.build)** — static site generator
+- **[Astro](https://astro.build)** — static site generator, with **[@astrojs/sitemap](https://docs.astro.build/en/guides/integrations-guide/sitemap/)**
 - **[Cloudflare](https://cloudflare.com)** — DNS
 - **[Cloudinary](https://cloudinary.com)** — image hosting and transformation
 - **[GitHub Pages](https://pages.github.com)** — hosting

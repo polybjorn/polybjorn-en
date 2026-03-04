@@ -9,7 +9,7 @@ const tr = t[lang];
 ---
 
 <Layout lang={lang} title="CV – Bjørn A. Andersen" description="Curriculum vitae for Bjørn A. Andersen: 3D modelling, additive manufacturing, graphic design, and 3D printing courses.">
-  
+  <link slot="head" rel="preload" as="image" href="https://res.cloudinary.com/djpkffk5u/image/upload/v1772287930/profile-img_pr1q8o.png" />
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -253,10 +253,49 @@ const tr = t[lang];
         padding: 2rem 1.5rem 3rem;
       }
     }
+
+    @media print {
+      body {
+        background: #fff;
+        color: #111;
+      }
+      .cv-wrap {
+        padding: 0;
+        max-width: 100%;
+      }
+      .back-home, .scroll-top, .skip-link { display: none; }
+      h1 { color: #111; }
+      h2 {
+        color: #555;
+        border-bottom-color: #ccc;
+      }
+      .cv-sub { color: #555; }
+      .period { color: #555; }
+      .entry-content .title { color: #111; }
+      .entry-content .org { color: #555; }
+      .entry-content .desc { color: #222; }
+      .entry { break-inside: avoid; }
+      section { break-inside: avoid; }
+      .skills-list li, .software-list li {
+        background: none;
+        color: #111;
+        border: 1px solid #ccc;
+      }
+      .software-group h3 { color: #555; }
+      .references { color: #555; }
+      .entry-content .org a { color: #111; text-decoration: underline; }
+      .entry-content .org .insta-link,
+      .entry-content .org .fb-link { display: none; }
+      a[href^="http"]::after {
+        content: " (" attr(href) ")";
+        font-size: 0.75rem;
+        color: #666;
+      }
+    }
   </style>
 
   <a class="back-home" href="/" aria-label="Back to home"><ArrowLeft size={28} strokeWidth={1.5} /></a>
-  <main>
+  <main id="main">
   <div class="cv-wrap">
     <div class="cv-header">
       <div>

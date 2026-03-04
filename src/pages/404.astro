@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import { t } from '../data/translations.js';
 ---
 
 <Layout title="404 — Page not found" description="This page doesn't exist.">
@@ -45,9 +46,20 @@ import Layout from '../layouts/Layout.astro';
     }
   </style>
 
-  <div class="container">
-    <h1>404</h1>
-    <p>This page doesn't exist.</p>
-    <a href="/">Go home</a>
-  </div>
+  <main id="main">
+    <div class="container">
+      <h1>404</h1>
+      <p id="not-found-msg"></p>
+      <a id="not-found-link" href="/"></a>
+    </div>
+  </main>
+
+  <script define:vars={{ strings: { en: { msg: t.en.notFound, home: t.en.goHome }, no: { msg: t.no.notFound, home: t.no.goHome } } }}>
+    const isNo = window.location.pathname.startsWith('/no/') || window.location.pathname === '/no';
+    const tr = isNo ? strings.no : strings.en;
+    document.getElementById('not-found-msg').textContent = tr.msg;
+    const link = document.getElementById('not-found-link');
+    link.textContent = tr.home;
+    link.href = isNo ? '/no' : '/';
+  </script>
 </Layout>

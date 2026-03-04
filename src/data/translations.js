@@ -17,6 +17,8 @@ export const t = {
     software: "Software & Tools",
     present: "Present",
     references: "References available on request",
+    notFound: "This page doesn't exist.",
+    goHome: "Go home",
   },
   no: {
     bio1: "Jeg liker å lage ting, og å finne ut hvordan. Jeg jobber innen design, fabrikasjon, elektronikk og programvare, fra første idé til ferdig produkt. Jeg holder også kurs for de som vil bli kjent med verktøyene og prosessen.",
@@ -36,5 +38,7 @@ export const t = {
     software: "Programvareferdigheter",
     present: "Aktiv",
     references: "Referanser oppgis på forespørsel",
+    notFound: "Denne siden finnes ikke.",
+    goHome: "Gå hjem",
   }
 }
