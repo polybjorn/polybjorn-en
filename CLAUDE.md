@@ -26,7 +26,7 @@ src/
 
 ## Stack
 
-- Astro 5 (SSG, no framework), vanilla CSS (scoped styles inline in each `.astro` file)
+- Astro 5 (SSG, no framework) with `@astrojs/sitemap`, vanilla CSS (scoped styles inline in each `.astro` file)
 - Hosted on GitHub Pages, deployed via GitHub Actions on push
 - Cloudflare for DNS only
 - Cloudinary for image hosting and transforms — use `cloudinaryUrl()` helper from `made.js`
