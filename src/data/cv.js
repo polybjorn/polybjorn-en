@@ -1,7 +1,7 @@
 export const cv = {
   experience: [
     {
-      en: { title: "Sole proprietor", org: "Polybjorn Andersen", desc: "Design and fabrication services with a focus on 3D printing, spanning furniture, fittings, and custom commissions. Works directly with clients or collaborates with other makers." },
+      en: { title: "Sole proprietor", org: "Polybjorn Andersen", desc: "Design and production services with a focus on 3D printing, spanning furniture, fittings, and custom commissions. Works directly with clients or collaborates with other makers." },
       no: { title: "Daglig leder i enkeltpersonforetak", org: "Polybjorn Andersen", desc: "Design og produksjonstjenester med fokus på 3D-printing, innen møbler, innredning og spesialbestillinger. Jobber direkte med kunder eller i samarbeid med andre produsenter." },
       links: { website: "https://virksomhet.brreg.no/nb/oppslag/enheter/925828513" },
       period: "2020 – Present"
