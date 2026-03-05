@@ -1,6 +1,6 @@
 # Polybjorn
 
-Personal portfolio and CV site for Bjørn A. Andersen.
+Personal portfolio and CV site for Bjørn Andreas Andersen.
 
 ## Rules
 
@@ -32,10 +32,18 @@ scripts/
 - Astro 5 (SSG, no framework) with `@astrojs/sitemap`, vanilla CSS (scoped styles inline in each `.astro` file)
 - Hosted on GitHub Pages, deployed via GitHub Actions on push
 - English site deploys to this repo's Pages, Norwegian site deploys to `polybjorn/polybjorn-no`
-- Cloudflare for DNS only
+- Cloudflare for DNS (proxied) — both polybjorn.com and polybjorn.no
 - Cloudinary for image hosting and transforms — use `cloudinaryUrl()` helper from `made.js`
+- `rough-notation` for hand-drawn underline effects on CV section headings
 - Piazzolla typeface via `@fontsource`, icons from `lucide-astro`
 - Dev server: `npm run dev` on port 4321
+
+## Brand assets
+
+- `assets/` symlink in repo root points to the brand asset library (gitignored)
+- Brand guidelines and color palette: `assets/brand-guidelines/colors.md`
+- Favicons generated from `assets/svg/polybjorn-mark.svg` using `rsvg-convert` and ImageMagick
+- Logo source files are Affinity Designer (`.af`)
 
 ## Privacy
 

@@ -31,10 +31,11 @@ const tr = t[lang];
 
     .cv-header {
       display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 1.5rem;
-      gap: 2rem;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      margin-bottom: 2rem;
+      gap: 1rem;
     }
 
     .cv-avatar {
@@ -42,7 +43,6 @@ const tr = t[lang];
       height: 130px;
       border-radius: 50%;
       object-fit: cover;
-      flex-shrink: 0;
     }
 
     .back {
@@ -95,17 +95,12 @@ const tr = t[lang];
 
     h1 {
       font-family: 'Piazzolla', serif;
-      font-size: 2.2rem;
-      color: #fff;
-      margin-bottom: 0.2rem;
-    }
-
-    .cv-sub {
-      color: #8a8f99;
-      font-size: 0.85rem;
+      font-size: 1rem;
+      color: #EEF0F3;
       letter-spacing: 0.08em;
       text-transform: uppercase;
     }
+
 
     section {
       margin-bottom: 3rem;
@@ -118,23 +113,21 @@ const tr = t[lang];
       font-weight: normal;
       letter-spacing: 0.08em;
       text-transform: uppercase;
-      color: #888;
-      border-bottom: 1px solid #2a2e35;
-      padding-bottom: 0.5rem;
-      margin-bottom: 1.5rem;
+      color: #EEF0F3;
+      margin: 0 auto 1.5rem;
+      width: fit-content;
     }
 
     .entry {
       display: grid;
-      grid-template-columns: 120px 1fr;
-      gap: 0.5rem 1.5rem;
+      grid-template-columns: 100px 1fr;
+      gap: 0.5rem 1rem;
       margin-bottom: 1.5rem;
     }
 
     .period {
       color: #8a8f99;
       font-size: 0.85rem;
-      padding-top: 0.15rem;
     }
 
     .entry-content .title {
@@ -194,6 +187,7 @@ const tr = t[lang];
       list-style: none;
       display: flex;
       flex-wrap: wrap;
+      justify-content: center;
       gap: 0.5rem;
     }
 
@@ -216,12 +210,14 @@ const tr = t[lang];
       color: #8a8f99;
       margin-bottom: 0.6rem;
       font-weight: normal;
+      text-align: center;
     }
 
     .software-list {
       list-style: none;
       display: flex;
       flex-wrap: wrap;
+      justify-content: center;
       gap: 0.5rem;
     }
 
@@ -264,12 +260,8 @@ const tr = t[lang];
         max-width: 100%;
       }
       .back-home, .scroll-top, .skip-link { display: none; }
-      h1 { color: #111; }
-      h2 {
-        color: #555;
-        border-bottom-color: #ccc;
-      }
-      .cv-sub { color: #555; }
+      h1 { color: #555; }
+      h2 { color: #555; }
       .period { color: #555; }
       .entry-content .title { color: #111; }
       .entry-content .org { color: #555; }
@@ -298,15 +290,12 @@ const tr = t[lang];
   <main id="main">
   <div class="cv-wrap">
     <div class="cv-header">
-      <div>
-        <h1>Bjørn A. Andersen</h1>
-        <p class="cv-sub">{tr.cv_title}</p>
-      </div>
       <img
         class="cv-avatar"
         src="https://res.cloudinary.com/djpkffk5u/image/upload/v1772287930/profile-img_pr1q8o.png"
         alt="Bjørn A. Andersen"
       />
+      <h1>Bjørn Andreas Andersen</h1>
     </div>
 
     <section>
@@ -381,6 +370,12 @@ const tr = t[lang];
   </main>
 
   <script>
+    import { annotate } from 'rough-notation';
+    document.querySelectorAll('h2').forEach(el => {
+      const a = annotate(el, { type: 'underline', color: '#6AAEEE', strokeWidth: 2, animate: false });
+      a.show();
+    });
+
     const backHome = document.querySelector('.back-home');
     const scrollTop = document.querySelector('.scroll-top');
     window.addEventListener('scroll', () => {
