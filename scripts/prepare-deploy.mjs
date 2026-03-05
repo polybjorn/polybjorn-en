@@ -25,7 +25,7 @@ for (const entry of readdirSync(DIST, { withFileTypes: true })) {
   if (entry.name === 'no') continue;
   if (entry.isDirectory() && entry.name.startsWith('_')) {
     cpSync(join(DIST, entry.name), join(DIST_NO, entry.name), { recursive: true });
-  } else if (!entry.isDirectory()) {
+  } else if (!entry.isDirectory() && !entry.name.endsWith('.html')) {
     cpSync(join(DIST, entry.name), join(DIST_NO, entry.name));
   }
 }
