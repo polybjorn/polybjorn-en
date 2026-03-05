@@ -84,6 +84,7 @@ Personal portfolio and contact point. Deploy target — source code lives in [po
 
 ## Assets
 
+- [flag-icons](https://flagicons.lipis.dev) — flags
 - [Icons8](https://icons8.com) — icons
 - [Lucide](https://lucide.dev) — icons
 - [Piazzolla](https://fontsource.org/fonts/piazzolla) — typeface
