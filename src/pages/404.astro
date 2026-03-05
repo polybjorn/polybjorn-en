@@ -55,11 +55,11 @@ import { t } from '../data/translations.js';
   </main>
 
   <script define:vars={{ strings: { en: { msg: t.en.notFound, home: t.en.goHome }, no: { msg: t.no.notFound, home: t.no.goHome } } }}>
-    const isNo = window.location.pathname.startsWith('/no/') || window.location.pathname === '/no';
+    const isNo = window.location.hostname === 'polybjorn.no';
     const tr = isNo ? strings.no : strings.en;
     document.getElementById('not-found-msg').textContent = tr.msg;
     const link = document.getElementById('not-found-link');
     link.textContent = tr.home;
-    link.href = isNo ? '/no' : '/';
+    link.href = '/';
   </script>
 </Layout>

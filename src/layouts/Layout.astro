@@ -4,11 +4,15 @@ import '@fontsource/piazzolla/700.css';
 import '@fontsource/piazzolla/400-italic.css';
 const { lang = 'en', title, description, image } = Astro.props;
 const otherLang = lang === 'en' ? 'no' : 'en';
-const otherUrl = lang === 'en' ? '/no' : '/';
 const path = Astro.url.pathname;
-const canonicalUrl = `https://polybjorn.com${path === '/' ? '' : path}`;
-const enUrl = lang === 'en' ? canonicalUrl : `https://polybjorn.com${path.replace(/^\/no/, '') || '/'}`;
-const noUrl = lang === 'no' ? canonicalUrl : `https://polybjorn.com/no${path === '/' ? '' : path}`;
+const enPath = lang === 'no' ? (path.replace(/^\/no/, '') || '/') : path;
+const noPath = lang === 'no' ? (path.replace(/^\/no/, '') || '/') : path;
+const enUrl = `https://polybjorn.com${enPath === '/' ? '' : enPath}`;
+const noUrl = `https://polybjorn.no${noPath === '/' ? '' : noPath}`;
+const canonicalUrl = lang === 'en' ? enUrl : noUrl;
+const otherUrl = lang === 'en'
+  ? `https://polybjorn.no${path === '/' ? '' : path}`
+  : `https://polybjorn.com${enPath === '/' ? '' : enPath}`;
 const ogImage = image ?? 'https://res.cloudinary.com/det9ftymo/image/upload/c_fill,g_auto,w_1200,h_630/v1725405810/photo_jn86fv.jpg';
 ---
 <html lang={lang}>
@@ -155,12 +159,6 @@ const ogImage = image ?? 'https://res.cloudinary.com/det9ftymo/image/upload/c_fi
     </a>
     <slot />
     <script define:vars={{ lang }}>
-      if (lang === 'en' && !localStorage.getItem('lang')) {
-        if (navigator.language.startsWith('no')) {
-          localStorage.setItem('lang', 'no');
-          window.location.replace('/no');
-        }
-      }
       document.querySelector('.lang-toggle').addEventListener('click', () => {
         localStorage.setItem('lang', {lang} === 'en' ? 'no' : 'en');
       });
