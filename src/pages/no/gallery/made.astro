@@ -10,7 +10,7 @@ const seeded = (n) => { let x = Math.sin(n + seed) * 10000; return x - Math.floo
 const allImages = flat.map((img, i) => ({ img, sort: seeded(i) })).sort((a, b) => a.sort - b.sort).map(x => x.img);
 ---
 
-<Layout lang={lang} title="Gallery – Bjørn A. Andersen" description="Gallery of 3D models, prints, and renders by Bjørn A. Andersen.">
+<Layout lang={lang} title="Gallery – Bjørn A. Andersen" description="Gallery of 3D models, prints, and renders by Bjørn A. Andersen." noindex>
   
 
   <style>

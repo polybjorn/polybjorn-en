@@ -2,7 +2,7 @@
 import '@fontsource/piazzolla/400.css';
 import '@fontsource/piazzolla/700.css';
 import '@fontsource/piazzolla/400-italic.css';
-const { lang = 'en', title, description, image } = Astro.props;
+const { lang = 'en', title, description, image, noindex = false } = Astro.props;
 const otherLang = lang === 'en' ? 'no' : 'en';
 const path = Astro.url.pathname;
 const enPath = lang === 'no' ? (path.replace(/^\/no/, '') || '/') : path;
@@ -12,8 +12,8 @@ const noUrl = `https://polybjorn.no${noPath === '/' ? '' : noPath}`;
 const canonicalUrl = lang === 'en' ? enUrl : noUrl;
 const otherUrl = lang === 'en'
   ? `https://polybjorn.no${path === '/' ? '' : path}`
-  : `https://polybjorn.com${enPath === '/' ? '' : enPath}`;
-const ogImage = image ?? 'https://res.cloudinary.com/det9ftymo/image/upload/c_fill,g_auto,w_1200,h_630/v1725405810/photo_jn86fv.jpg';
+  : `https://polybjorn.com${enPath === '/' ? '' : enPath}?lang=en`;
+const ogImage = image ?? 'https://res.cloudinary.com/djpkffk5u/image/upload/c_fill,g_auto,w_1200,h_630/v1772729286/polybjorn-banner-navy-1500x500_rvluaz.png';
 ---
 <html lang={lang}>
   <head>
@@ -29,6 +29,7 @@ const ogImage = image ?? 'https://res.cloudinary.com/det9ftymo/image/upload/c_fi
     <meta name="theme-color" content="#1e2228" />
     <title>{title}</title>
     <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex" />}
     <meta name="author" content="Bjørn Andreas Andersen" />
     <link rel="canonical" href={canonicalUrl} />
     <link rel="alternate" hreflang="en" href={enUrl} />

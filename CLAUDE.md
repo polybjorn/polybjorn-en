@@ -40,9 +40,9 @@ scripts/
 
 ## Brand assets
 
-- `assets/` symlink in repo root points to the brand asset library (gitignored)
-- Brand guidelines and color palette: `assets/brand-guidelines/colors.md`
-- Favicons generated from `assets/svg/polybjorn-mark.svg` using `rsvg-convert` and ImageMagick
+- `assets/` symlink in repo root points to `~/Vault/Assets/Brand` (gitignored)
+- Brand guidelines: `assets/brand-guide.md`
+- Favicons in `assets/Favicon/`
 - Logo source files are Affinity Designer (`.af`)
 
 ## Privacy
