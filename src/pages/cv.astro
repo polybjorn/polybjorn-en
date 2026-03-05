@@ -371,10 +371,16 @@ const tr = t[lang];
 
   <script>
     import { annotate } from 'rough-notation';
-    document.querySelectorAll('h2').forEach(el => {
-      const a = annotate(el, { type: 'underline', color: '#6AAEEE', strokeWidth: 2, animate: false });
-      a.show();
-    });
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const a = annotate(entry.target, { type: 'underline', color: '#6AAEEE', strokeWidth: 2, animationDuration: 800 });
+          a.show();
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('h2').forEach(el => observer.observe(el));
 
     const backHome = document.querySelector('.back-home');
     const scrollTop = document.querySelector('.scroll-top');

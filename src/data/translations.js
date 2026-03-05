@@ -37,7 +37,7 @@ export const t = {
     experience: "Erfaring",
     education: "Utdannelse",
     skills: "Ferdigheter",
-    software: "Programvareferdigheter",
+    software: "Programvare",
     present: "Aktiv",
     references: "Referanser oppgis på forespørsel",
     notFound: "Denne siden finnes ikke.",

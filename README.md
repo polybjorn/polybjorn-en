@@ -20,6 +20,7 @@ Personal portfolio and contact point.
 - [Icons8](https://icons8.com) — icons
 - [Lucide](https://lucide.dev) — icons
 - [Piazzolla](https://fontsource.org/fonts/piazzolla) — typeface
+- [rough-notation](https://roughnotation.com) — hand-drawn underline animations
 
 ## Structure
 
