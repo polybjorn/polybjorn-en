@@ -21,7 +21,7 @@ export const t = {
     goHome: "Go home",
   },
   no: {
-    bio1: "Jeg liker å lage ting, og å finne ut hvordan. Jeg jobber innen design, fabrikasjon, elektronikk og programvare, fra første idé til ferdig produkt. Jeg holder også kurs for de som vil bli kjent med verktøyene og prosessen.",
+    bio1: "Jeg liker å lage ting, og å finne ut hvordan. Jeg jobber innen design, produksjon, elektronikk og programvare, fra første idé til ferdig produkt. Jeg holder også kurs for de som vil bli kjent med verktøyene og prosessen.",
     bio2: "Jeg deler redigerbare design under en fri og åpen lisens når det er mulig.",
     bio3: "Holder for tiden til på ",
     bio4: "Har du et prosjekt i tankene? Jeg hører gjerne om det.",
