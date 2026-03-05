@@ -4,7 +4,8 @@ Personal portfolio and CV site for Bjørn A. Andersen.
 
 ## Rules
 
-- Always update both `en` and `no` when editing content — the site is bilingual (English at `/`, Norwegian at `/no/`)
+- Always update both `en` and `no` when editing content — the site is bilingual (English at polybjorn.com, Norwegian at polybjorn.no)
+- Both languages live in this repo — the Norwegian build is deployed to `polybjorn/polybjorn-no` via GitHub Actions
 - Use `npm`, not yarn or bun
 - Do not auto-commit — only commit when explicitly asked
 - Keep CV skills and software lists alphabetically sorted
@@ -16,18 +17,21 @@ Personal portfolio and CV site for Bjørn A. Andersen.
 ```
 src/
   layouts/Layout.astro        — shared layout
-  pages/                      — English pages (default)
-  pages/no/                   — Norwegian pages (mirrors English structure)
+  pages/                      — English pages (polybjorn.com)
+  pages/no/                   — Norwegian pages (polybjorn.no)
   data/cv.js                  — CV content (experience, education, skills, software)
   data/translations.js        — UI strings for both languages
   data/made.js                — gallery data (things I made)
   data/found.js               — gallery data (things I found)
+scripts/
+  prepare-deploy.mjs          — splits build output for two-repo deploy
 ```
 
 ## Stack
 
 - Astro 5 (SSG, no framework) with `@astrojs/sitemap`, vanilla CSS (scoped styles inline in each `.astro` file)
 - Hosted on GitHub Pages, deployed via GitHub Actions on push
+- English site deploys to this repo's Pages, Norwegian site deploys to `polybjorn/polybjorn-no`
 - Cloudflare for DNS only
 - Cloudinary for image hosting and transforms — use `cloudinaryUrl()` helper from `made.js`
 - Piazzolla typeface via `@fontsource`, icons from `lucide-astro`
