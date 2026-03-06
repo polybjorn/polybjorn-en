@@ -80,6 +80,7 @@ Personlig portefølje og kontaktpunkt. Distribusjonsmål — kildekoden ligger i
 - [Cloudinary](https://cloudinary.com) — bildehosting og transformasjoner
 - [GitHub Pages](https://pages.github.com) — hosting
 - [GitHub Actions](https://github.com/features/actions) — distribusjon ved push
+- [IndexNow](https://indexnow.org) — umiddelbar varsling av søkemotorer ved deploy
 - [Umami](https://umami.is) — informasjonskapselløs, personvernvennlig analyse
 
 ## Ressurser
