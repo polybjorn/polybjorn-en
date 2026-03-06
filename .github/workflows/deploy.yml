@@ -40,3 +40,48 @@ jobs:
     steps:
       - id: deployment
         uses: actions/deploy-pages@v4
+
+  indexnow:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Submit URLs to IndexNow
+        run: |
+          KEY="088dd9240f9674e496a7140b06f6f997"
+          SITEMAP_EN="https://polybjorn.com/sitemap-index.xml"
+          SITEMAP_NO="https://polybjorn.no/sitemap-index.xml"
+
+          # Fetch URLs from English sitemap
+          URLS_EN=$(curl -s "$SITEMAP_EN" | grep -oP '(?<=<loc>).*?(?=</loc>)')
+          for loc in $URLS_EN; do
+            if echo "$loc" | grep -q "sitemap.*\.xml"; then
+              curl -s "$loc" | grep -oP '(?<=<loc>).*?(?=</loc>)'
+            fi
+          done | sort -u > /tmp/urls_en.txt
+
+          # Fetch URLs from Norwegian sitemap
+          URLS_NO=$(curl -s "$SITEMAP_NO" | grep -oP '(?<=<loc>).*?(?=</loc>)')
+          for loc in $URLS_NO; do
+            if echo "$loc" | grep -q "sitemap.*\.xml"; then
+              curl -s "$loc" | grep -oP '(?<=<loc>).*?(?=</loc>)'
+            fi
+          done | sort -u > /tmp/urls_no.txt
+
+          # Submit English URLs
+          if [ -s /tmp/urls_en.txt ]; then
+            URLS_JSON=$(jq -R -s -c 'split("\n") | map(select(length > 0))' /tmp/urls_en.txt)
+            curl -s -X POST "https://api.indexnow.org/indexnow" \
+              -H "Content-Type: application/json" \
+              -d "{\"host\":\"polybjorn.com\",\"key\":\"$KEY\",\"keyLocation\":\"https://polybjorn.com/$KEY.txt\",\"urlList\":$URLS_JSON}"
+            echo "Submitted English URLs to IndexNow"
+          fi
+
+          # Submit Norwegian URLs
+          if [ -s /tmp/urls_no.txt ]; then
+            URLS_JSON=$(jq -R -s -c 'split("\n") | map(select(length > 0))' /tmp/urls_no.txt)
+            curl -s -X POST "https://api.indexnow.org/indexnow" \
+              -H "Content-Type: application/json" \
+              -d "{\"host\":\"polybjorn.no\",\"key\":\"$KEY\",\"keyLocation\":\"https://polybjorn.no/$KEY.txt\",\"urlList\":$URLS_JSON}"
+            echo "Submitted Norwegian URLs to IndexNow"
+          fi
