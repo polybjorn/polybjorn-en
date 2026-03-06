@@ -64,37 +64,51 @@ writeFileSync(join(DIST_NO, 'robots.txt'),
   `User-agent: *\nAllow: /\n\nSitemap: ${NO_DOMAIN}/sitemap-index.xml\n`
 );
 
-// 4. Add CNAME and README for polybjorn.no
+// 4. Add CNAME, README and LICENSE for polybjorn.no
 writeFileSync(join(DIST_NO, 'CNAME'), 'polybjorn.no\n');
 writeFileSync(join(DIST_NO, 'README.md'), `# polybjorn.no
 
-Personal portfolio and contact point. Deploy target — source code lives in [polybjorn/polybjorn-en](https://github.com/polybjorn/polybjorn-en).
+Personlig portefølje og kontaktpunkt. Distribusjonsmål — kildekoden ligger i [polybjorn/polybjorn-en](https://github.com/polybjorn/polybjorn-en).
 
-- [polybjorn.no](https://polybjorn.no) — Norwegian
-- [polybjorn.com](https://polybjorn.com) — English
+- [polybjorn.no](https://polybjorn.no) — Norsk
+- [polybjorn.com](https://polybjorn.com) — Engelsk
 
-## Stack
+## Teknologi
 
-- [Astro](https://astro.build) — static site generator
+- [Astro](https://astro.build) — statisk nettstedsgenerator
 - [Cloudflare](https://cloudflare.com) — DNS
-- [Cloudinary](https://cloudinary.com) — image hosting and transforms
+- [Cloudinary](https://cloudinary.com) — bildehosting og transformasjoner
 - [GitHub Pages](https://pages.github.com) — hosting
-- [GitHub Actions](https://github.com/features/actions) — deployment on push
-- [Umami](https://umami.is) — cookieless, privacy-friendly analytics
+- [GitHub Actions](https://github.com/features/actions) — distribusjon ved push
+- [Umami](https://umami.is) — informasjonskapselløs, personvernvennlig analyse
 
-## Assets
+## Ressurser
 
-- [flag-icons](https://flagicons.lipis.dev) — flags
-- [Icons8](https://icons8.com) — icons
-- [Lucide](https://lucide.dev) — icons
-- [Piazzolla](https://fontsource.org/fonts/piazzolla) — typeface
+- [flag-icons](https://flagicons.lipis.dev) — flagg
+- [Icons8](https://icons8.com) — ikoner
+- [Lucide](https://lucide.dev) — ikoner
+- [Piazzolla](https://fontsource.org/fonts/piazzolla) — skrifttype
+- [rough-notation](https://roughnotation.com) — håndtegnede understrekingsanimasjoner
 
-## Privacy
+## Struktur
 
-- No ads or third-party tracking
-- Analytics via Umami — cookieless, no personal data collected
-- Contact info encoded in HTML to reduce scraping
+\`\`\`
+src/
+  layouts/Layout.astro      — felles layout
+  pages/                    — engelske sider
+  pages/no/                 — norske sider
+  data/                     — innhold som JS-objekter
+scripts/
+  prepare-deploy.mjs        — forbereder deploy til to repoer
+\`\`\`
+
+## Personvern
+
+- Ingen annonser eller tredjepartssporing
+- Analyse via Umami — uten informasjonskapsler, ingen persondata samles inn
+- Kontaktinfo kodet i HTML for å redusere skraping
 `);
+cpSync('LICENSE', join(DIST_NO, 'LICENSE'));
 
 // 4. Replace dist/no/ with redirect stubs
 const noPages = getHtmlFiles(join(DIST, 'no'));
