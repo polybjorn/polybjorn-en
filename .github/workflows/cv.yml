@@ -1,0 +1,40 @@
+name: Build CV PDFs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'cv/template.typ'
+      - 'cv/fonts/**'
+      - 'src/data/cv.yaml'
+      - 'src/data/contact.yaml'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Typst
+        uses: typst-community/setup-typst@v4
+
+      - name: Create dummy assets for compile-check
+        run: |
+          mkdir -p cv/icons cv/images
+          echo '{"svg": [], "png": []}' > cv/icons.json
+          echo 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGNoaGgAAAMEAYFL09IQAAAAAElFTkSuQmCC' | base64 -d > cv/images/profile-photo.png
+          printf 'phone: "000"\nemail: x@x.com\nwebsite:\n  en: x.com\n  no: x.no\npersonal:\n  en:\n    born: x\n    address: x\n  no:\n    born: x\n    address: x\n' > src/data/contact.yaml
+
+      - name: Build PDFs
+        run: |
+          mkdir -p cv/output
+          typst compile cv/template.typ cv/output/CV-Bjorn-Andersen-EN.pdf --input lang=en --font-path cv/fonts --root .
+          typst compile cv/template.typ cv/output/CV-Bjorn-Andersen-NO.pdf --input lang=no --font-path cv/fonts --root .
+
+      - name: Upload PDFs
+        uses: actions/upload-artifact@v4
+        with:
+          name: cv-pdfs
+          path: cv/output/*.pdf
+          retention-days: 90

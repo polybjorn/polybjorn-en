@@ -29,6 +29,7 @@ pnpm-debug.log*
 assets
 cv/images/
 cv/icons/
+cv/icons.json
 
 # claude code
 .claude/

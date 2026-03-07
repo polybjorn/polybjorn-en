@@ -1,32 +1,33 @@
+profile:
+  en: "Maker and problem-solver with hands-on experience across 3D printing, product design and technical documentation. Built and managed innovation workshops, worked with over 50 clients on design and production, and authored technical manuals across 7 languages. With training in network administration and self-taught web development — equally comfortable building furniture as building servers."
+  no: "Praktiker og problemløser med erfaring innen 3D-printing, produktdesign og teknisk dokumentasjon. Etablerte og driftet innovasjonsverksted, jobbet med over 50 kunder innen design og produksjon, og utarbeidet tekniske manualer på 7 språk. Med utdanning innen nettverksadministrasjon og selvlært webutvikling — like komfortabel med å bygge møbler som servere."
+
 certifications:
   en:
     title: Certifications
     items:
       - "Driver's license class B"
+      - "Drone pilot certificate, EASA A1/A3"
   no:
     title: Sertifiseringer
     items:
       - "Førerkort klasse B"
+      - "Droneførarbevis, EASA A1/A3"
 
 clients:
   en:
-    title: Client list
+    title: Selected clients
   no:
-    title: Kundeliste
+    title: Utvalgte kunder
   list:
-    - Applica
     - Buen kulturhus
     - GE Healthcare Lindesnes
     - Global Ocean Technology
     - Lindesnes Havn
-    - Låsmannen
     - Mandal Castings
-    - Mandal Kjøleservice
-    - Mandal Stillasutleie
     - Mandal Videregående skole
     - Mandals
     - Mechatronics Innovation Lab
-    - M-Hus
     - Montér Mandal
     - Norsk Luftambulanse
     - "Nøsted &"
@@ -34,7 +35,6 @@ clients:
     - Sørlaminering
     - Tredal
     - Umoe
-    - Visit Lindesnes
 
 references:
   en: "References available upon request"
@@ -51,7 +51,9 @@ experience:
       desc: Design og produksjonstjenester med fokus på 3D-printing, innen møbler, innredning og spesialbestillinger. Jobber direkte med kunder eller i samarbeid med andre produsenter.
     links:
       website: https://virksomhet.brreg.no/nb/oppslag/enheter/925828513
-    period: "2020 – Present"
+    period:
+      en: "2020 – Present"
+      no: "2020 – nå"
 
   - en:
       title: Additive manufacturing workshop manager
@@ -133,7 +135,7 @@ education:
     period: "2021 – 2022"
 
   - en:
-      title: Student and stipendiat
+      title: Student and scholarship recipient
       org: Skap Kreativ Folkehøyskole
     no:
       title: Elev og stipendiat
@@ -161,19 +163,16 @@ skills:
     no: "3D modellering, direkte og parametrisk"
   - en: "3D scanning"
     no: "3D-skanning"
-    cv: false
-  - en: "Design / operation of workshop and production equipment"
-    no: "Design / drift av verksted og produksjonsutstyr"
-    cv: false
-  - en: "Image editing, vector and pixel based"
-    no: "Bilderedigering, vektor og pixelbasert"
-  - en: "CO2 laser cutting / CNC machining / Vinyl cutting"
-    no: "CO2-laserkutting / CNC-bearbeiding / Vinylkutting"
   - en: "Mechanical / product design"
     no: "Mekanisk / produktdesign"
+  - en: "CO2 laser cutting / CNC machining / Vinyl cutting"
+    no: "CO2-laserkutting / CNC-bearbeiding / Vinylkutting"
+  - en: "Design / operation of workshop and production equipment"
+    no: "Design / drift av verksted og produksjonsutstyr"
+  - en: "Image editing, vector and pixel based"
+    no: "Bilderedigering, vektor og pixelbasert"
   - en: "System administration"
     no: "Systemadministrasjon"
-    cv: false
   - en: "Technical documentation"
     no: "Teknisk dokumentasjon"
   - en: "Training / knowledge transfer / technical support"
@@ -191,6 +190,12 @@ software:
       - FreeCAD
       - OpenSCAD
       - Tinkercad
+    cv_tools:
+      - Autodesk Fusion 360
+      - Autodesk Inventor
+      - Blender
+      - FreeCAD
+      - OpenSCAD
   - category:
       en: "Fabrication & Slicing"
       no: "Fabrikasjon og slicing"
@@ -210,6 +215,13 @@ software:
       - ShopBot
       - Shining 3D
       - Strecs3D
+    cv_tools:
+      - Bambu Lab
+      - Cura
+      - OrcaSlicer
+      - Prusa
+      - Epilog
+      - Shapeoko
   - category:
       en: "Graphic Design"
       no: "Grafisk design"
@@ -218,6 +230,13 @@ software:
       - Adobe Photoshop
       - Affinity Designer
       - Affinity Photo
+      - DigiKam
+      - GIMP
+      - Inkscape
+    cv_tools:
+      - Adobe Illustrator
+      - Adobe Photoshop
+      - Affinity
       - DigiKam
       - GIMP
       - Inkscape
@@ -230,12 +249,19 @@ software:
       - Calibre
       - Office 365
       - Obsidian
-      - OnlyOffice
       - Scrivener
       - Sigil
+    cv_tools:
+      - Adobe InDesign
+      - Affinity Publisher
+      - Calibre
+      - Obsidian
+      - Office 365
+      - Scrivener
   - category:
       en: "Operating Systems"
       no: "Operativsystemer"
+    cv: false
     tools:
       - Android
       - Arch
@@ -258,6 +284,12 @@ software:
       - Portainer
       - Syncthing
       - Tailscale
+    cv_tools:
+      - Ansible
+      - Docker
+      - nginx
+      - Syncthing
+      - Tailscale
   - category:
       en: "Languages"
       no: "Språk"
@@ -269,6 +301,12 @@ software:
       - Python
       - SQL
       - YAML
+    cv_tools:
+      - G-code
+      - HTML/CSS
+      - JavaScript
+      - Python
+      - YAML
   - category:
       en: "Development & Web"
       no: "Utvikling og web"
@@ -278,6 +316,12 @@ software:
       - Cloudinary
       - Git
       - Jekyll
+      - Sublime Text
+      - Umami
+    cv_tools:
+      - Astro
+      - Cloudflare
+      - Git
       - Sublime Text
       - Umami
   - category:
