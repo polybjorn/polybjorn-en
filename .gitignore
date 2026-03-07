@@ -1,6 +1,7 @@
 # build output
 dist/
 dist-no/
+cv/output/
 # generated types
 .astro/
 
@@ -24,11 +25,16 @@ pnpm-debug.log*
 # jetbrains setting folder
 .idea/
 
-# asset library symlink
+# asset library symlinks
 assets
+cv/images/
+cv/icons/
 
 # claude code
 .claude/
+
+# personal contact data
+src/data/contact.yaml
 
 # secrets and credentials
 *.pem

@@ -9,7 +9,8 @@ Personal portfolio and CV site for Bjørn Andreas Andersen.
 - Use `npm`, not yarn or bun
 - Do not auto-commit — only commit when explicitly asked
 - Keep CV skills and software lists alphabetically sorted
-- Keep data in `src/data/*.js` — pages import from there
+- Keep data in `src/data/` — pages import from there
+- CV data lives in `src/data/cv.yaml` (single source of truth for both web and PDF)
 - Prefer editing existing files over creating new ones
 
 ## Project structure
@@ -19,7 +20,8 @@ src/
   layouts/Layout.astro        — shared layout
   pages/                      — English pages (polybjorn.com)
   pages/no/                   — Norwegian pages (polybjorn.no)
-  data/cv.js                  — CV content (experience, education, skills, software)
+  data/cv.yaml                — CV content (experience, education, skills, software)
+  data/cv.js                  — thin re-export of cv.yaml for Astro imports
   data/translations.js        — UI strings for both languages
   data/made.js                — gallery data (things I made)
   data/found.js               — gallery data (things I found)
@@ -29,7 +31,8 @@ scripts/
 
 ## Stack
 
-- Astro 5 (SSG, no framework) with `@astrojs/sitemap`, vanilla CSS (scoped styles inline in each `.astro` file)
+- Astro 5 (SSG, no framework) with `@astrojs/sitemap`, `@rollup/plugin-yaml`, vanilla CSS (scoped styles inline in each `.astro` file)
+- Typst for CV PDF generation — `sh cv/build.sh` generates both languages from `src/data/cv.yaml`
 - Hosted on GitHub Pages, deployed via GitHub Actions on push
 - English site deploys to this repo's Pages, Norwegian site deploys to `polybjorn/polybjorn-no`
 - Cloudflare for DNS (proxied) — both polybjorn.com and polybjorn.no
@@ -42,7 +45,7 @@ scripts/
 
 - English pages at `src/pages/`, Norwegian at `src/pages/no/`
 - Translations in `src/data/translations.js` — access via `t[lang].keyName`
-- Data files (`cv.js`, `made.js`, `found.js`) use `{ en: ..., no: ... }` keys for bilingual content
+- Data files (`cv.yaml`, `made.js`, `found.js`) use `{ en: ..., no: ... }` keys for bilingual content
 - Language toggle saves preference to `localStorage`
 - Layout.astro sets `hreflang` alternates and canonical URLs automatically
 
@@ -78,6 +81,16 @@ scripts/
 - `.sr-only` class for screen-reader-only elements (gallery h1 headings)
 - ARIA labels on navigation buttons and gallery links
 - CV print styles: white background, visible link URLs via `a[href]::after`, `break-inside: avoid`
+
+## CV generation
+
+- CV data in `src/data/cv.yaml` is the single source of truth for both the website and PDF output
+- Astro imports it via `src/data/cv.js` (one-line re-export using `@rollup/plugin-yaml`)
+- Typst template at `cv/template.typ` reads the same YAML directly
+- `sh cv/build.sh` generates `cv/output/cv-en.pdf` and `cv/output/cv-no.pdf`
+- `cv/output/` is gitignored
+- Requires `typst` (`brew install typst`)
+- Live preview: `typst watch cv/template.typ cv/output/cv-en.pdf --input lang=en --root .`
 
 ## Brand assets
 
