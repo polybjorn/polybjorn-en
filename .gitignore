@@ -28,6 +28,7 @@ pnpm-debug.log*
 # asset library symlinks
 assets
 cv/images/
+!cv/images/profile-photo-cv.png
 cv/icons/
 cv/icons.json
 
