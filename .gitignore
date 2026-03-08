@@ -33,6 +33,7 @@ cv/icons/
 cv/icons.json
 
 # claude code
+CLAUDE.md
 .claude/
 
 # personal contact data
