@@ -287,9 +287,9 @@ software:
     cv_tools:
       - Ansible
       - Docker
+      - Grafana
+      - n8n
       - nginx
-      - Syncthing
-      - Tailscale
   - category:
       en: "Languages"
       no: "Språk"
@@ -310,6 +310,7 @@ software:
   - category:
       en: "Development & Web"
       no: "Utvikling og web"
+    cv: false
     tools:
       - Astro
       - Cloudflare
@@ -336,9 +337,9 @@ software:
   - category:
       en: "AI Tools"
       no: "AI-verktøy"
-    cv: false
     tools:
-      - Claude
+      - Claude Code
       - Midjourney
       - Ollama
+      - OpenClaw
       - Perplexity

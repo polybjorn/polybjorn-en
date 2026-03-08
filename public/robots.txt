@@ -1,4 +1,6 @@
 User-agent: *
 Allow: /
+Disallow: /CV-Bjorn-Andersen-EN.pdf
+Disallow: /CV-Bjorn-Andersen-NO.pdf
 
 Sitemap: https://polybjorn.com/sitemap-index.xml

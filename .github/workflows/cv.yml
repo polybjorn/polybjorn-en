@@ -23,7 +23,7 @@ jobs:
         run: |
           mkdir -p cv/icons cv/images
           echo '{"svg": [], "png": []}' > cv/icons.json
-          echo 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGNoaGgAAAMEAYFL09IQAAAAAElFTkSuQmCC' | base64 -d > cv/images/profile-photo.png
+          echo 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGNoaGgAAAMEAYFL09IQAAAAAElFTkSuQmCC' | base64 -d > cv/images/profile-photo-cv.png
           printf 'phone: "000"\nemail: x@x.com\nwebsite:\n  en: x.com\n  no: x.no\npersonal:\n  en:\n    born: x\n    address: x\n  no:\n    born: x\n    address: x\n' > src/data/contact.yaml
 
       - name: Build PDFs
