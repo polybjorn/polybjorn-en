@@ -317,14 +317,10 @@ software:
       - Cloudinary
       - Git
       - Jekyll
-      - Sublime Text
-      - Umami
     cv_tools:
       - Astro
       - Cloudflare
       - Git
-      - Sublime Text
-      - Umami
   - category:
       en: "Privacy & Security"
       no: "Personvern og sikkerhet"
