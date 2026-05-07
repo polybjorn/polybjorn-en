@@ -1,6 +1,6 @@
 profile:
-  en: "Maker and problem-solver with hands-on experience across 3D printing, product design and technical documentation. Built and managed innovation workshops, worked with over 50 clients on design and production, and authored technical manuals across 7 languages. With training in network administration and self-taught web development — equally comfortable building furniture as building servers."
-  no: "Praktiker og problemløser med erfaring innen 3D-printing, produktdesign og teknisk dokumentasjon. Etablerte og driftet innovasjonsverksted, jobbet med over 50 kunder innen design og produksjon, og utarbeidet tekniske manualer på 7 språk. Med utdanning innen nettverksadministrasjon og selvlært webutvikling — like komfortabel med å bygge møbler som servere."
+  en: "Maker and problem-solver with hands-on experience across 3D printing, product design and technical documentation. Built and managed innovation workshops, worked with over 50 clients on design and production, and authored technical manuals across 7 languages. With training in network administration and self-taught web development; equally comfortable building furniture as building servers."
+  no: "Praktiker og problemløser med erfaring innen 3D-printing, produktdesign og teknisk dokumentasjon. Etablerte og driftet innovasjonsverksted, jobbet med over 50 kunder innen design og produksjon, og utarbeidet tekniske manualer på 7 språk. Med utdanning innen nettverksadministrasjon og selvlært webutvikling; like komfortabel med å bygge møbler som servere."
 
 certifications:
   en:
@@ -52,8 +52,8 @@ experience:
     links:
       website: https://virksomhet.brreg.no/nb/oppslag/enheter/925828513
     period:
-      en: "2020 – Present"
-      no: "2020 – nå"
+      en: "2020 - Present"
+      no: "2020 - nå"
 
   - en:
       title: Additive manufacturing workshop manager
@@ -66,7 +66,7 @@ experience:
     links:
       website: https://naringshagen.no
       instagram: https://instagram.com/naringshagen
-    period: "2021 – 2026"
+    period: "2021 - 2026"
 
   - en:
       title: Technical writer
@@ -79,7 +79,7 @@ experience:
     links:
       website: https://nosted.com
       instagram: https://instagram.com/nosted_com
-    period: "2022 – 2024"
+    period: "2022 - 2024"
 
   - en:
       title: Technician
@@ -92,7 +92,7 @@ experience:
     links:
       website: https://mandal.frivilligsentral.no
       facebook: https://facebook.com/mandalfrivilligsentral
-    period: "2022 – 2024"
+    period: "2022 - 2024"
 
   - en:
       title: Various roles
@@ -105,7 +105,7 @@ experience:
     links:
       website: https://skapfhs.no
       instagram: https://instagram.com/skapfhs
-    period: "2018 – 2023"
+    period: "2018 - 2023"
 
   - en:
       title: Electrician apprentice
@@ -115,16 +115,16 @@ experience:
       title: Elektriker lærling
       org: Apply TB
       desc: Service- og prosjektarbeid fra private hjem til større byggeprosjekter, inkludert fiber for Haugaland Kraft.
-    period: "2014 – 2017"
+    period: "2014 - 2017"
 
 education:
   - en:
-      title: "Technical drawing – Mechanical"
+      title: "Technical drawing - Mechanical"
       org: Noroff, Online study
     no:
-      title: "Teknisk tegning – Mekanisk"
+      title: "Teknisk tegning - Mekanisk"
       org: Noroff, Nettstudie
-    period: "2025 – 2026"
+    period: "2025 - 2026"
 
   - en:
       title: Network and System Administration
@@ -132,7 +132,7 @@ education:
     no:
       title: Nettverk- og Systemadministrasjon
       org: Noroff, Nettstudie
-    period: "2021 – 2022"
+    period: "2021 - 2022"
 
   - en:
       title: Student and scholarship recipient
@@ -140,7 +140,7 @@ education:
     no:
       title: Elev og stipendiat
       org: Skap Kreativ Folkehøyskole
-    period: "2018 – 2020"
+    period: "2018 - 2020"
 
   - en:
       title: Upper secondary supplement
@@ -148,7 +148,7 @@ education:
     no:
       title: Påbygg
       org: Sonans, Bergen
-    period: "2017 – 2018"
+    period: "2017 - 2018"
 
   - en:
       title: Electrical studies
@@ -156,7 +156,7 @@ education:
     no:
       title: Elektrofag og Elenergi
       org: Åkrehamn Videregående Skole
-    period: "2012 – 2014"
+    period: "2012 - 2014"
 
 skills:
   - en: "3D modelling, direct and parametric"
