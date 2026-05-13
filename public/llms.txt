@@ -1,26 +1,31 @@
-# Bjørn A. Andersen — Polybjørn
+# Bjørn A. Andersen - Polybjorn
 
-> 3D modelling, additive manufacturing, graphic design, and hands-on 3D printing courses. Based in Røvær, Haugesund, Norway.
+> 3D printing, 3D modelling, design, prototyping, small-batch production, and hands-on courses. Based in Røvær, Haugesund, Norway.
 
 ## About
 
-Bjørn A. Andersen operates Polybjørn, a sole proprietorship offering 3D modelling, additive manufacturing, and courses in 3D printing. He takes projects from first sketch to finished product and shares editable designs under Creative Commons licenses when possible.
+Bjørn A. Andersen operates Polybjorn Andersen, a sole proprietorship offering 3D modelling, additive manufacturing, design consultation, and courses in 3D printing. He takes projects from first sketch to finished product and shares editable designs under Creative Commons licenses when possible. Primary focus is local businesses on Haugalandet (Haugesund, Karmøy, Tysvær, Sveio, and surrounding municipalities).
 
 ## Services
 
-- 3D modelling and rendering
-- Additive manufacturing / 3D printing
-- Graphic design
-- Hands-on 3D printing courses
+- 3D modelling
+- Design consultation
+- Prototyping
+- Small-batch production
+- Support and maintenance of 3D printers
+- Hands-on courses in 3D printing and 3D modelling
 
 ## Links
 
 - Website: https://polybjorn.com
-- Gallery: https://polybjorn.com/gallery
+- 3D printing services: https://polybjorn.com/3d-printing
+- Gallery (3D models): https://polybjorn.com/gallery/made
+- Gallery (photography): https://polybjorn.com/gallery/found
 - CV: https://polybjorn.com/cv
-- 3D Models: https://grabcad.com/bjorn.a.andersen-1
+- 3D Models on GrabCAD: https://grabcad.com/bjorn.a.andersen-1
+- GitHub: https://github.com/polybjorn
 - Mastodon: https://social.polybjorn.com/@bjanda
 
 ## Contact
 
-- Signal: https://signal.me/#eu/polybjorn.99
+- Signal: https://signal.me/#eu/bjanda.60

@@ -2,22 +2,24 @@
 import '@fontsource/piazzolla/400.css';
 import '@fontsource/piazzolla/700.css';
 import '@fontsource/piazzolla/400-italic.css';
-const { lang = 'en', title, description, image, noindex = false } = Astro.props;
+const { lang = 'en', title, description, image, noindex = false, altLangPath } = Astro.props;
 const otherLang = lang === 'en' ? 'no' : 'en';
 const path = Astro.url.pathname;
-const enPath = lang === 'no' ? (path.replace(/^\/no/, '') || '/') : path;
-const noPath = lang === 'no' ? (path.replace(/^\/no/, '') || '/') : path;
+const stripped = lang === 'no' ? (path.replace(/^\/no/, '') || '/') : path;
+const enPath = lang === 'no' ? (altLangPath ?? stripped) : path;
+const noPath = lang === 'no' ? stripped : (altLangPath ?? path);
 const enUrl = `https://polybjorn.com${enPath === '/' ? '' : enPath}`;
 const noUrl = `https://polybjorn.no${noPath === '/' ? '' : noPath}`;
 const canonicalUrl = lang === 'en' ? enUrl : noUrl;
 const otherUrl = lang === 'en'
-  ? `https://polybjorn.no${path === '/' ? '' : path}`
-  : `https://polybjorn.com${enPath === '/' ? '' : enPath}?lang=en`;
+  ? noUrl
+  : `${enUrl}?lang=en`;
 const ogImage = image ?? 'https://res.cloudinary.com/djpkffk5u/image/upload/c_fill,g_center,w_1200,h_630/v1772729286/polybjorn-banner-navy-1500x500_rvluaz.png';
 
 const schemas = [{
   "@context": "https://schema.org",
   "@type": "Person",
+  "@id": "https://polybjorn.com/#person",
   "name": "Bjørn A. Andersen",
   "alternateName": "Bjørn Andreas Andersen",
   "url": "https://polybjorn.com",
@@ -41,12 +43,7 @@ const schemas = [{
   "name": "3D Printing & Design Services",
   "description": "3D modelling, 3D printing, production and hands-on courses in Haugesund and Haugalandet, Norway.",
   "areaServed": ["Haugesund", "Haugalandet", "Rogaland"],
-  "provider": {
-    "@type": "Person",
-    "name": "Bjørn A. Andersen",
-    "alternateName": "Bjørn Andreas Andersen",
-    "url": "https://polybjorn.com"
-  }
+  "provider": { "@id": "https://polybjorn.com/#person" }
 }];
 
 if (lang === 'no' && !noindex) {
@@ -73,7 +70,7 @@ if (lang === 'no' && !noindex) {
       "propertyID": "Organisasjonsnummer",
       "value": "925828513"
     },
-    "founder": { "@type": "Person", "name": "Bjørn A. Andersen" }
+    "founder": { "@id": "https://polybjorn.com/#person" }
   });
 }
 ---
@@ -117,10 +114,6 @@ if (lang === 'no' && !noindex) {
     />
     <slot name="head" />
     <style>
-      @font-face {
-        font-family: 'Piazzolla';
-        font-display: swap;
-      }
       :focus-visible {
         outline: 2px solid #6aaeee;
         outline-offset: 3px;

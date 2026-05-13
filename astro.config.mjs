@@ -5,7 +5,7 @@ import yaml from '@rollup/plugin-yaml';
 export default defineConfig({
   site: 'https://polybjorn.com',
   integrations: [sitemap({
-    filter: (page) => !page.includes('/gallery/'),
+    filter: (page) => !page.includes('/gallery/') && !page.includes('/galleri/'),
   })],
   vite: {
     plugins: [yaml()],

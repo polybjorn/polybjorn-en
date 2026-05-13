@@ -5,7 +5,6 @@ export function cloudinaryUrl(url, { width = 800, quality = 'auto' } = {}) {
 export const projects = [
   {
     title: "3D Printer Toolheads",
-    category: "3dprinter",
     images: [
       {
         url: "https://res.cloudinary.com/djpkffk5u/image/upload/v1772368655/Polyalkemi_PolySmart_cardboard_spool_adapter_herko2.png",
@@ -59,7 +58,6 @@ export const projects = [
   },
   {
     title: "DIN Rail Mounts",
-    category: "electronics",
     images: [
       {
         url: "https://res.cloudinary.com/djpkffk5u/image/upload/v1772368652/PVC_20mm_enclosure_render_hm4arf.png",
@@ -108,6 +106,7 @@ export const projects = [
         type: "render",
         transparent: true,
         link: "https://grabcad.com/library/lrs-350-psu-din-rail-assembly-1",
+        featured3D: true,
       },
       {
         url: "https://res.cloudinary.com/djpkffk5u/image/upload/v1772294458/SSR_DIN_rail_assembly_ymo4wd.png",
@@ -121,7 +120,6 @@ export const projects = [
   },
   {
     title: "Furniture & Workshop",
-    category: "furniture",
     images: [
       {
         url: "https://res.cloudinary.com/djpkffk5u/image/upload/v1772369311/Bathroom_honeycomb_wall_render_rc3rep.png",
@@ -247,7 +245,6 @@ export const projects = [
   },
   {
     title: "Gridfinity",
-    category: "storage",
     images: [
       {
         url: "https://res.cloudinary.com/djpkffk5u/image/upload/v1772369226/Gridfinity_2x6_Bj%C3%B8rklund_Amitto_universal_slicer_holder_scene_render_l6loxx.jpg",
@@ -293,7 +290,6 @@ export const projects = [
   },
   {
     title: "Multiboard",
-    category: "storage",
     images: [
       {
         url: "https://res.cloudinary.com/djpkffk5u/image/upload/v1772369221/Multiboard_square_holders_render_byub3v.png",
@@ -355,7 +351,6 @@ export const projects = [
   },
   {
     title: "Cabinets",
-    category: "furniture",
     images: [
       {
         url: "https://res.cloudinary.com/djpkffk5u/image/upload/v1772366980/337d96de-12d7-4531-aefa-ac81739b1c52_aisnyn.jpg",
@@ -364,6 +359,7 @@ export const projects = [
         type: "photo",
         transparent: false,
         link: "https://grabcad.com/library/cabinet-fronts-and-inserts-1",
+        featured3D: true,
       },
       {
         url: "https://res.cloudinary.com/djpkffk5u/image/upload/v1772366987/GODMORGON_1_zpwoph.jpg",
@@ -377,7 +373,6 @@ export const projects = [
   },
   {
     title: "Garden",
-    category: "garden",
     images: [
       {
         url: "https://res.cloudinary.com/djpkffk5u/image/upload/v1772367790/NG-LED_loop_bracket_ifemin.png",
@@ -399,7 +394,6 @@ export const projects = [
   },
   {
     title: "Lab & Science",
-    category: "lab",
     images: [
       {
         url: "https://res.cloudinary.com/djpkffk5u/image/upload/v1772369749/Statisk_mikser_render_ggpekn.png",
@@ -408,6 +402,7 @@ export const projects = [
         type: "render",
         transparent: true,
         link: null,
+        featured3D: true,
       },
       {
         url: "https://res.cloudinary.com/djpkffk5u/image/upload/v1772369854/Impellere_render_sn277h.png",
@@ -421,7 +416,6 @@ export const projects = [
   },
   {
     title: "Decorative",
-    category: "decorative",
     images: [
       {
         url: "https://res.cloudinary.com/djpkffk5u/image/upload/v1772378422/45af70df-307f-480b-8ae8-50d02a1b9a3c_r6rr7d.jpg",
@@ -459,7 +453,6 @@ export const projects = [
   },
   {
     title: "Marine",
-    category: "marine",
     images: [
       {
         url: "https://res.cloudinary.com/djpkffk5u/image/upload/v1772370536/Adaptere_2024-09-02_render_k0yhhb.png",
@@ -476,6 +469,7 @@ export const projects = [
         type: "render",
         transparent: true,
         link: "https://grabcad.com/library/sail-slides-with-bolt-holes-1",
+        featured3D: true,
       },
       {
         url: "https://res.cloudinary.com/djpkffk5u/image/upload/v1772368651/Lobster_pot_tag_render_q7yfxx.png",
@@ -521,7 +515,6 @@ export const projects = [
   },
   {
     title: "Tools & Everyday",
-    category: "everyday",
     images: [
       {
         url: "https://res.cloudinary.com/djpkffk5u/image/upload/v1772485699/Carburetor_float_v2_render_q02bqv.png",

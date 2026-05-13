@@ -6,7 +6,7 @@ const lang = 'en';
 const foundImages = found;
 ---
 
-<Layout lang={lang} title="Found – Bjørn A. Andersen" description="Personal photography and free time captures by Bjørn A. Andersen." noindex>
+<Layout lang={lang} title="Found - Bjørn A. Andersen" description="Personal photography and free time captures by Bjørn A. Andersen." noindex altLangPath="/galleri/funnet">
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -125,7 +125,11 @@ const foundImages = found;
       <div class="grid" id="grid">
         {found.map(img => (
           <div class="grid-item">
-            <img src={cloudinaryUrl(img.url, { width: 600 })} alt={img.alt} loading="lazy" />
+            <img
+              src={cloudinaryUrl(img.url, { width: 600 })}
+              srcset={`${cloudinaryUrl(img.url, { width: 400 })} 400w, ${cloudinaryUrl(img.url, { width: 600 })} 600w, ${cloudinaryUrl(img.url, { width: 800 })} 800w, ${cloudinaryUrl(img.url, { width: 1200 })} 1200w`}
+              sizes="(max-width: 700px) 100vw, 25vw"
+              alt={img.alt} loading="lazy" />
           </div>
         ))}
       </div>

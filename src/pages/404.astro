@@ -1,9 +1,10 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import { t } from '../data/translations.js';
+import { Link2Off } from 'lucide-astro';
 ---
 
-<Layout title="404 — Page not found" description="This page doesn't exist.">
+<Layout title="404 - Page not found" description="This page doesn't exist." noindex>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -23,19 +24,28 @@ import { t } from '../data/translations.js';
       padding: 2rem;
     }
 
+    .icon {
+      color: #6aaeee;
+      opacity: 0.7;
+      margin-bottom: 1rem;
+    }
+
     h1 {
+      font-family: 'Piazzolla', serif;
       font-size: 4rem;
       color: #fff;
       margin-bottom: 0.5rem;
     }
 
     p {
+      font-family: 'Piazzolla', serif;
       font-size: 1.2rem;
       color: #ccc;
       margin-bottom: 2rem;
     }
 
     a {
+      font-family: 'Piazzolla', serif;
       color: #6aaeee;
       text-decoration: underline;
       font-size: 1.1rem;
@@ -48,6 +58,7 @@ import { t } from '../data/translations.js';
 
   <main id="main">
     <div class="container">
+      <Link2Off size={64} strokeWidth={1.25} class="icon" />
       <h1>404</h1>
       <p id="not-found-msg"></p>
       <a id="not-found-link" href="/"></a>

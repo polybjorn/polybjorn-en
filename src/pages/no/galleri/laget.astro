@@ -1,17 +1,16 @@
 ---
-import Layout from '../../layouts/Layout.astro';
-import { projects, cloudinaryUrl } from '../../data/made.js';
+import Layout from '../../../layouts/Layout.astro';
+import { projects, cloudinaryUrl } from '../../../data/made.js';
 import { ArrowUp, ArrowLeft } from 'lucide-astro';
 
-const lang = 'en';
+const lang = 'no';
 const flat = projects.flatMap(p => p.images.map(img => ({ ...img, project: p.title })));
-// Seeded shuffle — consistent order per build, feels random
 const seed = 42;
 const seeded = (n) => { let x = Math.sin(n + seed) * 10000; return x - Math.floor(x); };
 const allImages = flat.map((img, i) => ({ img, sort: seeded(i) })).sort((a, b) => a.sort - b.sort).map(x => x.img);
 ---
 
-<Layout lang={lang} title="Gallery - Bjørn A. Andersen" description="Gallery of 3D models, prints, and renders by Bjørn A. Andersen." noindex altLangPath="/galleri/laget">
+<Layout lang={lang} title="3D-modeller - Bjørn A. Andersen" description="Galleri med 3D-modeller og prosjekter." noindex altLangPath="/gallery/made">
   
 
   <style>
@@ -157,14 +156,14 @@ const allImages = flat.map((img, i) => ({ img, sort: seeded(i) })).sort((a, b) =
     }
   </style>
 
-  <a class="back-home" href="/" aria-label="Back to home"><ArrowLeft size={28} strokeWidth={1.5} /></a>
+  <a class="back-home" href="/no" aria-label="Tilbake til forsiden"><ArrowLeft size={28} strokeWidth={1.5} /></a>
   <main id="main">
   <div class="wrap">
     <div style="display:flex;justify-content:center;gap:3rem;margin-bottom:2rem;">
-      <span class="back current">Made</span>
-      <a class="back" href="/gallery/found">Found</a>
+      <span class="back current">Laget</span>
+      <a class="back" href="/no/galleri/funnet">Funnet</a>
     </div>
-    <h1 class="sr-only">Made</h1>
+    <h1 class="sr-only">Laget</h1>
     <div class="grid" id="grid">
       {allImages.map(img => (
         <div class={`grid-item ${img.transparent ? 'transparent' : 'opaque'}`}>
@@ -194,10 +193,10 @@ const allImages = flat.map((img, i) => ({ img, sort: seeded(i) })).sort((a, b) =
       sizes="(max-width: 1648px) 100vw, 1600px"
       alt="Workshop" style="max-width:100%;max-height:400px;width:auto;border-radius:6px;display:block;margin:0 auto;" loading="lazy" />
   </div>
-  <a class="scroll-top" href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});this.classList.remove('visible');return false;" aria-label="Back to top"><ArrowUp size={28} strokeWidth={1.5} /></a>
+  <a class="scroll-top" href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});this.classList.remove('visible');return false;" aria-label="Til toppen"><ArrowUp size={28} strokeWidth={1.5} /></a>
   <div style="display:flex;justify-content:center;gap:3rem;padding:2rem 0 3rem;">
-    <span class="back current">Made</span>
-    <a class="back" href="/gallery/found">Found</a>
+    <span class="back current">Laget</span>
+    <a class="back" href="/no/galleri/funnet">Funnet</a>
   </div>
   </main>
 

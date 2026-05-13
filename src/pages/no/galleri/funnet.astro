@@ -1,37 +1,28 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
-import { projects, cloudinaryUrl } from '../../../data/made.js';
+import { found, cloudinaryUrl } from '../../../data/found.js';
 import { ArrowUp, ArrowLeft } from 'lucide-astro';
-
 const lang = 'no';
-const flat = projects.flatMap(p => p.images.map(img => ({ ...img, project: p.title })));
-const seed = 42;
-const seeded = (n) => { let x = Math.sin(n + seed) * 10000; return x - Math.floor(x); };
-const allImages = flat.map((img, i) => ({ img, sort: seeded(i) })).sort((a, b) => a.sort - b.sort).map(x => x.img);
+const foundImages = found;
 ---
 
-<Layout lang={lang} title="3D-modeller - Bjørn A. Andersen" description="Galleri med 3D-modeller og prosjekter." noindex>
-  
+<Layout lang={lang} title="Funnet - Bjørn A. Andersen" description="Galleri med personlige bilder fra reiser og hverdag." noindex altLangPath="/gallery/found">
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     body {
       background: #1e2228;
-      color: #eee;
+      color: #dde1e7;
       font-family: 'Piazzolla', serif;
     }
-
     .wrap {
       max-width: 1600px;
       width: 100%;
       margin: 0 auto;
       padding: 2rem 1.5rem 4rem;
     }
-
     .back {
       display: inline-block;
-      margin-bottom: 0rem;
       color: #ccc;
       text-decoration: none;
       font-size: 0.85rem;
@@ -82,10 +73,10 @@ const allImages = flat.map((img, i) => ({ img, sort: seeded(i) })).sort((a, b) =
         color: #ccc;
       }
     }
-
     .grid {
       columns: 4;
       gap: 1rem;
+      margin-top: 2rem;
       opacity: 0;
       transition: opacity 0.6s ease;
     }
@@ -93,7 +84,6 @@ const allImages = flat.map((img, i) => ({ img, sort: seeded(i) })).sort((a, b) =
     .grid.ready {
       opacity: 1;
     }
-
     .grid-item {
       position: relative;
       margin-bottom: 1rem;
@@ -101,40 +91,11 @@ const allImages = flat.map((img, i) => ({ img, sort: seeded(i) })).sort((a, b) =
       border-radius: 6px;
       overflow: hidden;
     }
-
     .grid-item img {
       width: 100%;
       height: auto;
       display: block;
     }
-
-    .grid-item.opaque img { background: #1e2228; }
-
-.overlay {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 0.75rem;
-  display: flex;
-  justify-content: center;
-  opacity: 0;
-  transition: opacity 0.2s;
-  background: none;
-}
-
-    .grid-item:hover .overlay { opacity: 1; }
-
-.overlay-title {
-  font-size: 0.75rem;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: #fff;
-  background: rgba(0,0,0,0.5);
-  padding: 3px 10px;
-  border-radius: 4px;
-}
-
     .sr-only {
       position: absolute;
       width: 1px;
@@ -147,10 +108,7 @@ const allImages = flat.map((img, i) => ({ img, sort: seeded(i) })).sort((a, b) =
     }
     @media (max-width: 700px) {
       .grid { columns: 1; }
-      .overlay { opacity: 1; background: none; }
-      .overlay-title { display: none; }
     }
-
     @media (max-width: 400px) {
       .grid { columns: 1; }
     }
@@ -158,34 +116,29 @@ const allImages = flat.map((img, i) => ({ img, sort: seeded(i) })).sort((a, b) =
 
   <a class="back-home" href="/no" aria-label="Tilbake til forsiden"><ArrowLeft size={28} strokeWidth={1.5} /></a>
   <main id="main">
-  <div class="wrap">
-    <div style="display:flex;justify-content:center;gap:3rem;margin-bottom:2rem;">
-      <span class="back current">Laget</span>
-      <a class="back" href="/no/gallery/found">Funnet</a>
-    </div>
-    <h1 class="sr-only">Laget</h1>
-    <div class="grid" id="grid">
-      {allImages.map(img => (
-        <div class={`grid-item ${img.transparent ? 'transparent' : 'opaque'}`}>
-          {img.link
-            ? <a href={img.link} target="_blank" rel="noopener" aria-label={img.title}><img src={cloudinaryUrl(img.url, { width: 600 })} alt="" loading="lazy" /></a>
-            : <img src={cloudinaryUrl(img.url, { width: 600 })} alt={img.alt} loading="lazy" />
-          }
-          <div class="overlay">
-            <span class="overlay-title">{img.title}</span>
+    <div class="wrap">
+      <div style="display:flex;justify-content:center;gap:3rem;margin-bottom:2rem;">
+        <a class="back" href="/no/galleri/laget">Laget</a>
+        <span class="back current">Funnet</span>
+      </div>
+      <h1 class="sr-only">Funnet</h1>
+      <div class="grid" id="grid">
+        {found.map(img => (
+          <div class="grid-item">
+            <img
+              src={cloudinaryUrl(img.url, { width: 600 })}
+              srcset={`${cloudinaryUrl(img.url, { width: 400 })} 400w, ${cloudinaryUrl(img.url, { width: 600 })} 600w, ${cloudinaryUrl(img.url, { width: 800 })} 800w, ${cloudinaryUrl(img.url, { width: 1200 })} 1200w`}
+              sizes="(max-width: 700px) 100vw, 25vw"
+              alt={img.alt} loading="lazy" />
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
-  </div>
-  <div style="max-width:1600px;width:100%;margin:0 auto;padding:0 1.5rem 3rem;">
-    <img src="https://res.cloudinary.com/djpkffk5u/image/upload/v1772447680/Panorama_wk07xx.jpg" alt="Workshop" style="width:100%;border-radius:6px;display:block;" loading="lazy" />
-  </div>
   <a class="scroll-top" href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});this.classList.remove('visible');return false;" aria-label="Til toppen"><ArrowUp size={28} strokeWidth={1.5} /></a>
-  <div style="display:flex;justify-content:center;gap:3rem;padding:2rem 0 3rem;">
-    <span class="back current">Laget</span>
-    <a class="back" href="/no/gallery/found">Funnet</a>
-  </div>
+    <div style="display:flex;justify-content:center;gap:3rem;padding:2rem 0 3rem;">
+      <a class="back" href="/no/galleri/laget">Laget</a>
+      <span class="back current">Funnet</span>
+    </div>
   </main>
 
   <script>
@@ -201,19 +154,11 @@ const allImages = flat.map((img, i) => ({ img, sort: seeded(i) })).sort((a, b) =
     const imgs = Array.from(grid.querySelectorAll('img'));
     let loaded = 0;
     const threshold = Math.min(imgs.length, 8);
-
-    const reveal = () => {
-      loaded++;
-      if (loaded >= threshold) {
-        requestAnimationFrame(() => grid.classList.add('ready'));
-      }
-    };
-
+    const reveal = () => { loaded++; if (loaded >= threshold) requestAnimationFrame(() => grid.classList.add('ready')); };
     imgs.slice(0, threshold).forEach(img => {
       if (img.complete) reveal();
       else { img.addEventListener('load', reveal); img.addEventListener('error', reveal); }
     });
-
     setTimeout(() => grid.classList.add('ready'), 3000);
   </script>
 </Layout>
