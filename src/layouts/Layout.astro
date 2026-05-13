@@ -14,6 +14,68 @@ const otherUrl = lang === 'en'
   ? `https://polybjorn.no${path === '/' ? '' : path}`
   : `https://polybjorn.com${enPath === '/' ? '' : enPath}?lang=en`;
 const ogImage = image ?? 'https://res.cloudinary.com/djpkffk5u/image/upload/c_fill,g_center,w_1200,h_630/v1772729286/polybjorn-banner-navy-1500x500_rvluaz.png';
+
+const schemas = [{
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "Bjørn A. Andersen",
+  "alternateName": "Bjørn Andreas Andersen",
+  "url": "https://polybjorn.com",
+  "image": "https://res.cloudinary.com/det9ftymo/image/upload/c_pad,b_gen_fill,w_360,h_360/v1725405810/photo_jn86fv.jpg",
+  "sameAs": [
+    "https://grabcad.com/bjorn.a.andersen-1",
+    "https://social.polybjorn.com/@bjanda"
+  ],
+  "jobTitle": "3D Designer & Instructor",
+  "description": "3D modelling, 3D printing, production, electronics and design services in Haugesund and Haugalandet, Norway.",
+  "address": {
+    "@type": "PostalAddress",
+    "addressLocality": "Haugesund",
+    "addressRegion": "Rogaland",
+    "addressCountry": "NO"
+  },
+  "knowsAbout": ["3D modelling", "3D printing", "Additive manufacturing", "Graphic design", "Electronics", "Production"]
+}, {
+  "@context": "https://schema.org",
+  "@type": "Service",
+  "name": "3D Printing & Design Services",
+  "description": "3D modelling, 3D printing, production and hands-on courses in Haugesund and Haugalandet, Norway.",
+  "areaServed": ["Haugesund", "Haugalandet", "Rogaland"],
+  "provider": {
+    "@type": "Person",
+    "name": "Bjørn A. Andersen",
+    "alternateName": "Bjørn Andreas Andersen",
+    "url": "https://polybjorn.com"
+  }
+}];
+
+if (lang === 'no' && !noindex) {
+  schemas.push({
+    "@context": "https://schema.org",
+    "@type": "ProfessionalService",
+    "@id": "https://polybjorn.no/#business",
+    "name": "Bjørn A. Andersen",
+    "legalName": "Polybjorn Andersen",
+    "alternateName": ["Bjørn Andreas Andersen", "Polybjorn"],
+    "url": "https://polybjorn.no",
+    "image": "https://res.cloudinary.com/det9ftymo/image/upload/c_pad,b_gen_fill,w_360,h_360/v1725405810/photo_jn86fv.jpg",
+    "description": "3D-printing, 3D-modellering, design og kurs i Haugesund og Haugalandet.",
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "Haugesund",
+      "addressRegion": "Rogaland",
+      "addressCountry": "NO"
+    },
+    "geo": { "@type": "GeoCoordinates", "latitude": 59.4138, "longitude": 5.268 },
+    "areaServed": ["Haugesund", "Karmøy", "Tysvær", "Sveio", "Bokn", "Vindafjord", "Haugalandet", "Rogaland"],
+    "identifier": {
+      "@type": "PropertyValue",
+      "propertyID": "Organisasjonsnummer",
+      "value": "925828513"
+    },
+    "founder": { "@type": "Person", "name": "Bjørn A. Andersen" }
+  });
+}
 ---
 <html lang={lang}>
   <head>
@@ -47,39 +109,7 @@ const ogImage = image ?? 'https://res.cloudinary.com/djpkffk5u/image/upload/c_fi
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage} />
     <!-- JSON-LD -->
-    <script type="application/ld+json" set:html={JSON.stringify([{
-      "@context": "https://schema.org",
-      "@type": "Person",
-      "name": "Bjørn A. Andersen",
-      "alternateName": "Bjørn Andreas Andersen",
-      "url": "https://polybjorn.com",
-      "image": "https://res.cloudinary.com/det9ftymo/image/upload/c_pad,b_gen_fill,w_360,h_360/v1725405810/photo_jn86fv.jpg",
-      "sameAs": [
-        "https://grabcad.com/bjorn.a.andersen-1",
-        "https://social.polybjorn.com/@bjanda"
-      ],
-      "jobTitle": "3D Designer & Instructor",
-      "description": "3D modelling, 3D printing, production, electronics and design services in Haugesund and Haugalandet, Norway.",
-      "address": {
-        "@type": "PostalAddress",
-        "addressLocality": "Haugesund",
-        "addressRegion": "Rogaland",
-        "addressCountry": "NO"
-      },
-      "knowsAbout": ["3D modelling", "3D printing", "Additive manufacturing", "Graphic design", "Electronics", "Production"]
-    }, {
-      "@context": "https://schema.org",
-      "@type": "Service",
-      "name": "3D Printing & Design Services",
-      "description": "3D modelling, 3D printing, production and hands-on courses in Haugesund and Haugalandet, Norway.",
-      "areaServed": ["Haugesund", "Haugalandet", "Rogaland"],
-      "provider": {
-        "@type": "Person",
-        "name": "Bjørn A. Andersen",
-        "alternateName": "Bjørn Andreas Andersen",
-        "url": "https://polybjorn.com"
-      }
-    }])} />
+    <script type="application/ld+json" set:html={JSON.stringify(schemas)} />
     <script
       defer
       src="https://cloud.umami.is/script.js"
