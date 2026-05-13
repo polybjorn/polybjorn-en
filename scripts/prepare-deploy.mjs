@@ -35,6 +35,7 @@ for (const file of getHtmlFiles(DIST_NO)) {
   let html = readFileSync(file, 'utf8');
   html = html.replaceAll('href="/no/', 'href="/');
   html = html.replaceAll('href="/no"', 'href="/"');
+  html = html.replaceAll('url=/no/', 'url=/');
   writeFileSync(file, html);
 }
 
