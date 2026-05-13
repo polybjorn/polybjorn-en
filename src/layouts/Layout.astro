@@ -117,6 +117,15 @@ if (lang === 'no' && !noindex) {
     />
     <slot name="head" />
     <style>
+      @font-face {
+        font-family: 'Piazzolla';
+        font-display: swap;
+      }
+      :focus-visible {
+        outline: 2px solid #6aaeee;
+        outline-offset: 3px;
+        border-radius: 2px;
+      }
       html, body {
         margin: 0;
         padding: 0;
