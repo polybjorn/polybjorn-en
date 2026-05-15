@@ -1,3 +1,6 @@
+// Aesthetic gallery (travel and everyday photos). Empty `alt=""` is
+// intentional: these images carry no information beyond their visual
+// presence, so screen readers correctly skip them as decorative.
 export const found = [
   { url: "https://res.cloudinary.com/djpkffk5u/image/upload/v1772377834/Telttur_2-1_oqqjlu.heic", alt: "" },
   { url: "https://res.cloudinary.com/djpkffk5u/image/upload/v1772377832/Sankthans_2_zangti.jpg", alt: "" },
