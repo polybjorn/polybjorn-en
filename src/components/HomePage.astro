@@ -312,14 +312,18 @@ const featuredImages = [
     <div class="divider"></div>
     <div class="preview">
       <div class="preview-grid">
-        {featuredImages.map((img) => (
-          <div class="preview-item">
-            {img.link
-              ? <a href={img.link} target="_blank" rel="noopener"><img src={cloudinaryUrl(img.url, { width: 120 })} alt={img.alt} loading="lazy" /></a>
-              : <img src={cloudinaryUrl(img.url, { width: 120 })} alt={img.alt} loading="lazy" />
-            }
-          </div>
-        ))}
+        {featuredImages.map((img) => {
+          const src = cloudinaryUrl(img.url, { width: 120 });
+          const srcset = `${src} 1x, ${cloudinaryUrl(img.url, { width: 240 })} 2x`;
+          return (
+            <div class="preview-item">
+              {img.link
+                ? <a href={img.link} target="_blank" rel="noopener"><img src={src} srcset={srcset} alt={img.alt} loading="lazy" /></a>
+                : <img src={src} srcset={srcset} alt={img.alt} loading="lazy" />
+              }
+            </div>
+          );
+        })}
         <a href={galleryMadeHref} class="more-arrow" title={tr.viewAllModelsTitle}>
           <ArrowRight size={36} strokeWidth={1.5} />
         </a>

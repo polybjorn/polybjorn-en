@@ -1,7 +1,6 @@
 ---
 import '@fontsource/piazzolla/400.css';
 import '@fontsource/piazzolla/700.css';
-import '@fontsource/piazzolla/400-italic.css';
 const { lang = 'en', title, description, image, noindex = false, altLangPath } = Astro.props;
 const otherLang = lang === 'en' ? 'no' : 'en';
 const path = Astro.url.pathname;
@@ -207,11 +206,7 @@ if (lang === 'no' && !noindex) {
       )}
     </a>
     <slot />
-    <script define:vars={{ lang }}>
-      document.querySelector('.lang-toggle').addEventListener('click', () => {
-        localStorage.setItem('lang', {lang} === 'en' ? 'no' : 'en');
-      });
-
+    <script>
       const flag = document.querySelector('.lang-toggle');
       window.addEventListener('scroll', () => {
         flag.classList.toggle('hidden', window.scrollY > 60);
