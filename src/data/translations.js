@@ -23,6 +23,18 @@ export const t = {
     cv_other: "Norwegian",
     notFound: "This page doesn't exist.",
     goHome: "Go home",
+    galleries: {
+      made: {
+        title: "Gallery - Bjørn A. Andersen",
+        description: "Gallery of 3D models, prints, and renders by Bjørn A. Andersen.",
+        tabLabel: "Made",
+      },
+      found: {
+        title: "Found - Bjørn A. Andersen",
+        description: "Personal photography and free time captures by Bjørn A. Andersen.",
+        tabLabel: "Found",
+      },
+    },
     threeDPrinting: {
       title: "3D printing in Haugesund - Bjørn A. Andersen",
       description: "3D printing, modelling, prototyping, and small-batch production for businesses in Haugesund and Haugalandet, Norway.",
@@ -72,6 +84,18 @@ export const t = {
     cv_other: "Engelsk",
     notFound: "Denne siden finnes ikke.",
     goHome: "Gå hjem",
+    galleries: {
+      made: {
+        title: "3D-modeller - Bjørn A. Andersen",
+        description: "Galleri med 3D-modeller og prosjekter.",
+        tabLabel: "Laget",
+      },
+      found: {
+        title: "Funnet - Bjørn A. Andersen",
+        description: "Galleri med personlige bilder fra reiser og hverdag.",
+        tabLabel: "Funnet",
+      },
+    },
     threeDPrinting: {
       title: "3D-printing i Haugesund - Bjørn A. Andersen",
       description: "3D-printing, modellering, prototyping og småserieproduksjon for lokale bedrifter i Haugesund og på Haugalandet.",
