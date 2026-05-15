@@ -112,6 +112,9 @@ if (lang === 'no' && !noindex) {
       data-website-id={lang === 'no' ? '2eb7ad17-e72b-4623-8ee8-7faf054587a8' : 'ed33a1a1-90f7-4f7b-8466-e6b0c74f5227'}
     />
     <slot name="head" />
+    <style is:global>
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    </style>
     <style>
       :focus-visible {
         outline: 2px solid #6aaeee;
