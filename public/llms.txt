@@ -18,6 +18,7 @@ Bjørn A. Andersen operates Polybjorn Andersen, a sole proprietorship offering 3
 ## Links
 
 - Website: https://polybjorn.com
+- Norwegian site (same content, Norwegian language): https://polybjorn.no
 - 3D printing services: https://polybjorn.com/3d-printing
 - Gallery (3D models): https://polybjorn.com/gallery/made
 - Gallery (photography): https://polybjorn.com/gallery/found

@@ -67,6 +67,8 @@ writeFileSync(join(DIST_NO, 'robots.txt'),
 
 // 4. Add CNAME, README and LICENSE for polybjorn.no
 writeFileSync(join(DIST_NO, 'CNAME'), 'polybjorn.no\n');
+// English: all GitHub-facing text (READMEs, commits, PRs) stays English
+// regardless of the site's UI language. Don't translate this string.
 writeFileSync(join(DIST_NO, 'README.md'), `# polybjorn.no
 
 Deploy target for [polybjorn.no](https://polybjorn.no), the Norwegian build of [polybjorn.com](https://polybjorn.com). Source and history live in [polybjorn/polybjorn-en](https://github.com/polybjorn/polybjorn-en).
