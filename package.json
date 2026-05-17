@@ -13,11 +13,13 @@
     "node": ">=20"
   },
   "dependencies": {
+    "@astrojs/rss": "^4.0.18",
     "@astrojs/sitemap": "^3.7.0",
     "@fontsource/piazzolla": "^5.2.8",
     "@rollup/plugin-yaml": "^4.1.2",
     "astro": "^5.17.1",
     "lucide-astro": "^0.556.0",
+    "markdown-it": "^14.1.1",
     "rough-notation": "^0.5.1"
   }
 }

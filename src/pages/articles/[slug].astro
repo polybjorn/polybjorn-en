@@ -1,0 +1,143 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import { ArrowLeft, ArrowUp } from 'lucide-astro';
+import { cloudinaryUrl } from '../../data/made.js';
+
+export async function getStaticPaths() {
+  const articles = await getCollection('articles');
+  return articles.map(article => ({
+    params: { slug: article.slug },
+    props: { article },
+  }));
+}
+
+const { article } = Astro.props;
+const { Content } = await article.render();
+const fmt = (d: Date) => d.toISOString().slice(0, 10);
+---
+
+<Layout lang="en" title={`${article.data.title} - Bjørn A. Andersen`} description={article.data.description} noindex>
+  <style>
+    body {
+      background: #1e2228;
+      color: #dde1e7;
+      font-family: 'Piazzolla', serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+    }
+    main {
+      width: 100%;
+      max-width: 720px;
+      padding: 3rem 1.5rem 4rem;
+    }
+    .back-home {
+      position: fixed;
+      top: calc(1rem - 4px);
+      left: max(1rem, env(safe-area-inset-left, 0px) + 0.5rem);
+      color: #ccc;
+      text-decoration: none;
+      z-index: 100;
+      opacity: 0.75;
+      transition: opacity 0.3s, transform 0.3s;
+      line-height: 1;
+    }
+    .back-home:hover { opacity: 1; color: #fff; }
+    .back-home.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-0.5rem);
+    }
+    .cover {
+      display: block;
+      width: 100%;
+      max-width: 640px;
+      aspect-ratio: 16 / 9;
+      object-fit: contain;
+      margin: 0 auto 1rem;
+    }
+    h1 { font-size: 2.2rem; margin-bottom: 0.5rem; font-weight: 700; line-height: 1.2; }
+    .meta { color: #8a8f99; font-size: 0.95rem; margin-bottom: 2.5rem; }
+
+    article :global(h2) { font-size: 1.5rem; margin: 2rem 0 0.75rem; font-weight: 700; }
+    article :global(h3) { font-size: 1.2rem; margin: 1.5rem 0 0.5rem; font-weight: 700; }
+    article :global(p) { margin-bottom: 1.1rem; line-height: 1.65; }
+    article :global(a) { color: #6AAEEE; text-decoration: underline; }
+    article :global(ul), article :global(ol) { margin: 0 0 1.1rem 1.5rem; }
+    article :global(li) { margin-bottom: 0.35rem; line-height: 1.6; }
+    article :global(strong) { font-weight: 700; }
+    article :global(em) { font-style: italic; }
+    article :global(blockquote) {
+      border-left: 3px solid #6AAEEE;
+      padding: 0.25rem 0 0.25rem 1rem;
+      margin: 1.25rem 0;
+      color: #b5bac3;
+      font-style: italic;
+    }
+    article :global(code) {
+      background: #2a2f37;
+      padding: 0.1rem 0.35rem;
+      border-radius: 3px;
+      font-size: 0.9em;
+    }
+    article :global(pre) {
+      background: #15181d;
+      padding: 1rem;
+      border-radius: 6px;
+      overflow-x: auto;
+      margin: 1.25rem 0;
+    }
+    article :global(pre code) { background: transparent; padding: 0; }
+    article :global(img) { max-width: 100%; height: auto; border-radius: 4px; margin: 1.25rem 0; }
+    article :global(hr) { border: none; border-top: 1px solid #2a2f37; margin: 2rem 0; }
+    .scroll-top {
+      position: fixed;
+      bottom: 1rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(0.5rem);
+      color: #ccc;
+      text-decoration: none;
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s, transform 0.3s;
+      line-height: 1;
+    }
+    .scroll-top.visible {
+      opacity: 0.75;
+      pointer-events: auto;
+      transform: translateX(-50%) translateY(0);
+    }
+    .scroll-top:hover { opacity: 1; color: #fff; }
+  </style>
+
+  <a class="back-home" href="/articles" aria-label="Back to articles"><ArrowLeft size={28} strokeWidth={1.5} /></a>
+  <main id="main">
+    {article.data.cover && (
+      <img
+        class="cover"
+        src={cloudinaryUrl(article.data.cover, { width: 1200 })}
+        srcset={`${cloudinaryUrl(article.data.cover, { width: 800 })} 800w, ${cloudinaryUrl(article.data.cover, { width: 1200 })} 1200w, ${cloudinaryUrl(article.data.cover, { width: 1600 })} 1600w`}
+        sizes="(max-width: 720px) 100vw, 720px"
+        alt={article.data.coverAlt ?? ''}
+      />
+    )}
+    <h1>{article.data.title}</h1>
+    <div class="meta">{fmt(article.data.date)}</div>
+    <article>
+      <Content />
+    </article>
+  </main>
+  <a class="scroll-top" href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});this.classList.remove('visible');return false;" aria-label="Back to top"><ArrowUp size={28} strokeWidth={1.5} /></a>
+  <script>
+    const backHome = document.querySelector('.back-home');
+    const scrollTop = document.querySelector('.scroll-top');
+    window.addEventListener('scroll', () => {
+      backHome.classList.toggle('hidden', window.scrollY > 60);
+      scrollTop.classList.toggle('visible', window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 5);
+    }, { passive: true });
+  </script>
+</Layout>

@@ -1,0 +1,164 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import { ArrowLeft, ArrowUp, Rss } from 'lucide-astro';
+import { cloudinaryUrl } from '../../data/made.js';
+
+const articles = (await getCollection('articles'))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+const fmt = (d: Date) => d.toISOString().slice(0, 10);
+---
+
+<Layout lang="en" title="Articles - Bjørn A. Andersen" description="Writing by Bjørn A. Andersen." noindex>
+  <style>
+    body {
+      background: #1e2228;
+      color: #dde1e7;
+      font-family: 'Piazzolla', serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+    }
+    main {
+      width: 100%;
+      max-width: 720px;
+      padding: 3rem 1.5rem 4rem;
+    }
+    .back-home {
+      position: fixed;
+      top: calc(1rem - 4px);
+      left: max(1rem, env(safe-area-inset-left, 0px) + 0.5rem);
+      color: #ccc;
+      text-decoration: none;
+      z-index: 100;
+      opacity: 0.75;
+      transition: opacity 0.3s, transform 0.3s;
+      line-height: 1;
+    }
+    .back-home:hover { opacity: 1; color: #fff; }
+    .back-home.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-0.5rem);
+    }
+    .heading {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 2rem;
+    }
+    h1 { font-size: 2rem; font-weight: 700; }
+    .rss {
+      color: #8a8f99;
+      transition: color 0.2s;
+      display: inline-flex;
+    }
+    .rss:hover { color: #6AAEEE; }
+    ul { list-style: none; }
+    li { margin-bottom: 2rem; }
+    a.card {
+      display: flex;
+      gap: 1.25rem;
+      align-items: flex-start;
+      color: inherit;
+      text-decoration: none;
+      padding: 1rem 0;
+      border-bottom: 1px solid #2a2f37;
+      transition: color 0.2s;
+    }
+    a.card:hover h2 { color: #6AAEEE; }
+    a.card:hover .cover { opacity: 0.92; }
+    .text { flex: 1; min-width: 0; }
+    .cover {
+      flex-shrink: 0;
+      width: 160px;
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+      border-radius: 4px;
+      background: #15181d;
+      transition: opacity 0.2s;
+    }
+    @media (max-width: 480px) {
+      a.card { gap: 0.9rem; }
+      .cover { width: 110px; }
+    }
+    h2 { font-size: 1.35rem; margin-bottom: 0.35rem; transition: color 0.2s; }
+    .meta { color: #8a8f99; font-size: 0.9rem; margin-bottom: 0.5rem; }
+    .desc {
+      color: #b5bac3;
+      line-height: 1.5;
+      min-height: calc(2 * 1.5em);
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .empty { color: #8a8f99; }
+    .scroll-top {
+      position: fixed;
+      bottom: 1rem;
+      left: 50%;
+      transform: translateX(-50%) translateY(0.5rem);
+      color: #ccc;
+      text-decoration: none;
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s, transform 0.3s;
+      line-height: 1;
+    }
+    .scroll-top.visible {
+      opacity: 0.75;
+      pointer-events: auto;
+      transform: translateX(-50%) translateY(0);
+    }
+    .scroll-top:hover { opacity: 1; color: #fff; }
+  </style>
+
+  <a class="back-home" href="/" aria-label="Back to home"><ArrowLeft size={28} strokeWidth={1.5} /></a>
+  <main id="main">
+    <div class="heading">
+      <h1>Articles</h1>
+      <a class="rss" href="/articles/rss.xml" aria-label="RSS feed"><Rss size={20} strokeWidth={2} /></a>
+    </div>
+    {articles.length === 0 ? (
+      <p class="empty">Nothing here yet.</p>
+    ) : (
+      <ul>
+        {articles.map(a => (
+          <li>
+            <a class="card" href={`/articles/${a.slug}`}>
+              <div class="text">
+                <h2>{a.data.title}</h2>
+                <div class="meta">{fmt(a.data.date)}</div>
+                <div class="desc">{a.data.description}</div>
+              </div>
+              {(a.data.thumb ?? a.data.cover) && (
+                <img
+                  class="cover"
+                  src={cloudinaryUrl(a.data.thumb ?? a.data.cover, { width: 400 })}
+                  srcset={`${cloudinaryUrl(a.data.thumb ?? a.data.cover, { width: 320 })} 320w, ${cloudinaryUrl(a.data.thumb ?? a.data.cover, { width: 480 })} 480w`}
+                  sizes="160px"
+                  alt={a.data.thumbAlt ?? a.data.coverAlt ?? ''}
+                  loading="lazy"
+                />
+              )}
+            </a>
+          </li>
+        ))}
+      </ul>
+    )}
+  </main>
+  <a class="scroll-top" href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});this.classList.remove('visible');return false;" aria-label="Back to top"><ArrowUp size={28} strokeWidth={1.5} /></a>
+  <script>
+    const backHome = document.querySelector('.back-home');
+    const scrollTop = document.querySelector('.scroll-top');
+    window.addEventListener('scroll', () => {
+      backHome.classList.toggle('hidden', window.scrollY > 60);
+      scrollTop.classList.toggle('visible', window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 5);
+    }, { passive: true });
+  </script>
+</Layout>
