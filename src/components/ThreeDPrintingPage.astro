@@ -290,7 +290,6 @@ const serviceOrder = [
     </section>
 
     <section>
-      <h2>{td.examplesHeading}</h2>
       <div class="examples-grid">
         {featured.map(img => (
           <div class="example">
@@ -338,7 +337,7 @@ const serviceOrder = [
     const scrollTop = document.querySelector('.scroll-top');
     window.addEventListener('scroll', () => {
       backHome.classList.toggle('hidden', window.scrollY > 60);
-      scrollTop.classList.toggle('visible', window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 200);
+      scrollTop.classList.toggle('visible', window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 20);
     }, { passive: true });
   </script>
 </Layout>
