@@ -93,6 +93,35 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
     article :global(pre code) { background: transparent; padding: 0; }
     article :global(img) { max-width: 100%; height: auto; border-radius: 4px; margin: 1.25rem 0; }
     article :global(hr) { border: none; border-top: 1px solid #2a2f37; margin: 2rem 0; }
+    article :global(.link-buttons) {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.75rem;
+      margin: 2.5rem 0 1.5rem;
+    }
+    article :global(.link-buttons a) {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.55rem 0.95rem;
+      background: #2a2f37;
+      color: #dde1e7;
+      text-decoration: none;
+      border-radius: 6px;
+      border: 1px solid #3a4049;
+      font-size: 0.95rem;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    article :global(.link-buttons a:hover) {
+      background: #333941;
+      border-color: #6AAEEE;
+    }
+    article :global(.link-buttons svg) {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+    }
     .to-top {
       position: fixed;
       bottom: 1rem;
