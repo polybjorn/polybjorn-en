@@ -13,7 +13,7 @@ export const t = {
     viewAllModelsTitle: "View all models",
     cvDescription: "Curriculum vitae for Bjørn A. Andersen: 3D modelling, additive manufacturing, graphic design, and 3D printing courses.",
     backHomeAria: "Back to home",
-    backTopAria: "Back to top",
+    backTopAria: "To top",
     experience: "Experience",
     education: "Education",
     skills: "Skills",
