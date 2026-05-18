@@ -222,7 +222,7 @@ const serviceOrder = [
       transform: translateY(-0.5rem);
     }
 
-    .scroll-top {
+    .to-top {
       position: fixed;
       bottom: 1rem;
       left: 50%;
@@ -236,12 +236,12 @@ const serviceOrder = [
       transition: opacity 0.3s, transform 0.3s;
       line-height: 1;
     }
-    .scroll-top.visible {
+    .to-top.visible {
       opacity: 0.75;
       pointer-events: auto;
       transform: translateX(-50%) translateY(0);
     }
-    .scroll-top:hover { opacity: 1; color: #fff; }
+    .to-top:hover { opacity: 1; color: #fff; }
 
     @media (max-width: 720px) {
       main { padding: 2.5rem 1.25rem 2rem; }
@@ -326,7 +326,7 @@ const serviceOrder = [
 
   </main>
 
-  <a class="scroll-top" href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});this.classList.remove('visible');return false;" aria-label={tr.backTopAria}><ArrowUp size={28} strokeWidth={1.5} /></a>
+  <a class="to-top" href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});this.classList.remove('visible');return false;" aria-label={tr.backTopAria}><ArrowUp size={28} strokeWidth={1.5} /></a>
 
   <script>
     const phone = atob('KzQ3IDk2OSAxMSA1ODc=');
@@ -335,7 +335,7 @@ const serviceOrder = [
     document.getElementById('email').textContent = email;
 
     const backHome = document.querySelector('.back-home');
-    const scrollTop = document.querySelector('.scroll-top');
+    const scrollTop = document.querySelector('.to-top');
     window.addEventListener('scroll', () => {
       backHome.classList.toggle('hidden', window.scrollY > 60);
       scrollTop.classList.toggle('visible', window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 20);

@@ -77,7 +77,7 @@ const backHref = lang === 'no' ? '/no' : '/';
       transform: translateY(-0.5rem);
     }
 
-    .scroll-top {
+    .to-top {
       position: fixed;
       bottom: 1rem;
       left: 50%;
@@ -91,12 +91,12 @@ const backHref = lang === 'no' ? '/no' : '/';
       transition: opacity 0.3s, transform 0.3s;
       line-height: 1;
     }
-    .scroll-top.visible {
+    .to-top.visible {
       opacity: 0.75;
       pointer-events: auto;
       transform: translateX(-50%) translateY(0);
     }
-    .scroll-top:hover { opacity: 1; color: #fff; }
+    .to-top:hover { opacity: 1; color: #fff; }
 
     h1 {
       font-family: 'Piazzolla', serif;
@@ -317,7 +317,7 @@ const backHref = lang === 'no' ? '/no' : '/';
         padding: 0;
         max-width: 100%;
       }
-      .back-home, .scroll-top, .skip-link { display: none; }
+      .back-home, .to-top, .skip-link { display: none; }
       h1 { color: #555; }
       h2 { color: #555; }
       .period { color: #555; }
@@ -429,7 +429,7 @@ const backHref = lang === 'no' ? '/no' : '/';
     </section>
 
   </div>
-  <a class="scroll-top" href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});this.classList.remove('visible');return false;" aria-label={tr.backTopAria}><ArrowUp size={28} strokeWidth={1.5} /></a>
+  <a class="to-top" href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});this.classList.remove('visible');return false;" aria-label={tr.backTopAria}><ArrowUp size={28} strokeWidth={1.5} /></a>
   </main>
 
   <script>
@@ -446,7 +446,7 @@ const backHref = lang === 'no' ? '/no' : '/';
     document.querySelectorAll('h2').forEach(el => observer.observe(el));
 
     const backHome = document.querySelector('.back-home');
-    const scrollTop = document.querySelector('.scroll-top');
+    const scrollTop = document.querySelector('.to-top');
     window.addEventListener('scroll', () => {
       backHome.classList.toggle('hidden', window.scrollY > 60);
       scrollTop.classList.toggle('visible', window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 20);

@@ -93,7 +93,7 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
     article :global(pre code) { background: transparent; padding: 0; }
     article :global(img) { max-width: 100%; height: auto; border-radius: 4px; margin: 1.25rem 0; }
     article :global(hr) { border: none; border-top: 1px solid #2a2f37; margin: 2rem 0; }
-    .scroll-top {
+    .to-top {
       position: fixed;
       bottom: 1rem;
       left: 50%;
@@ -107,12 +107,12 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
       transition: opacity 0.3s, transform 0.3s;
       line-height: 1;
     }
-    .scroll-top.visible {
+    .to-top.visible {
       opacity: 0.75;
       pointer-events: auto;
       transform: translateX(-50%) translateY(0);
     }
-    .scroll-top:hover { opacity: 1; color: #fff; }
+    .to-top:hover { opacity: 1; color: #fff; }
   </style>
 
   <a class="back-home" href="/articles" aria-label="Back to articles"><ArrowLeft size={28} strokeWidth={1.5} /></a>
@@ -132,10 +132,10 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
       <Content />
     </article>
   </main>
-  <a class="scroll-top" href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});this.classList.remove('visible');return false;" aria-label="Back to top"><ArrowUp size={28} strokeWidth={1.5} /></a>
+  <a class="to-top" href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});this.classList.remove('visible');return false;" aria-label="Back to top"><ArrowUp size={28} strokeWidth={1.5} /></a>
   <script>
     const backHome = document.querySelector('.back-home');
-    const scrollTop = document.querySelector('.scroll-top');
+    const scrollTop = document.querySelector('.to-top');
     window.addEventListener('scroll', () => {
       backHome.classList.toggle('hidden', window.scrollY > 60);
       scrollTop.classList.toggle('visible', window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 20);

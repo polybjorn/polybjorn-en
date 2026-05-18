@@ -78,7 +78,7 @@ const images = isMade
       transform: translateY(-0.5rem);
     }
 
-    .scroll-top {
+    .to-top {
       display: flex;
       justify-content: center;
       padding: 1.5rem 0 0;
@@ -88,7 +88,7 @@ const images = isMade
       transition: opacity 0.3s, color 0.3s;
       line-height: 1;
     }
-    .scroll-top:hover { opacity: 1; color: #fff; }
+    .to-top:hover { opacity: 1; color: #fff; }
 
     .current {
       color: #fff;
@@ -233,7 +233,7 @@ const images = isMade
         alt="Workshop" style="max-width:100%;max-height:400px;width:auto;border-radius:6px;display:block;margin:0 auto;" loading="lazy" />
     </div>
   )}
-  <a class="scroll-top" href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});this.classList.remove('visible');return false;" aria-label={tr.backTopAria}><ArrowUp size={28} strokeWidth={1.5} /></a>
+  <a class="to-top" href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});this.classList.remove('visible');return false;" aria-label={tr.backTopAria}><ArrowUp size={28} strokeWidth={1.5} /></a>
   <div style="display:flex;justify-content:center;gap:3rem;padding:2rem 0 3rem;">
     {isMade
       ? <span class="back current">{g.made.tabLabel}</span>

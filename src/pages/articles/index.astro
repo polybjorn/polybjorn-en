@@ -97,7 +97,7 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
       overflow: hidden;
     }
     .empty { color: #8a8f99; }
-    .scroll-top {
+    .to-top {
       position: fixed;
       bottom: 1rem;
       left: 50%;
@@ -111,12 +111,12 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
       transition: opacity 0.3s, transform 0.3s;
       line-height: 1;
     }
-    .scroll-top.visible {
+    .to-top.visible {
       opacity: 0.75;
       pointer-events: auto;
       transform: translateX(-50%) translateY(0);
     }
-    .scroll-top:hover { opacity: 1; color: #fff; }
+    .to-top:hover { opacity: 1; color: #fff; }
   </style>
 
   <a class="back-home" href="/" aria-label="Back to home"><ArrowLeft size={28} strokeWidth={1.5} /></a>
@@ -153,10 +153,10 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
       </ul>
     )}
   </main>
-  <a class="scroll-top" href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});this.classList.remove('visible');return false;" aria-label="Back to top"><ArrowUp size={28} strokeWidth={1.5} /></a>
+  <a class="to-top" href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});this.classList.remove('visible');return false;" aria-label="Back to top"><ArrowUp size={28} strokeWidth={1.5} /></a>
   <script>
     const backHome = document.querySelector('.back-home');
-    const scrollTop = document.querySelector('.scroll-top');
+    const scrollTop = document.querySelector('.to-top');
     window.addEventListener('scroll', () => {
       backHome.classList.toggle('hidden', window.scrollY > 60);
       scrollTop.classList.toggle('visible', window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 20);
