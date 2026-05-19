@@ -2,7 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import { t } from '../data/translations.js';
 import { cloudinaryUrl } from '../data/made.js';
-import { Phone, Mail, MessageCircle, ArrowRight, Music, Github } from 'lucide-astro';
+import { Phone, Mail, MessageCircle, ArrowRight, Music, Github, KeyRound } from 'lucide-astro';
 
 interface Props {
   lang: 'en' | 'no';
@@ -250,10 +250,7 @@ const featuredImages = [
       .icon-link span { color: #fff; }
       .contact ul { font-size: 0.9rem; }
       .contact-row { align-items: center; gap: 0.6rem; flex-direction: column; }
-      .contact-row .contact-item:nth-child(1) { order: 1; } /* Phone */
-      .contact-row .contact-item:nth-child(2) { order: 3; } /* Signal */
-      .contact-row .contact-item:nth-child(3) { order: 2; } /* Email */
-      .contact-row span:not(.contact-item) { order: 4; }    /* Location */
+      .contact-row + .contact-row { margin-top: 0.6rem; }
       .preview-grid img { width: 90px; height: 90px; }
       .bio a, .contact-item a, .preview a { text-decoration: none; }
     }
@@ -298,11 +295,17 @@ const featuredImages = [
     <div class="contact">
       <div class="contact-row">
         <span class="contact-item"><Phone size={18} strokeWidth={1.5} style="color: #4CAF82;" /> <span id="phone"></span></span>
+        <span class="contact-item"><Mail size={18} strokeWidth={1.5} style="color: #E8A838;" /> <span id="email"></span></span>
+      </div>
+      <div class="contact-row">
         <span class="contact-item">
           <MessageCircle size={18} strokeWidth={1.5} style="color: #6aaeee;" />
           <a href="https://signal.me/#eu/bjanda.60">{tr.signal}</a>
         </span>
-        <span class="contact-item"><Mail size={18} strokeWidth={1.5} style="color: #E8A838;" /> <span id="email"></span></span>
+        <span class="contact-item">
+          <KeyRound size={18} strokeWidth={1.5} style="color: #b08bd9;" />
+          <a href="/pubkey.asc">PGP</a>
+        </span>
       </div>
 
     </div>
