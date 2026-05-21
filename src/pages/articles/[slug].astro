@@ -122,6 +122,70 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
       height: 18px;
       flex-shrink: 0;
     }
+    article :global(.article-gallery) {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+      margin: 1.25rem 0;
+    }
+    article :global(.gallery-thumb) {
+      padding: 0;
+      border: 1px solid #2a2f37;
+      background: #2a2f37;
+      border-radius: 4px;
+      overflow: hidden;
+      cursor: pointer;
+      aspect-ratio: 16 / 9;
+      transition: border-color 0.2s;
+    }
+    article :global(.gallery-thumb:hover),
+    article :global(.gallery-thumb:focus-visible) {
+      border-color: #6AAEEE;
+      outline: none;
+    }
+    article :global(.gallery-thumb img) {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      margin: 0;
+      border-radius: 0;
+    }
+    @media (max-width: 480px) {
+      article :global(.article-gallery) {
+        grid-template-columns: 1fr;
+      }
+    }
+    :global(.gallery-lightbox) {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 17, 21, 0.92);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      padding: 2rem;
+    }
+    :global(.gallery-lightbox.open) { display: flex; }
+    :global(.gallery-lightbox img) {
+      max-width: 90vw;
+      max-height: 90vh;
+      object-fit: contain;
+      border-radius: 6px;
+    }
+    :global(.gallery-lightbox .close) {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: transparent;
+      border: none;
+      color: #ccc;
+      font-size: 2rem;
+      cursor: pointer;
+      line-height: 1;
+      padding: 0.25rem 0.6rem;
+    }
+    :global(.gallery-lightbox .close:hover) { color: #fff; }
     .to-top {
       position: fixed;
       bottom: 1rem;
@@ -169,5 +233,63 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
       backHome.classList.toggle('hidden', window.scrollY > 60);
       scrollTop.classList.toggle('visible', window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 20);
     }, { passive: true });
+
+    const thumbs = document.querySelectorAll('.gallery-thumb');
+    if (thumbs.length) {
+      const items = Array.from(thumbs).map(t => ({
+        src: t.dataset.full,
+        alt: t.querySelector('img')?.alt ?? '',
+      }));
+      let idx = 0;
+
+      const lightbox = document.createElement('div');
+      lightbox.className = 'gallery-lightbox';
+      lightbox.innerHTML = '<button class="close" type="button" aria-label="Close">×</button><img alt="" />';
+      document.body.appendChild(lightbox);
+      const lbImg = lightbox.querySelector('img');
+      lbImg.style.cursor = 'pointer';
+
+      const show = i => {
+        idx = (i + items.length) % items.length;
+        lbImg.src = items[idx].src;
+        lbImg.alt = items[idx].alt;
+      };
+      const prev = () => show(idx - 1);
+      const next = () => show(idx + 1);
+      const isOpen = () => lightbox.classList.contains('open');
+      const closeLb = () => lightbox.classList.remove('open');
+
+      lightbox.querySelector('.close').addEventListener('click', closeLb);
+      lightbox.addEventListener('click', e => { if (e.target === lightbox) closeLb(); });
+      lbImg.addEventListener('click', e => {
+        e.stopPropagation();
+        const rect = lbImg.getBoundingClientRect();
+        if (e.clientX < rect.left + rect.width / 2) prev();
+        else next();
+      });
+      lightbox.addEventListener('wheel', e => {
+        if (!isOpen()) return;
+        e.preventDefault();
+        if (e.deltaY > 0) next();
+        else prev();
+      }, { passive: false });
+      lightbox.addEventListener('mouseup', e => {
+        if (e.button === 3) { e.preventDefault(); prev(); }
+        else if (e.button === 4) { e.preventDefault(); next(); }
+      });
+      document.addEventListener('keydown', e => {
+        if (!isOpen()) return;
+        if (e.key === 'Escape') closeLb();
+        else if (e.key === 'ArrowLeft') prev();
+        else if (e.key === 'ArrowRight') next();
+      });
+
+      thumbs.forEach((btn, i) => {
+        btn.addEventListener('click', () => {
+          show(i);
+          lightbox.classList.add('open');
+        });
+      });
+    }
   </script>
 </Layout>
