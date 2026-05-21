@@ -2,8 +2,8 @@
 title: An atlas of my own
 description: Travel pins and GPS routes in one free, open-source map, reachable from any device.
 date: 2026-05-20
-cover: https://placehold.co/1280x720/1f2937/9ca3af?text=Hero+image+placeholder+1280x720
-coverAlt: Hero image placeholder
+cover: https://res.cloudinary.com/djpkffk5u/image/upload/v1779360907/atlas_hero_16x9_jmfver.png
+coverAlt: Atlas map view with place pins
 thumb: https://res.cloudinary.com/djpkffk5u/image/upload/c_crop,w_500,h_281,g_center/v1779354867/Atlas_thumbnail_zhyyqi.jpg
 thumbAlt: Stylized topographic map with a dashed trail and scattered brightly coloured location pins
 draft: true
@@ -16,14 +16,14 @@ Phone apps already do a lot of this. Organic Maps and OsmAnd both keep bookmarks
 Atlas is what I ended up with. One map for the pins and the lines, running on my own machine.
 
 <div class="article-gallery">
-  <button class="gallery-thumb" type="button" data-full="https://placehold.co/1600x900/1f2937/9ca3af?text=Image+1+full">
-    <img src="https://placehold.co/480x270/1f2937/9ca3af?text=Image+1" alt="Gallery image 1 placeholder" loading="lazy" />
+  <button class="gallery-thumb" type="button" data-full="https://res.cloudinary.com/djpkffk5u/image/upload/w_1600,f_auto/v1779361052/Screenshot_2026-05-21_at_13.56.24_xxx3et.png">
+    <img src="https://res.cloudinary.com/djpkffk5u/image/upload/w_480,f_auto/v1779361052/Screenshot_2026-05-21_at_13.56.24_xxx3et.png" alt="Atlas screenshot 1" loading="lazy" />
   </button>
-  <button class="gallery-thumb" type="button" data-full="https://placehold.co/1600x900/1f2937/9ca3af?text=Image+2+full">
-    <img src="https://placehold.co/480x270/1f2937/9ca3af?text=Image+2" alt="Gallery image 2 placeholder" loading="lazy" />
+  <button class="gallery-thumb" type="button" data-full="https://res.cloudinary.com/djpkffk5u/image/upload/w_1600,f_auto/v1779361052/Screenshot_2026-05-21_at_13.56.40_nf4kxi.png">
+    <img src="https://res.cloudinary.com/djpkffk5u/image/upload/w_480,f_auto/v1779361052/Screenshot_2026-05-21_at_13.56.40_nf4kxi.png" alt="Atlas screenshot 2" loading="lazy" />
   </button>
-  <button class="gallery-thumb" type="button" data-full="https://placehold.co/1600x900/1f2937/9ca3af?text=Image+3+full">
-    <img src="https://placehold.co/480x270/1f2937/9ca3af?text=Image+3" alt="Gallery image 3 placeholder" loading="lazy" />
+  <button class="gallery-thumb" type="button" data-full="https://res.cloudinary.com/djpkffk5u/image/upload/w_1600,f_auto/v1779361051/Screenshot_2026-05-21_at_13.57.12_o9jzng.png">
+    <img src="https://res.cloudinary.com/djpkffk5u/image/upload/w_480,f_auto/v1779361051/Screenshot_2026-05-21_at_13.57.12_o9jzng.png" alt="Atlas screenshot 3" loading="lazy" />
   </button>
 </div>
 
