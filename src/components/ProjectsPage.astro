@@ -1,16 +1,22 @@
 ---
 import { getCollection } from 'astro:content';
-import Layout from '../../layouts/Layout.astro';
+import Layout from '../layouts/Layout.astro';
 import { ArrowLeft, ArrowUp, Rss } from 'lucide-astro';
-import { cloudinaryUrl } from '../../data/made.js';
+import { cloudinaryUrl } from '../data/made.js';
+import { t } from '../data/translations.js';
 
-const articles = (await getCollection('articles'))
+const { lang } = Astro.props;
+const tr = t[lang];
+
+const projects = (await getCollection('projects', ({ data }) => !data.draft))
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 
-const fmt = (d: Date) => d.toISOString().slice(0, 10);
+const fmt = (d) => d.toISOString().slice(0, 10);
+const cardHref = (slug) => lang === 'no' ? `https://polybjorn.com/projects/${slug}` : `/projects/${slug}`;
+const altLangPath = lang === 'no' ? '/projects' : '/no/prosjekter';
 ---
 
-<Layout lang="en" title="Articles - Bjørn A. Andersen" description="Writing by Bjørn A. Andersen." noindex>
+<Layout lang={lang} title={`${tr.projectsTitle} - Bjørn A. Andersen`} description={tr.projectsDescription} altLangPath={altLangPath}>
   <style>
     body {
       background: #1e2228;
@@ -57,6 +63,11 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
       display: inline-flex;
     }
     .rss:hover { color: #6AAEEE; }
+    .lang-note {
+      color: #8a8f99;
+      font-size: 0.95rem;
+      margin: -1rem 0 2rem;
+    }
     ul { list-style: none; }
     li { margin-bottom: 2rem; }
     a.card {
@@ -119,19 +130,20 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
     .to-top:hover { opacity: 1; color: #fff; }
   </style>
 
-  <a class="back-home" href="/" aria-label="Back to home"><ArrowLeft size={28} strokeWidth={1.5} /></a>
+  <a class="back-home" href={lang === 'no' ? '/no' : '/'} aria-label={tr.backHomeAria}><ArrowLeft size={28} strokeWidth={1.5} /></a>
   <main id="main">
     <div class="heading">
-      <h1>Articles</h1>
-      <a class="rss" href="/articles/rss.xml" aria-label="RSS feed"><Rss size={20} strokeWidth={2} /></a>
+      <h1>{tr.projectsTitle}</h1>
+      {lang === 'en' && <a class="rss" href="/projects/rss.xml" aria-label={tr.projectsRssAria}><Rss size={20} strokeWidth={2} /></a>}
     </div>
-    {articles.length === 0 ? (
-      <p class="empty">Nothing here yet.</p>
+    {lang === 'no' && <p class="lang-note">{tr.projectsLangNote}</p>}
+    {projects.length === 0 ? (
+      <p class="empty">{tr.projectsEmpty}</p>
     ) : (
       <ul>
-        {articles.map(a => (
+        {projects.map(a => (
           <li>
-            <a class="card" href={`/articles/${a.slug}`}>
+            <a class="card" href={cardHref(a.slug)}>
               <div class="text">
                 <h2>{a.data.title}</h2>
                 <div class="meta">{fmt(a.data.date)}</div>
@@ -153,7 +165,7 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
       </ul>
     )}
   </main>
-  <a class="to-top" href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});this.classList.remove('visible');return false;" aria-label="To top"><ArrowUp size={28} strokeWidth={1.5} /></a>
+  <a class="to-top" href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});this.classList.remove('visible');return false;" aria-label={tr.projectsToTopAria}><ArrowUp size={28} strokeWidth={1.5} /></a>
   <script>
     const backHome = document.querySelector('.back-home');
     const scrollTop = document.querySelector('.to-top');

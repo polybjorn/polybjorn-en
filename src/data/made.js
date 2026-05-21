@@ -106,7 +106,6 @@ export const projects = [
         type: "render",
         transparent: true,
         link: "https://grabcad.com/library/lrs-350-psu-din-rail-assembly-1",
-        featured3D: true,
       },
       {
         url: "https://res.cloudinary.com/djpkffk5u/image/upload/v1772294458/SSR_DIN_rail_assembly_ymo4wd.png",
@@ -224,6 +223,7 @@ export const projects = [
         type: "render",
         transparent: false,
         link: null,
+        featured3D: true,
       },
       {
         url: "https://res.cloudinary.com/djpkffk5u/image/upload/v1772531357/handle2_p0l91f.jpg",
@@ -232,6 +232,7 @@ export const projects = [
         type: "render",
         transparent: false,
         link: null,
+        featured3D: true,
       },
       {
         url: "https://res.cloudinary.com/djpkffk5u/image/upload/v1772531357/trinse_nt6anj.jpg",
@@ -359,7 +360,6 @@ export const projects = [
         type: "photo",
         transparent: false,
         link: "https://grabcad.com/library/cabinet-fronts-and-inserts-1",
-        featured3D: true,
       },
       {
         url: "https://res.cloudinary.com/djpkffk5u/image/upload/v1772366987/GODMORGON_1_zpwoph.jpg",
@@ -402,7 +402,6 @@ export const projects = [
         type: "render",
         transparent: true,
         link: null,
-        featured3D: true,
       },
       {
         url: "https://res.cloudinary.com/djpkffk5u/image/upload/v1772369854/Impellere_render_sn277h.png",
@@ -469,7 +468,6 @@ export const projects = [
         type: "render",
         transparent: true,
         link: "https://grabcad.com/library/sail-slides-with-bolt-holes-1",
-        featured3D: true,
       },
       {
         url: "https://res.cloudinary.com/djpkffk5u/image/upload/v1772368651/Lobster_pot_tag_render_q7yfxx.png",
@@ -555,6 +553,7 @@ export const projects = [
         type: "render",
         transparent: true,
         link: null,
+        featured3D: true,
       },
       {
         url: "https://res.cloudinary.com/djpkffk5u/image/upload/v1772369995/Brannhjelm_lyktholder_v1_render_dnt9ar.png",
@@ -659,6 +658,7 @@ export const projects = [
         type: "render",
         transparent: false,
         link: null,
+        featured3D: true,
       },
     ]
   },

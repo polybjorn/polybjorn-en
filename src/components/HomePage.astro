@@ -13,6 +13,7 @@ const tr = t[lang];
 
 const galleryFoundHref = lang === 'no' ? '/no/galleri/funnet' : '/gallery/found';
 const galleryMadeHref = lang === 'no' ? '/no/galleri/laget' : '/gallery/made';
+const projectsHref = lang === 'no' ? '/no/prosjekter' : '/projects';
 const cvHref = lang === 'no' ? '/no/cv' : '/cv';
 
 const featuredImages = [
@@ -139,6 +140,7 @@ const featuredImages = [
       color: #ccc;
       margin-bottom: 1.5rem;
       text-align: center;
+      text-wrap: pretty;
     }
 
     .bio p:first-child { margin-top: 0; }
@@ -278,9 +280,9 @@ const featuredImages = [
         </a>
       </div>
       <div class="icon-link">
-        <a href="https://grabcad.com/bjorn.a.andersen-1">
-          <img src="https://res.cloudinary.com/djpkffk5u/image/upload/v1772282528/3D_printer_dbzhhj.svg?v=2" class="icon-img" alt="" />
-          <span>{tr.models}</span>
+        <a href={projectsHref}>
+          <img src="https://res.cloudinary.com/djpkffk5u/image/upload/v1779364182/journal_toksm5.svg" class="icon-img" alt="" />
+          <span>{tr.projects}</span>
         </a>
       </div>
     </div>
@@ -288,7 +290,7 @@ const featuredImages = [
 
   <div class="content">
     <div class="bio">
-      <p>{tr.bio1}</p>
+      <p set:html={tr.bio1Html}></p>
       <p>{tr.bio4}</p>
     </div>
 

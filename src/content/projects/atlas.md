@@ -6,26 +6,28 @@ cover: https://res.cloudinary.com/djpkffk5u/image/upload/v1779360907/atlas_hero_
 coverAlt: Atlas map view with place pins
 thumb: https://res.cloudinary.com/djpkffk5u/image/upload/c_crop,w_500,h_281,g_center/v1779354867/Atlas_thumbnail_zhyyqi.jpg
 thumbAlt: Stylized topographic map with a dashed trail and scattered brightly coloured location pins
-draft: true
+draft: false
 ---
 
-For years I kept two parallel lists. One was a scatter of dropped pins in Google Maps for the places I'd visited and the places I wanted to visit. The other was a folder of GPS routes from hikes, sitting on my disk because I'd never settled on one place to keep them all.
+For years my GPS routes from hikes sat in a folder on disk, and the places I'd been or wanted to go were mostly in my head. I'd never found a tool that held both.
 
-Phone apps already do a lot of this. Organic Maps and OsmAnd both keep bookmarks and GPS routes on the same map, and Trail Sense covers the outdoor utility side. What was still missing was a cross-platform option, since the three above are phone apps. The shape of it mattered too, with the distinctions I think in built into the data itself, like places I've been versus places I want to go, or routes I've travelled versus routes I'm still planning, rather than tags I'd have to remember to add. And the categories should be my own, not one undifferentiated bookmark pile.
+Phone apps already do a lot of this. Organic Maps and OsmAnd both keep bookmarks and GPS routes on the same map, and Trail Sense covers the outdoor utility side. What was still missing was a cross-platform option, since the three above are phone apps.
 
 Atlas is what I ended up with. One map for the pins and the lines, running on my own machine.
 
 <div class="article-gallery">
   <button class="gallery-thumb" type="button" data-full="https://res.cloudinary.com/djpkffk5u/image/upload/w_1600,f_auto/v1779361052/Screenshot_2026-05-21_at_13.56.24_xxx3et.png">
-    <img src="https://res.cloudinary.com/djpkffk5u/image/upload/w_480,f_auto/v1779361052/Screenshot_2026-05-21_at_13.56.24_xxx3et.png" alt="Atlas screenshot 1" loading="lazy" />
+    <img src="https://res.cloudinary.com/djpkffk5u/image/upload/w_480,f_auto/v1779361052/Screenshot_2026-05-21_at_13.56.24_xxx3et.png" alt="Atlas places list page" loading="lazy" />
   </button>
   <button class="gallery-thumb" type="button" data-full="https://res.cloudinary.com/djpkffk5u/image/upload/w_1600,f_auto/v1779361052/Screenshot_2026-05-21_at_13.56.40_nf4kxi.png">
-    <img src="https://res.cloudinary.com/djpkffk5u/image/upload/w_480,f_auto/v1779361052/Screenshot_2026-05-21_at_13.56.40_nf4kxi.png" alt="Atlas screenshot 2" loading="lazy" />
+    <img src="https://res.cloudinary.com/djpkffk5u/image/upload/w_480,f_auto/v1779361052/Screenshot_2026-05-21_at_13.56.40_nf4kxi.png" alt="Atlas trail detail page" loading="lazy" />
   </button>
   <button class="gallery-thumb" type="button" data-full="https://res.cloudinary.com/djpkffk5u/image/upload/w_1600,f_auto/v1779361051/Screenshot_2026-05-21_at_13.57.12_o9jzng.png">
-    <img src="https://res.cloudinary.com/djpkffk5u/image/upload/w_480,f_auto/v1779361051/Screenshot_2026-05-21_at_13.57.12_o9jzng.png" alt="Atlas screenshot 3" loading="lazy" />
+    <img src="https://res.cloudinary.com/djpkffk5u/image/upload/w_480,f_auto/v1779361051/Screenshot_2026-05-21_at_13.57.12_o9jzng.png" alt="Atlas appearance settings" loading="lazy" />
   </button>
 </div>
+
+Under the hood it's small. About 5 MB of code, made of one web page, a small Python API, and a SQLite database behind it.
 
 Nothing about it is technically novel. What it gives me is the thing I'd been looking for, which is one map for both the dots and the lines, reachable from any device.
 

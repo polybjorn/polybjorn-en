@@ -264,6 +264,27 @@ const serviceOrder = [
     </section>
 
     <section>
+      <div class="examples-grid">
+        {featured.map(img => (
+          <div class="example">
+            {img.link
+              ? <a href={img.link} target="_blank" rel="noopener" aria-label={img.title}><img
+                  src={cloudinaryUrl(img.url, { width: 600 })}
+                  srcset={`${cloudinaryUrl(img.url, { width: 400 })} 400w, ${cloudinaryUrl(img.url, { width: 600 })} 600w, ${cloudinaryUrl(img.url, { width: 800 })} 800w`}
+                  sizes="(max-width: 720px) 50vw, 25vw"
+                  alt="" loading="lazy" /></a>
+              : <img
+                  src={cloudinaryUrl(img.url, { width: 600 })}
+                  srcset={`${cloudinaryUrl(img.url, { width: 400 })} 400w, ${cloudinaryUrl(img.url, { width: 600 })} 600w, ${cloudinaryUrl(img.url, { width: 800 })} 800w`}
+                  sizes="(max-width: 720px) 50vw, 25vw"
+                  alt={img.alt} loading="lazy" />
+            }
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <section>
       <h2>{td.servicesHeading}</h2>
       <div class="services">
         {serviceOrder.map(({ key, icon: Icon }) => (
@@ -290,28 +311,6 @@ const serviceOrder = [
       <p>{td.whoItsFor2}</p>
     </section>
 
-    <section>
-      <div class="examples-grid">
-        {featured.map(img => (
-          <div class="example">
-            {img.link
-              ? <a href={img.link} target="_blank" rel="noopener" aria-label={img.title}><img
-                  src={cloudinaryUrl(img.url, { width: 600 })}
-                  srcset={`${cloudinaryUrl(img.url, { width: 400 })} 400w, ${cloudinaryUrl(img.url, { width: 600 })} 600w, ${cloudinaryUrl(img.url, { width: 800 })} 800w`}
-                  sizes="(max-width: 720px) 50vw, 25vw"
-                  alt="" loading="lazy" /></a>
-              : <img
-                  src={cloudinaryUrl(img.url, { width: 600 })}
-                  srcset={`${cloudinaryUrl(img.url, { width: 400 })} 400w, ${cloudinaryUrl(img.url, { width: 600 })} 600w, ${cloudinaryUrl(img.url, { width: 800 })} 800w`}
-                  sizes="(max-width: 720px) 50vw, 25vw"
-                  alt={img.alt} loading="lazy" />
-            }
-          </div>
-        ))}
-      </div>
-      <p class="examples-more" set:html={td.examplesMoreHtml}></p>
-    </section>
-
     <section class="contact-cta">
       <p>{td.contactCta}</p>
       <div class="contact-row">
@@ -322,6 +321,10 @@ const serviceOrder = [
         </span>
         <span class="contact-item"><Mail size={18} strokeWidth={1.5} style="color: #E8A838;" /> <span id="email"></span></span>
       </div>
+    </section>
+
+    <section>
+      <p class="examples-more" set:html={td.examplesMoreHtml}></p>
     </section>
 
   </main>

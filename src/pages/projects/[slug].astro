@@ -5,19 +5,19 @@ import { ArrowLeft, ArrowUp } from 'lucide-astro';
 import { cloudinaryUrl } from '../../data/made.js';
 
 export async function getStaticPaths() {
-  const articles = await getCollection('articles');
-  return articles.map(article => ({
-    params: { slug: article.slug },
-    props: { article },
+  const projects = await getCollection('projects');
+  return projects.map(project => ({
+    params: { slug: project.slug },
+    props: { project },
   }));
 }
 
-const { article } = Astro.props;
-const { Content } = await article.render();
+const { project } = Astro.props;
+const { Content } = await project.render();
 const fmt = (d: Date) => d.toISOString().slice(0, 10);
 ---
 
-<Layout lang="en" title={`${article.data.title} - Bjørn A. Andersen`} description={article.data.description} noindex>
+<Layout lang="en" title={`${project.data.title} - Bjørn A. Andersen`} description={project.data.description}>
   <style>
     body {
       background: #1e2228;
@@ -208,19 +208,19 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
     .to-top:hover { opacity: 1; color: #fff; }
   </style>
 
-  <a class="back-home" href="/articles" aria-label="Back to articles"><ArrowLeft size={28} strokeWidth={1.5} /></a>
+  <a class="back-home" href="/projects" aria-label="Back to projects"><ArrowLeft size={28} strokeWidth={1.5} /></a>
   <main id="main">
-    {article.data.cover && (
+    {project.data.cover && (
       <img
         class="cover"
-        src={cloudinaryUrl(article.data.cover, { width: 1200 })}
-        srcset={`${cloudinaryUrl(article.data.cover, { width: 800 })} 800w, ${cloudinaryUrl(article.data.cover, { width: 1200 })} 1200w, ${cloudinaryUrl(article.data.cover, { width: 1600 })} 1600w`}
+        src={cloudinaryUrl(project.data.cover, { width: 1200 })}
+        srcset={`${cloudinaryUrl(project.data.cover, { width: 800 })} 800w, ${cloudinaryUrl(project.data.cover, { width: 1200 })} 1200w, ${cloudinaryUrl(project.data.cover, { width: 1600 })} 1600w`}
         sizes="(max-width: 720px) 100vw, 720px"
-        alt={article.data.coverAlt ?? ''}
+        alt={project.data.coverAlt ?? ''}
       />
     )}
-    <h1>{article.data.title}</h1>
-    <div class="meta">{fmt(article.data.date)}</div>
+    <h1>{project.data.title}</h1>
+    <div class="meta">{fmt(project.data.date)}</div>
     <article>
       <Content />
     </article>
