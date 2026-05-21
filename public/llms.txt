@@ -23,9 +23,9 @@ Bjørn A. Andersen operates Polybjorn Andersen, a sole proprietorship offering 3
 - Gallery (3D models): https://polybjorn.com/gallery/made
 - Gallery (photography): https://polybjorn.com/gallery/found
 - CV: https://polybjorn.com/cv
+- Projects (personal builds and write-ups): https://polybjorn.com/projects
 - 3D Models on GrabCAD: https://grabcad.com/bjorn.a.andersen-1
 - GitHub: https://github.com/polybjorn
-- Mastodon: https://social.polybjorn.com/@bjanda
 
 ## Contact
 
