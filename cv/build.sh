@@ -35,7 +35,7 @@ typst compile cv/template.typ "cv/output/$NO_FILE" --input lang=no --font-path c
 cp "cv/output/$EN_FILE" public/
 cp "cv/output/$NO_FILE" public/
 
-BRAND_DIR="$HOME/Vault/Assets/Brand/CV"
+BRAND_DIR="$HOME/Vault/Polybjorn/Brand/CV"
 if [ -d "$BRAND_DIR" ]; then
   cp "cv/output/$EN_FILE" "$BRAND_DIR/"
   cp "cv/output/$NO_FILE" "$BRAND_DIR/"
