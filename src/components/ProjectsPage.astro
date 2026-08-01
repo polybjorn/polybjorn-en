@@ -143,7 +143,7 @@ const altLangPath = lang === 'no' ? '/projects' : '/no/prosjekter';
       <ul>
         {projects.map(a => (
           <li>
-            <a class="card" href={cardHref(a.slug)}>
+            <a class="card" href={cardHref(a.id)}>
               <div class="text">
                 <h2>{a.data.title}</h2>
                 <div class="meta">{fmt(a.data.date)}</div>

@@ -16,7 +16,7 @@ export async function GET(context) {
       title: project.data.title,
       description: project.data.description,
       pubDate: project.data.date,
-      link: `/projects/${project.slug}/`,
+      link: `/projects/${project.id}/`,
       content: parser.render(project.body),
     })),
     customData: '<language>en-us</language>',

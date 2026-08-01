@@ -1,5 +1,5 @@
 ---
-import { getCollection } from 'astro:content';
+import { getCollection, render } from 'astro:content';
 import Layout from '../../layouts/Layout.astro';
 import { ArrowLeft, ArrowUp } from 'lucide-astro';
 import { cloudinaryUrl } from '../../data/made.js';
@@ -7,13 +7,13 @@ import { cloudinaryUrl } from '../../data/made.js';
 export async function getStaticPaths() {
   const projects = await getCollection('projects');
   return projects.map(project => ({
-    params: { slug: project.slug },
+    params: { slug: project.id },
     props: { project },
   }));
 }
 
 const { project } = Astro.props;
-const { Content } = await project.render();
+const { Content } = await render(project);
 const fmt = (d: Date) => d.toISOString().slice(0, 10);
 ---
 
