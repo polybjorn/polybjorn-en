@@ -1,0 +1,19 @@
+# Build gate on the self-hosted runner (media-runner, docker label ->
+# node:22-bookworm; engines say >=20). Plain `astro build`, not build:deploy -
+# prepare-deploy.mjs is a deploy step, and Pages deploy plus the Typst CV job
+# stay in .github/workflows/ off the push mirror (setup-typst and artifact
+# upload are GitHub-specific).
+name: CI
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: docker
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm ci
+      - run: npm run build
