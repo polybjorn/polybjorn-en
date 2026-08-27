@@ -90,6 +90,8 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
       overflow-x: auto;
       margin: 1.25rem 0;
     }
+    /* Shiki sets its theme background inline, so it needs overriding to match */
+    article :global(pre.astro-code) { background: #15181d !important; }
     article :global(pre code) { background: transparent; padding: 0; }
     article :global(img) { max-width: 100%; height: auto; border-radius: 4px; margin: 1.25rem 0; }
     article :global(hr) { border: none; border-top: 1px solid #2a2f37; margin: 2rem 0; }
