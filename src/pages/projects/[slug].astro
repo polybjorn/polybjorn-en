@@ -5,7 +5,11 @@ import { ArrowLeft, ArrowUp } from 'lucide-astro';
 import { cloudinaryUrl } from '../../data/made.js';
 
 export async function getStaticPaths() {
-  const projects = await getCollection('projects');
+  // Drafts are filtered from the index and the feed, but a page was still
+  // built for them and listed in the sitemap - unlisted, not unpublished.
+  // Keep them reachable in dev so they can be previewed.
+  const projects = await getCollection('projects', ({ data }) =>
+    import.meta.env.PROD ? !data.draft : true);
   return projects.map(project => ({
     params: { slug: project.id },
     props: { project },
