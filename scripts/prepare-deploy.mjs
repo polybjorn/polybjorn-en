@@ -20,10 +20,13 @@ rmSync(DIST_NO, { recursive: true, force: true });
 mkdirSync(DIST_NO, { recursive: true });
 cpSync(join(DIST, 'no'), DIST_NO, { recursive: true });
 
-// Copy shared static assets (favicon, fonts, manifest, etc.)
+// Copy shared static assets (favicon, fonts, manifest, etc.). Directories are
+// skipped by default because most top-level dirs are page routes that the NO
+// build already has its own copies of; asset dirs from public/ go in SHARED_DIRS.
+const SHARED_DIRS = ['images'];
 for (const entry of readdirSync(DIST, { withFileTypes: true })) {
   if (entry.name === 'no') continue;
-  if (entry.isDirectory() && entry.name.startsWith('_')) {
+  if (entry.isDirectory() && (entry.name.startsWith('_') || SHARED_DIRS.includes(entry.name))) {
     cpSync(join(DIST, entry.name), join(DIST_NO, entry.name), { recursive: true });
   } else if (!entry.isDirectory() && !entry.name.endsWith('.html')) {
     cpSync(join(DIST, entry.name), join(DIST_NO, entry.name));
