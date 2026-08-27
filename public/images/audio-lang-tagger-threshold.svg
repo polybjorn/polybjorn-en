@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 336" role="img" aria-labelledby="t d">
+  <title id="t">Why no single confidence cutoff works</title>
+  <desc id="d">A confidence axis from 0 to 1 showing two measured tracks. A musical short with no speech scores 0.86, higher than a sparse cartoon with 99 clean words that scores 0.42. Three candidate cutoffs are shown, none of which give the right answer for both.</desc>
+  <style>
+    .l { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
+    .hd { font-size: 15px; fill: #e1e4e8; font-weight: 600; }
+    .ax { font-size: 12px; fill: #8b949e; }
+    .cs { font-size: 13px; fill: #e1e4e8; }
+    .sm { font-size: 12px; fill: #8b949e; }
+    .ft { font-size: 13px; fill: #e1e4e8; }
+  </style>
+
+  <rect width="720" height="336" rx="6" fill="#15181d"/>
+  <text x="32" y="34" class="l hd">Two measured tracks, placed by how sure the detector was</text>
+
+  <!-- candidate cutoffs -->
+  <g stroke="#6b7681" stroke-width="1.5" stroke-dasharray="4 4">
+    <line x1="283" y1="96" x2="283" y2="176"/>
+    <line x1="457" y1="96" x2="457" y2="176"/>
+  </g>
+  <line x1="602" y1="96" x2="602" y2="176" stroke="#6aaeee" stroke-width="2" stroke-dasharray="4 4"/>
+
+  <!-- case labels -->
+  <text x="324" y="80" text-anchor="middle" class="l cs">sparse cartoon</text>
+  <text x="324" y="97" text-anchor="middle" class="l sm">99 clean words &#183; real speech</text>
+  <text x="600" y="80" text-anchor="middle" class="l cs">musical short</text>
+  <text x="600" y="97" text-anchor="middle" class="l sm">&#8220;la la la&#8221; &#215;219 &#183; no speech</text>
+
+  <!-- axis -->
+  <line x1="80" y1="176" x2="660" y2="176" stroke="#8b949e" stroke-width="1.5"/>
+  <g stroke="#8b949e" stroke-width="1.5">
+    <line x1="80" y1="176" x2="80" y2="183"/>
+    <line x1="225" y1="176" x2="225" y2="183"/>
+    <line x1="370" y1="176" x2="370" y2="183"/>
+    <line x1="515" y1="176" x2="515" y2="183"/>
+    <line x1="660" y1="176" x2="660" y2="183"/>
+  </g>
+  <g class="l ax" text-anchor="middle" fill="#8b949e">
+    <text x="80" y="199">0.0</text>
+    <text x="225" y="199">0.25</text>
+    <text x="370" y="199">0.50</text>
+    <text x="515" y="199">0.75</text>
+    <text x="660" y="199">1.0</text>
+  </g>
+  <text x="370" y="219" text-anchor="middle" class="l ax">confidence</text>
+
+  <!-- measured points -->
+  <circle cx="324" cy="176" r="7" fill="#7ee787"/>
+  <circle cx="579" cy="176" r="7" fill="#ff7b72"/>
+  <text x="324" y="160" text-anchor="middle" class="l cs" fill="#7ee787">0.42</text>
+  <text x="579" y="160" text-anchor="middle" class="l cs" fill="#ff7b72">0.86</text>
+
+  <!-- outcomes -->
+  <g class="l sm">
+    <text x="32" y="253"><tspan fill="#e1e4e8">cut at 0.35</tspan>  both pass, and one of them has no speech in it at all</text>
+    <text x="32" y="277"><tspan fill="#e1e4e8">cut at 0.65</tspan>  only the music passes: precisely the wrong one</text>
+    <text x="32" y="301"><tspan fill="#6aaeee">cut at 0.90</tspan>  neither passes, so nothing wrong is written down</text>
+  </g>
+  <text x="32" y="326" class="l ft">The one to reject scores higher than the one to keep, so no line splits them.</text>
+</svg>
