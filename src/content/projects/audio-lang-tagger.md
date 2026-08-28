@@ -1,15 +1,27 @@
 ---
 title: Putting a name to unknown audio
 description: A tool that listens to unlabelled audio tracks in MKV video files and works out what language they are in.
-date: 2026-08-27
+date: 2026-08-28
 cover: /images/audio-lang-tagger-ui.svg
 coverAlt: The tool's interactive card, showing whisper's verdict for one audio track alongside the words it heard
-draft: true
+thumb: /images/audio-lang-tagger-thumb.svg
+thumbAlt: The language label und becoming nor
 ---
 
 A video file can carry several audio tracks, and not all of them say what they are. An unlabelled one comes up as "Unknown" wherever you play it, so choosing between them means guessing which is the original, which is a dub, and which is somebody talking over the top. Across a whole collection it adds up to hundreds of tracks nobody ever got around to labelling.
 
-So I made audio-lang-tagger. It works out what language each unlabelled track is in and writes that into the file. Since that means editing my own files, it can also just look and report what is still missing a label, which is the safer place to start:
+Seen through [ffprobe](https://ffmpeg.org/ffprobe.html), the standard way to ask a video file what it holds, a labelled track shows its language right after the stream number, like <code>#0:1(nor)</code>. These two have nothing there at all:
+
+<pre><code>$ ffprobe "Interviews/Bergen 2018.mkv"
+<span style="color:#8b949e">...
+  Stream #0:0: Video: hevc (Main), yuv420p(tv), 1920x1080, 25 fps</span>
+  Stream #0:1: Audio: aac (LC), 48000 Hz, stereo <span style="color:#8b949e">(default)</span>
+  Stream #0:2: Audio: aac (LC), 48000 Hz, stereo
+    <span style="color:#8b949e">Metadata:
+      title           : Interpreter</span>
+</code></pre>
+
+So I made audio-lang-tagger. It works out what language each unlabelled track is in and writes that into the file. Since that means editing my own files, it can also just look and report what is still missing a label, which is the safer place to start. Same file, but the gap now has a name:
 
 <pre><code>$ audio-lang-tagger.py --list ~/video
 <span style="color:#8b949e">[1/1] Interviews/</span>
@@ -32,9 +44,14 @@ Ledger       2 rows   manual 2
 
 It can also be left to run on its own, and the bar for labelling anything without asking is worth stating plainly. Every sample taken from a track has to come back as the same language at 0.90 confidence or better, there has to be enough varied speech behind that verdict to rule out singing, and an outside source has to agree independently. Past that it refuses whole categories where it knows it is unreliable: anything made before 1940, where dialogue tends to be thin; music and concert recordings; files carrying more than one audio track; and the Norwegian, Danish and Swedish cluster it mixes up too often to be trusted with. Everything that falls short of all of that waits for me.
 
-Setting the label by hand has always been possible, and [MKVToolNix](https://mkvtoolnix.download/) does it in seconds once you know the answer. Working out the answer is the part that does not scale, and something already existed for that too. [ULDAS](https://github.com/netplexflix/MKV-Undefined-Audio-Language-Detector) does the same detection and a good deal more around it, subtitles and rebuilding files included. It can be told to rehearse a run and report what it would do without touching anything, but there is no setting between that and letting it write every label it is confident about. That middle is what I wanted, because the two mistakes available here are not the same size. Being asked costs a second. A wrong label is silent, stays in the file, and gets acted on later by whatever reads it, which is how a pass that removes unwanted audio ends up removing the wrong track. That would matter less if confidence sorted the safe cases from the risky ones, but it does not: a musical short came back confidently labelled off a transcript that was a 219-word “la la la” loop, while a sparse cartoon opening on a music cue scored badly and had 99 perfectly clear words later in the same track. They fail in opposite directions, so no single number puts them in the right order, and a better model would make both rarer without changing that. So I would rather be shown what was heard.
+Setting the label by hand has always been possible, and [MKVToolNix](https://mkvtoolnix.download/) does it in seconds once you know the answer. Working out the answer is the part that does not scale, and [ULDAS](https://github.com/netplexflix/MKV-Undefined-Audio-Language-Detector) already automates it, along with a good deal more. What it lacks is a setting between a dry run and writing every label it is confident about, and that middle is what I wanted, because the two mistakes here are not the same size. Being asked costs a second. A wrong label is silent, stays in the file, and gets acted on later by whatever reads it.
 
-<img src="/images/audio-lang-tagger-threshold.svg" alt="A confidence scale from 0 to 1. A musical short with no speech sits at 0.86, further right than a sparse cartoon with 99 clean words at 0.42. Cutting at 0.35 lets both through, cutting at 0.65 lets only the music through, and cutting at 0.90 lets neither through." />
+Nor does confidence sort the safe cases from the risky ones. A musical short came back confidently labelled off a transcript that was a 219-word “la la la” loop, while a sparse cartoon with 99 perfectly clear words scored badly. They fail in opposite directions, so no single number puts them in the right order. I would rather be shown what was heard.
+
+<button class="img-zoom" type="button" data-full="/images/audio-lang-tagger-threshold.svg">
+  <img src="/images/audio-lang-tagger-threshold.svg" alt="A confidence scale running from 0, unsure, to 1, certain. A musical short with no speech sits at 0.86, further right than a sparse cartoon with 99 clean words at 0.42. Dashed lines mark candidate cutoffs at 0.35, 0.65 and 0.90." />
+</button>
+<p class="img-caption">Cut at 0.35 and both pass, at 0.65 only the music passes, and at 0.90 neither does.</p>
 
 In practice the listening happens ahead of time, unattended on the machine that holds the files, so by the time I sit down to work through the results there is nothing left to wait for.
 

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" viewBox="0 0 640 360" role="img" aria-label="The language label und becoming nor">
+  <style>
+    .w { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 92px; font-weight: 700; }
+  </style>
+  <rect width="640" height="360" fill="#15181d"/>
+  <text x="150" y="212" text-anchor="middle" class="w" fill="#a5aeb8">und</text>
+  <g fill="none" stroke="#6aaeee" stroke-width="11" stroke-linecap="round">
+    <line x1="283" y1="180" x2="352" y2="180"/>
+  </g>
+  <path d="M348 156 L384 180 L348 204 Z" fill="#6aaeee"/>
+  <text x="494" y="212" text-anchor="middle" class="w" fill="#7ee787">nor</text>
+</svg>

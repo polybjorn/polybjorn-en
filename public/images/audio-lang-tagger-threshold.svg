@@ -1,60 +1,57 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 336" role="img" aria-labelledby="t d">
-  <title id="t">Why no single confidence cutoff works</title>
-  <desc id="d">A confidence axis from 0 to 1 showing two measured tracks. A musical short with no speech scores 0.86, higher than a sparse cartoon with 99 clean words that scores 0.42. Three candidate cutoffs are shown, none of which give the right answer for both.</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="400" viewBox="0 0 720 200" role="img" aria-labelledby="t d">
+  <title id="t">Two tracks on the confidence scale</title>
+  <desc id="d">A confidence axis running from 0, unsure, to 1, certain. A musical short with no speech scores 0.86, further right than a sparse cartoon with 99 clean words that scores 0.42. Dashed lines mark candidate cutoffs at 0.35, 0.65 and 0.90.</desc>
   <style>
     .l { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; }
-    .hd { font-size: 15px; fill: #e1e4e8; font-weight: 600; }
-    .ax { font-size: 12px; fill: #8b949e; }
+    .ax { font-size: 12px; fill: #a5aeb8; }
     .cs { font-size: 13px; fill: #e1e4e8; }
-    .sm { font-size: 12px; fill: #8b949e; }
-    .ft { font-size: 13px; fill: #e1e4e8; }
+    .sm { font-size: 12px; fill: #a5aeb8; }
   </style>
 
-  <rect width="720" height="336" rx="6" fill="#15181d"/>
-  <text x="32" y="34" class="l hd">Two measured tracks, placed by how sure the detector was</text>
+  <rect width="720" height="200" rx="6" fill="#15181d"/>
 
-  <!-- candidate cutoffs -->
+  <!-- case labels, tied to their points -->
+  <text x="314" y="34" text-anchor="middle" class="l cs">sparse cartoon</text>
+  <text x="314" y="51" text-anchor="middle" class="l sm">99 clean words &#183; real speech</text>
+  <line x1="314" y1="58" x2="314" y2="102" stroke="#7ee787" stroke-width="1" opacity="0.45"/>
+  <text x="569" y="34" text-anchor="middle" class="l cs">musical short</text>
+  <text x="569" y="51" text-anchor="middle" class="l sm">&#8220;la la la&#8221; &#215;219 &#183; no speech</text>
+  <line x1="569" y1="58" x2="569" y2="102" stroke="#ff7b72" stroke-width="1" opacity="0.45"/>
+
+  <!-- candidate cutoffs, labelled at the top -->
   <g stroke="#6b7681" stroke-width="1.5" stroke-dasharray="4 4">
-    <line x1="283" y1="96" x2="283" y2="176"/>
-    <line x1="457" y1="96" x2="457" y2="176"/>
+    <line x1="273" y1="78" x2="273" y2="136"/>
+    <line x1="447" y1="78" x2="447" y2="136"/>
   </g>
-  <line x1="602" y1="96" x2="602" y2="176" stroke="#6aaeee" stroke-width="2" stroke-dasharray="4 4"/>
-
-  <!-- case labels -->
-  <text x="324" y="80" text-anchor="middle" class="l cs">sparse cartoon</text>
-  <text x="324" y="97" text-anchor="middle" class="l sm">99 clean words &#183; real speech</text>
-  <text x="600" y="80" text-anchor="middle" class="l cs">musical short</text>
-  <text x="600" y="97" text-anchor="middle" class="l sm">&#8220;la la la&#8221; &#215;219 &#183; no speech</text>
+  <line x1="592" y1="78" x2="592" y2="136" stroke="#6aaeee" stroke-width="2" stroke-dasharray="4 4"/>
+  <g class="l sm" text-anchor="middle">
+    <text x="273" y="72">0.35</text>
+    <text x="447" y="72">0.65</text>
+    <text x="592" y="72" fill="#6aaeee">0.90</text>
+  </g>
 
   <!-- axis -->
-  <line x1="80" y1="176" x2="660" y2="176" stroke="#8b949e" stroke-width="1.5"/>
+  <line x1="70" y1="136" x2="650" y2="136" stroke="#8b949e" stroke-width="1.5"/>
   <g stroke="#8b949e" stroke-width="1.5">
-    <line x1="80" y1="176" x2="80" y2="183"/>
-    <line x1="225" y1="176" x2="225" y2="183"/>
-    <line x1="370" y1="176" x2="370" y2="183"/>
-    <line x1="515" y1="176" x2="515" y2="183"/>
-    <line x1="660" y1="176" x2="660" y2="183"/>
+    <line x1="70" y1="136" x2="70" y2="143"/>
+    <line x1="650" y1="136" x2="650" y2="143"/>
   </g>
-  <g class="l ax" text-anchor="middle" fill="#8b949e">
-    <text x="80" y="199">0.0</text>
-    <text x="225" y="199">0.25</text>
-    <text x="370" y="199">0.50</text>
-    <text x="515" y="199">0.75</text>
-    <text x="660" y="199">1.0</text>
+  <g class="l ax" text-anchor="middle">
+    <text x="70" y="159">0.0</text>
+    <text x="650" y="159">1.0</text>
   </g>
-  <text x="370" y="219" text-anchor="middle" class="l ax">confidence</text>
 
   <!-- measured points -->
-  <circle cx="324" cy="176" r="7" fill="#7ee787"/>
-  <circle cx="579" cy="176" r="7" fill="#ff7b72"/>
-  <text x="324" y="160" text-anchor="middle" class="l cs" fill="#7ee787">0.42</text>
-  <text x="579" y="160" text-anchor="middle" class="l cs" fill="#ff7b72">0.86</text>
+  <text x="314" y="118" text-anchor="middle" class="l cs" fill="#7ee787">0.42</text>
+  <text x="569" y="118" text-anchor="middle" class="l cs" fill="#ff7b72">0.86</text>
+  <circle cx="314" cy="136" r="7" fill="#7ee787"/>
+  <circle cx="569" cy="136" r="7" fill="#ff7b72"/>
 
-  <!-- outcomes -->
-  <g class="l sm">
-    <text x="32" y="253"><tspan fill="#e1e4e8">cut at 0.35</tspan>  both pass, and one of them has no speech in it at all</text>
-    <text x="32" y="277"><tspan fill="#e1e4e8">cut at 0.65</tspan>  only the music passes: precisely the wrong one</text>
-    <text x="32" y="301"><tspan fill="#6aaeee">cut at 0.90</tspan>  neither passes, so nothing wrong is written down</text>
+  <!-- direction of the scale -->
+  <g class="l ax">
+    <text x="318" y="183" text-anchor="end">unsure</text>
+    <line x1="330" y1="179" x2="394" y2="179" stroke="#8b949e" stroke-width="1.5"/>
+    <path d="M394 175 L402 179 L394 183 Z" fill="#8b949e"/>
+    <text x="414" y="183" text-anchor="start">certain</text>
   </g>
-  <text x="32" y="326" class="l ft">The one to reject scores higher than the one to keep, so no line splits them.</text>
 </svg>

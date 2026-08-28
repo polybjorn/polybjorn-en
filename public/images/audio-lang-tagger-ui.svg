@@ -1,4 +1,4 @@
-<svg class="rich-terminal" viewBox="0 0 1238 440.4" xmlns="http://www.w3.org/2000/svg">
+<svg class="rich-terminal" width="1358" height="560.4" viewBox="-60 -50 1358 560.4" xmlns="http://www.w3.org/2000/svg">
     <!-- Generated with Rich https://www.textualize.io -->
     <style>
 
@@ -39,6 +39,9 @@
     </style>
 
     <defs>
+    <filter id="hero-shadow" x="-10%" y="-15%" width="120%" height="135%">
+      <feDropShadow dx="0" dy="14" stdDeviation="22" flood-color="#000000" flood-opacity="0.6"/>
+    </filter>
     <clipPath id="terminal-246207641-clip-terminal">
       <rect x="0" y="0" width="1219.0" height="389.4" />
     </clipPath>
@@ -89,7 +92,7 @@
             </clipPath>
     </defs>
 
-    <rect fill="#292929" stroke="rgba(255,255,255,0.35)" stroke-width="1" x="1" y="1" width="1236" height="438.4" rx="8"/><text class="terminal-246207641-title" fill="#c5c8c6" text-anchor="middle" x="618" y="27">audio-lang-tagger</text>
+    <rect fill="#292929" stroke="rgba(255,255,255,0.35)" stroke-width="1" x="1" y="1" width="1236" height="438.4" rx="8" filter="url(#hero-shadow)"/><text class="terminal-246207641-title" fill="#c5c8c6" text-anchor="middle" x="618" y="27">audio-lang-tagger</text>
             <g transform="translate(26,22)">
             <circle cx="0" cy="0" r="7" fill="#ff5f57"/>
             <circle cx="22" cy="0" r="7" fill="#febc2e"/>
