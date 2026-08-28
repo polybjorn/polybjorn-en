@@ -9,7 +9,7 @@ thumbAlt: A highlighter pen marking a line of text
 draft: false
 ---
 
-Highlighting passages in a book never did much for me. Once a highlight was sitting inside the reader app, I didn't have a way to pull it back out, so it mostly just stayed there. My notes live in [Obsidian](https://obsidian.md), and getting the highlights from [Readest](https://readest.com) into that same place was the gap I wanted to close.
+I don't highlight in physical books. A marked passage ends up buried somewhere in a few hundred pages, so I would almost never go back and find it again. Digital books have the same problem in a different shape: highlights I make in [Readest](https://readest.com) sit inside the reader app, where they can't be searched, linked, or connected to anything else I've written. My notes live in [Obsidian](https://obsidian.md), and getting the highlights into that same place was the gap I wanted to close.
 
 A small plugin closes it. Open Obsidian, run a command, and your book highlights show up as notes, one per book. Run it again later and the notes update in place instead of piling up duplicates.
 
