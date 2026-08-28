@@ -13,7 +13,7 @@ For years my GPS routes from hikes sat in a folder on disk, and the places I'd b
 
 Phone apps already do a lot of this. Organic Maps and OsmAnd both keep bookmarks and GPS routes on the same map, and Trail Sense covers the outdoor utility side. What was still missing was a cross-platform option, since the three above are phone apps.
 
-Ferd is what I ended up with. One map for the pins and the lines, running on my own machine.
+Ferd is that option: one map for the pins and the lines, running on my own machine.
 
 <div class="article-gallery">
   <button class="gallery-thumb" type="button" data-full="https://res.cloudinary.com/djpkffk5u/image/upload/w_1600,f_auto/v1779361052/Screenshot_2026-05-21_at_13.56.24_xxx3et.png">

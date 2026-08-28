@@ -21,7 +21,7 @@ Seen through [ffprobe](https://ffmpeg.org/ffprobe.html), the standard way to ask
       title           : Interpreter</span>
 </code></pre>
 
-So I made audio-lang-tagger. It works out what language each unlabelled track is in and writes that into the file. Since that means editing my own files, it can also just look and report what is still missing a label, which is the safer place to start. Same file, but the gap now has a name:
+audio-lang-tagger fills that in. It works out what language each unlabelled track is in and writes that into the file. Since that means editing my own files, it can also just look and report what is still missing a label, which is the safer place to start. Same file, but the gap now has a name:
 
 <pre><code>$ audio-lang-tagger.py --list ~/video
 <span style="color:#8b949e">[1/1] Interviews/</span>

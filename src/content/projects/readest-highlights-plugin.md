@@ -11,7 +11,7 @@ draft: false
 
 Highlighting passages in a book never did much for me. Once a highlight was sitting inside the reader app, I didn't have a way to pull it back out, so it mostly just stayed there. My notes live in [Obsidian](https://obsidian.md), and getting the highlights from [Readest](https://readest.com) into that same place was the gap I wanted to close.
 
-So I made a small plugin that does exactly that. Open Obsidian, run a command, and your book highlights show up as notes, one per book. Run it again later and the notes update in place instead of piling up duplicates.
+A small plugin closes it. Open Obsidian, run a command, and your book highlights show up as notes, one per book. Run it again later and the notes update in place instead of piling up duplicates.
 
 Each note has the title, author, and year at the top, followed by the highlights as a list, each with its page number and any notes you wrote alongside it.
 
