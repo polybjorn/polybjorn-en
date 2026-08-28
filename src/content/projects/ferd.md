@@ -4,8 +4,8 @@ description: Travel pins and GPS routes in one free, open-source map, reachable 
 date: 2026-05-20
 cover: https://res.cloudinary.com/djpkffk5u/image/upload/v1779360907/atlas_hero_16x9_jmfver.png
 coverAlt: Ferd map view with place pins
-thumb: https://res.cloudinary.com/djpkffk5u/image/upload/c_crop,w_500,h_281,g_center/v1779354867/Atlas_thumbnail_zhyyqi.jpg
-thumbAlt: Stylized topographic map with a dashed trail and scattered brightly coloured location pins
+thumb: /images/ferd-thumb.svg
+thumbAlt: A folded map with a dashed route and a location pin
 draft: false
 ---
 

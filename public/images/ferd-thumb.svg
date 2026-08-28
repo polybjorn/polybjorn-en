@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" viewBox="0 0 640 360" role="img" aria-label="A folded map with a dashed route and a location pin">
+  <rect width="640" height="360" fill="#15181d"/>
+  <g transform="translate(320,180)">
+    <path d="M-200,-58 L-68,-82 L68,-58 L200,-82 L200,58 L68,82 L-68,58 L-200,82 Z"
+          fill="none" stroke="#7ee787" stroke-width="14" stroke-linejoin="round"/>
+    <line x1="-68" y1="-82" x2="-68" y2="58" stroke="#7ee787" stroke-width="8" opacity="0.45"/>
+    <line x1="68" y1="-58" x2="68" y2="82" stroke="#7ee787" stroke-width="8" opacity="0.45"/>
+    <path d="M-160,34 C-110,-16 -40,44 20,6 C60,-18 90,-4 118,-16"
+          fill="none" stroke="#6aaeee" stroke-width="13" stroke-linecap="round" stroke-dasharray="2 26"/>
+    <path d="M146,4 C135,-14 121,-27 121,-43 a25,25 0 1 1 50,0 C171,-27 157,-14 146,4 Z" fill="#ff7b72"/>
+    <circle cx="146" cy="-42" r="9" fill="#15181d"/>
+  </g>
+</svg>

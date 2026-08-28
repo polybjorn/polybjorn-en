@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" viewBox="0 0 640 360" role="img" aria-label="A highlighter pen marking a line of text">
+  <rect width="640" height="360" fill="#15181d"/>
+  <g transform="translate(360,186)">
+    <g stroke="#6aaeee" stroke-width="13" stroke-linecap="round">
+      <line x1="-200" y1="-56" x2="52" y2="-56"/>
+      <line x1="-200" y1="70" x2="120" y2="70"/>
+    </g>
+    <line x1="-200" y1="8" x2="-20" y2="8" stroke="#7ee787" stroke-width="24" stroke-linecap="round"/>
+    <g transform="translate(-8,8) rotate(-45)">
+      <path d="M0,4 L-24,-42 L24,-42 Z" fill="#7ee787"/>
+      <rect x="-30" y="-172" width="60" height="130" rx="12" fill="#15181d" stroke="#7ee787" stroke-width="14"/>
+      <line x1="-30" y1="-140" x2="30" y2="-140" stroke="#7ee787" stroke-width="9"/>
+    </g>
+  </g>
+</svg>

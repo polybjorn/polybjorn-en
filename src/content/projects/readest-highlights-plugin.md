@@ -4,8 +4,8 @@ description: A small Obsidian plugin that pulls my book highlights out of Reades
 date: 2026-05-02
 cover: https://res.cloudinary.com/djpkffk5u/image/upload/v1779013155/Obsidian_Readest_Highlights_16x9_ptqu2s.png
 coverAlt: An Obsidian note generated from a Readest book
-thumb: https://res.cloudinary.com/djpkffk5u/image/upload/v1779019401/Obsidian_Readest_Highlights_thumb_xmkdhb.png
-thumbAlt: Readest and Obsidian icons connected by an arrow
+thumb: /images/readest-highlights-thumb.svg
+thumbAlt: A highlighter pen marking a line of text
 draft: false
 ---
 
