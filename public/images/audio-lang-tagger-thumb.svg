@@ -1,12 +1,17 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" viewBox="0 0 640 360" role="img" aria-label="The language label und becoming nor">
-  <style>
-    .w { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 92px; font-weight: 700; }
-  </style>
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="360" viewBox="0 0 640 360" role="img" aria-label="A label tag containing an audio waveform">
   <rect width="640" height="360" fill="#15181d"/>
-  <text x="150" y="212" text-anchor="middle" class="w" fill="#a5aeb8">und</text>
-  <g fill="none" stroke="#6aaeee" stroke-width="11" stroke-linecap="round">
-    <line x1="283" y1="180" x2="352" y2="180"/>
+  <g transform="translate(320,180) rotate(-6) scale(0.95)">
+    <path d="M-190,-78 L120,-78 Q136,-78 147,-67 L196,-18 Q206,-8 206,0 Q206,8 196,18 L147,67 Q136,78 120,78 L-190,78 Q-206,78 -206,62 L-206,-62 Q-206,-78 -190,-78 Z"
+          fill="none" stroke="#7ee787" stroke-width="14" stroke-linejoin="round"/>
+    <circle cx="152" cy="0" r="17" fill="none" stroke="#7ee787" stroke-width="12"/>
+    <g stroke="#6aaeee" stroke-width="16" stroke-linecap="round">
+      <line x1="-152" y1="-14" x2="-152" y2="14"/>
+      <line x1="-114" y1="-30" x2="-114" y2="30"/>
+      <line x1="-76"  y1="-20" x2="-76"  y2="20"/>
+      <line x1="-38"  y1="-46" x2="-38"  y2="46"/>
+      <line x1="0"    y1="-26" x2="0"    y2="26"/>
+      <line x1="38"   y1="-38" x2="38"   y2="38"/>
+      <line x1="76"   y1="-12" x2="76"   y2="12"/>
+    </g>
   </g>
-  <path d="M348 156 L384 180 L348 204 Z" fill="#6aaeee"/>
-  <text x="494" y="212" text-anchor="middle" class="w" fill="#7ee787">nor</text>
 </svg>

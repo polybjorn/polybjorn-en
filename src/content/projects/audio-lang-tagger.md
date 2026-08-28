@@ -5,7 +5,7 @@ date: 2026-08-28
 cover: /images/audio-lang-tagger-ui.svg
 coverAlt: The tool's interactive card, showing whisper's verdict for one audio track alongside the words it heard
 thumb: /images/audio-lang-tagger-thumb.svg
-thumbAlt: The language label und becoming nor
+thumbAlt: A label tag containing an audio waveform
 ---
 
 A video file can carry several audio tracks, and not all of them say what they are. An unlabelled one comes up as "Unknown" wherever you play it, so choosing between them means guessing which is the original, which is a dub, and which is somebody talking over the top. Across a whole collection it adds up to hundreds of tracks nobody ever got around to labelling.
