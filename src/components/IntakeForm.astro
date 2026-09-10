@@ -1,0 +1,525 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { t } from '../data/translations.js';
+import { FULL_SPEC_ORDER_TYPES, BASE_FIELDS, EXTENDED_FIELDS } from '../data/intakeForm.js';
+import { ArrowLeft } from 'lucide-astro';
+
+interface Props {
+  lang: 'en' | 'no';
+}
+
+const { lang } = Astro.props;
+const tr = t[lang];
+const td = tr.threeDPrintingIntake;
+const backHref = lang === 'no' ? '/no/3d-printing' : '/3d-printing';
+
+const byId = (id: string) => BASE_FIELDS.find(f => f.id === id);
+
+const aboutFields = ['orderType', 'projectName', 'description'].map(byId);
+const filesFields = ['existingFiles', 'fileUpload'].map(byId);
+const specFields = ['size', 'material', 'colorFinish', 'copyright'].map(byId);
+const timingFields = ['quantity', 'targetDate', 'replyUrgency', 'budget'].map(byId);
+const contactFields = ['contactName', 'contactCompany', 'contactPhone', 'contactPreferSignal', 'contactEmail', 'contactLocation'].map(byId);
+---
+
+<Layout
+  lang={lang}
+  title={td.title}
+  description={td.description}
+  altLangPath="/3d-printing/enquiry"
+>
+  <style>
+    body {
+      background: #1e2228;
+      color: #dde1e7;
+      font-family: 'Piazzolla', serif;
+      min-height: 100vh;
+    }
+
+    main {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 4rem 2rem 5rem;
+    }
+
+    .hero {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    h1 {
+      font-family: 'Piazzolla', serif;
+      font-size: 2.2rem;
+      color: #fff;
+      margin-bottom: 0.8rem;
+      line-height: 1.15;
+    }
+
+    .intro {
+      font-size: 1.02rem;
+      line-height: 1.6;
+      color: #ccc;
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    .confidentiality {
+      font-size: 0.92rem;
+      color: #9aa2ad;
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    fieldset {
+      border: none;
+      padding: 0;
+      margin: 0 0 2.5rem;
+    }
+
+    legend, .section-heading {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 1.2rem;
+      padding: 0;
+    }
+
+    .section-intro {
+      font-size: 0.95rem;
+      color: #aaa;
+      margin: -0.6rem 0 1.2rem;
+      line-height: 1.5;
+    }
+
+    .field {
+      margin-bottom: 1.4rem;
+    }
+
+    .field label.field-label,
+    .field legend.field-label {
+      display: block;
+      font-size: 0.98rem;
+      color: #dde1e7;
+      margin-bottom: 0.4rem;
+      font-weight: 600;
+    }
+
+    .optional-tag {
+      font-weight: 400;
+      color: #888;
+      font-size: 0.88rem;
+    }
+
+    .field-help {
+      font-size: 0.88rem;
+      color: #888;
+      margin: 0.3rem 0 0;
+      line-height: 1.4;
+    }
+
+    input[type="text"],
+    input[type="date"],
+    input[type="file"],
+    textarea,
+    select {
+      width: 100%;
+      background: #2a2e35;
+      border: 1px solid #3a3f47;
+      border-radius: 8px;
+      color: #dde1e7;
+      font-family: 'Piazzolla', serif;
+      font-size: 0.98rem;
+      padding: 0.65rem 0.8rem;
+    }
+
+    textarea {
+      min-height: 6rem;
+      resize: vertical;
+    }
+
+    input:focus-visible,
+    textarea:focus-visible,
+    select:focus-visible {
+      outline: 2px solid #6aaeee;
+      outline-offset: 2px;
+    }
+
+    .option-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .option-list label {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+      font-size: 0.95rem;
+      color: #ccc;
+      font-weight: 400;
+    }
+
+    .option-list input {
+      margin-top: 0.2rem;
+      flex-shrink: 0;
+    }
+
+    .checkbox-field {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.6rem;
+      font-size: 0.95rem;
+      color: #ccc;
+      font-weight: 400;
+      margin-top: -0.6rem;
+    }
+
+    .checkbox-field input {
+      margin-top: 0.2rem;
+      flex-shrink: 0;
+    }
+
+    .honeypot {
+      position: absolute;
+      left: -9999px;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+    }
+
+    #requirements-section[hidden] {
+      display: none;
+    }
+
+    .submit-row {
+      text-align: center;
+      margin-top: 2.5rem;
+    }
+
+    button[type="submit"] {
+      font-family: 'Piazzolla', serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #1e2228;
+      background: #6aaeee;
+      border: none;
+      border-radius: 8px;
+      padding: 0.8rem 2rem;
+      cursor: pointer;
+    }
+
+    button[type="submit"]:hover {
+      background: #85bcf2;
+    }
+
+    .submit-note {
+      font-size: 0.85rem;
+      color: #888;
+      margin-top: 0.8rem;
+    }
+
+    .back-home {
+      position: fixed;
+      top: calc(1rem - 4px);
+      left: max(1rem, env(safe-area-inset-left, 0px) + 0.5rem);
+      color: #ccc;
+      text-decoration: none;
+      z-index: 100;
+      opacity: 0.75;
+      transition: opacity 0.3s, transform 0.3s;
+      line-height: 1;
+    }
+    .back-home:hover { opacity: 1; color: #fff; }
+
+    @media (max-width: 720px) {
+      main { padding: 2.5rem 1.25rem 3rem; }
+      h1 { font-size: 1.8rem; }
+    }
+  </style>
+
+  <a class="back-home" href={backHref} aria-label={tr.backHomeAria}><ArrowLeft size={28} strokeWidth={1.5} /></a>
+
+  <main id="main">
+    <section class="hero">
+      <h1>{td.h1}</h1>
+      <p class="intro">{td.intro}</p>
+    </section>
+
+    <p class="confidentiality">{td.confidentialityNote}</p>
+
+    <form id="intake-form" novalidate>
+      <!--
+        Honeypot: real visitors never see or fill this. A submission that
+        arrives with it non-empty is worth dropping server-side - the check
+        has to happen at the receiving endpoint, this form only carries the
+        field.
+      -->
+      <div class="honeypot" aria-hidden="true">
+        <label for="website">Website</label>
+        <input type="text" id="website" name="website" tabindex="-1" autocomplete="off" />
+      </div>
+
+      <fieldset>
+        <legend class="section-heading">{td.sectionAbout}</legend>
+        {aboutFields.map(field => (
+          <div class="field">
+            {field.type === 'radio' ? (
+              <fieldset>
+                <legend class="field-label">
+                  {field.label[lang]}
+                  {!field.required && <span class="optional-tag"> ({td.optionalTag})</span>}
+                </legend>
+                <div class="option-list">
+                  {field.options.map(opt => (
+                    <label>
+                      <input type="radio" name={field.id} value={opt.value} required={field.required} />
+                      <span>{opt[lang]}</span>
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+            ) : field.type === 'textarea' ? (
+              <>
+                <label class="field-label" for={field.id}>
+                  {field.label[lang]}
+                  {!field.required && <span class="optional-tag"> ({td.optionalTag})</span>}
+                </label>
+                <textarea id={field.id} name={field.id} required={field.required}></textarea>
+              </>
+            ) : (
+              <>
+                <label class="field-label" for={field.id}>
+                  {field.label[lang]}
+                  {!field.required && <span class="optional-tag"> ({td.optionalTag})</span>}
+                </label>
+                <input type="text" id={field.id} name={field.id} required={field.required} />
+              </>
+            )}
+            {field.help && <p class="field-help">{field.help[lang]}</p>}
+          </div>
+        ))}
+      </fieldset>
+
+      <fieldset>
+        <legend class="section-heading">{td.sectionFiles}</legend>
+        {filesFields.map(field => (
+          <div class="field">
+            {field.type === 'checkboxGroup' ? (
+              <fieldset>
+                <legend class="field-label">
+                  {field.label[lang]}
+                  {!field.required && <span class="optional-tag"> ({td.optionalTag})</span>}
+                </legend>
+                <div class="option-list">
+                  {field.options.map(opt => (
+                    <label>
+                      <input type="checkbox" name={`${field.id}[]`} value={opt.value} />
+                      <span>{opt[lang]}</span>
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+            ) : (
+              <>
+                <label class="field-label" for={field.id}>
+                  {field.label[lang]}
+                  {!field.required && <span class="optional-tag"> ({td.optionalTag})</span>}
+                </label>
+                <input type="file" id={field.id} name={field.id} accept={field.accept} multiple={field.multiple} />
+              </>
+            )}
+            {field.help && <p class="field-help">{field.help[lang]}</p>}
+          </div>
+        ))}
+      </fieldset>
+
+      <fieldset>
+        <legend class="section-heading">{td.sectionSpec}</legend>
+        {specFields.map(field => (
+          <div class="field">
+            {field.type === 'select' ? (
+              <>
+                <label class="field-label" for={field.id}>
+                  {field.label[lang]}
+                  {!field.required && <span class="optional-tag"> ({td.optionalTag})</span>}
+                </label>
+                <select id={field.id} name={field.id} required={field.required}>
+                  <option value="" disabled selected>{td.choosePlaceholder}</option>
+                  {field.options.map(opt => (
+                    <option value={opt.value}>{opt[lang]}</option>
+                  ))}
+                </select>
+              </>
+            ) : (
+              <>
+                <label class="field-label" for={field.id}>
+                  {field.label[lang]}
+                  {!field.required && <span class="optional-tag"> ({td.optionalTag})</span>}
+                </label>
+                <input type="text" id={field.id} name={field.id} required={field.required} />
+              </>
+            )}
+            {field.help && <p class="field-help">{field.help[lang]}</p>}
+          </div>
+        ))}
+      </fieldset>
+
+      <fieldset>
+        <legend class="section-heading">{td.sectionTiming}</legend>
+        {timingFields.map(field => (
+          <div class="field">
+            {field.type === 'select' ? (
+              <>
+                <label class="field-label" for={field.id}>
+                  {field.label[lang]}
+                  {!field.required && <span class="optional-tag"> ({td.optionalTag})</span>}
+                </label>
+                <select id={field.id} name={field.id} required={field.required}>
+                  <option value="" disabled selected>{td.choosePlaceholder}</option>
+                  {field.options.map(opt => (
+                    <option value={opt.value}>{opt[lang]}</option>
+                  ))}
+                </select>
+              </>
+            ) : (
+              <>
+                <label class="field-label" for={field.id}>
+                  {field.label[lang]}
+                  {!field.required && <span class="optional-tag"> ({td.optionalTag})</span>}
+                </label>
+                <input type="text" id={field.id} name={field.id} required={field.required} />
+              </>
+            )}
+            {field.help && <p class="field-help">{field.help[lang]}</p>}
+          </div>
+        ))}
+      </fieldset>
+
+      <fieldset id="requirements-section" hidden>
+        <legend class="section-heading">{td.sectionRequirements}</legend>
+        <p class="section-intro">{td.requirementsIntro}</p>
+        {EXTENDED_FIELDS.map(field => (
+          <div class="field">
+            {field.type === 'select' ? (
+              <>
+                <label class="field-label" for={field.id}>
+                  {field.label[lang]}
+                  <span class="optional-tag"> ({td.optionalTag})</span>
+                </label>
+                <select id={field.id} name={field.id}>
+                  <option value="" disabled selected>{td.choosePlaceholder}</option>
+                  {field.options.map(opt => (
+                    <option value={opt.value}>{opt[lang]}</option>
+                  ))}
+                </select>
+              </>
+            ) : (
+              <>
+                <label class="field-label" for={field.id}>
+                  {field.label[lang]}
+                  <span class="optional-tag"> ({td.optionalTag})</span>
+                </label>
+                <input type="text" id={field.id} name={field.id} />
+              </>
+            )}
+            {field.help && <p class="field-help">{field.help[lang]}</p>}
+          </div>
+        ))}
+      </fieldset>
+
+      <fieldset>
+        <legend class="section-heading">{td.sectionContact}</legend>
+        <p class="section-intro">{td.contactMethodNote}</p>
+        {contactFields.map(field => (
+          <div class="field" id={field.type === 'checkbox' ? `field-${field.id}` : undefined} hidden={field.type === 'checkbox' || undefined}>
+            {field.type === 'checkbox' ? (
+              <label class="checkbox-field">
+                <input type="checkbox" id={field.id} name={field.id} />
+                <span>{field.label[lang]}</span>
+              </label>
+            ) : (
+              <>
+                <label class="field-label" for={field.id}>
+                  {field.label[lang]}
+                  {!field.required && <span class="optional-tag"> ({td.optionalTag})</span>}
+                </label>
+                <input type="text" id={field.id} name={field.id} required={field.required} />
+              </>
+            )}
+            {field.help && <p class="field-help">{field.help[lang]}</p>}
+          </div>
+        ))}
+      </fieldset>
+
+      <div class="submit-row">
+        <button type="submit">{td.submitLabel}</button>
+        <p class="submit-note">{td.submitNote}</p>
+      </div>
+    </form>
+  </main>
+
+  <script define:vars={{ fullSpecOrderTypes: FULL_SPEC_ORDER_TYPES, contactMethodRequired: td.contactMethodRequired, fileTooLarge: td.fileTooLarge }}>
+    const form = document.getElementById('intake-form');
+    const requirementsSection = document.getElementById('requirements-section');
+
+    function updateRequirements() {
+      const selected = form.querySelector('input[name="orderType"]:checked');
+      requirementsSection.hidden = !selected || !fullSpecOrderTypes.includes(selected.value);
+    }
+
+    form.addEventListener('change', (event) => {
+      if (event.target.name === 'orderType') updateRequirements();
+    });
+    updateRequirements();
+
+    // Neither phone nor email is individually required - one of the two is.
+    const emailField = document.getElementById('contactEmail');
+    const phoneField = document.getElementById('contactPhone');
+
+    function validateContactMethod() {
+      const hasContact = emailField.value.trim() || phoneField.value.trim();
+      emailField.setCustomValidity(hasContact ? '' : contactMethodRequired);
+    }
+
+    emailField.addEventListener('input', validateContactMethod);
+    phoneField.addEventListener('input', validateContactMethod);
+    validateContactMethod();
+
+    // The "prefer Signal" checkbox only makes sense for a phone number - a
+    // Signal username or signal.me link is unambiguous on its own.
+    const signalField = document.getElementById('field-contactPreferSignal');
+    const signalCheckbox = document.getElementById('contactPreferSignal');
+
+    function looksLikePhoneNumber(value) {
+      const trimmed = value.trim();
+      return /^[+\d][\d\s().-]*$/.test(trimmed) && trimmed.replace(/\D/g, '').length >= 5;
+    }
+
+    function updateSignalCheckbox() {
+      const show = looksLikePhoneNumber(phoneField.value);
+      signalField.hidden = !show;
+      if (!show) signalCheckbox.checked = false;
+    }
+
+    phoneField.addEventListener('input', updateSignalCheckbox);
+    updateSignalCheckbox();
+
+    // Client-side only: a courtesy check against the advertised cap, not a
+    // real limit - the endpoint still has to enforce this on what it
+    // actually receives.
+    const MAX_FILE_BYTES = 10 * 1024 * 1024;
+    const fileInput = document.getElementById('fileUpload');
+
+    fileInput.addEventListener('change', () => {
+      const oversized = Array.from(fileInput.files).some(file => file.size > MAX_FILE_BYTES);
+      fileInput.setCustomValidity(oversized ? fileTooLarge : '');
+    });
+
+    // Stub: no endpoint is wired up yet. See issue #2 for the mail-based
+    // delivery design; this only needs to exist so the form is testable.
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      console.log('Intake form submit is stubbed - no endpoint connected yet.', new FormData(form));
+    });
+  </script>
+</Layout>
