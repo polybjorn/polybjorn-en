@@ -134,21 +134,18 @@ const stageLabels = {
       align-items: start;
     }
 
+    /* auto-fit rather than a viewport breakpoint: the row pairs whenever there
+       is room for two columns of a usable width and stacks when there is not,
+       measured against the space it actually has. A media query asks the wrong
+       question - it reads the viewport, which is not the same as the width this
+       row was given, and which browser zoom and a high-DPI display both shrink
+       out from under it. A 1280px screen at 250% zoom is 512 CSS pixels. */
     .field-row-2 {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(13.75rem, 1fr));
     }
 
     .field-row-3 {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-
-    /* Everything stacks on a phone. Two short boxes side by side on a 360px
-       screen are two boxes too narrow to type in. */
-    @media (max-width: 620px) {
-      .field-row-2,
-      .field-row-3 {
-        grid-template-columns: 1fr;
-      }
+      grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
     }
 
     .continue-row {
