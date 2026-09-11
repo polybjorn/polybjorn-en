@@ -3,10 +3,18 @@
 # prepare-deploy.mjs is a deploy step, and Pages deploy plus the Typst CV job
 # stay in .github/workflows/ off the push mirror (setup-typst and artifact
 # upload are GitHub-specific).
+#
+# check-attribution.sh gates AI attribution (Co-Authored-By: Claude,
+# "Generated with Claude Code") in commit messages and PR descriptions.
+# CLAUDE.md says not to add these; an agent has followed a conflicting
+# session-level instruction and added them anyway more than once regardless.
+# Also enforced by memory alone until this, and memory alone did not hold.
 name: CI
 
 on:
   push:
+    branches: [main]
+  pull_request:
     branches: [main]
   workflow_dispatch:
 
@@ -17,3 +25,25 @@ jobs:
       - uses: actions/checkout@v4
       - run: npm ci
       - run: npm run build
+
+  attribution:
+    runs-on: docker
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Check commit messages
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            git fetch origin "${{ github.event.pull_request.base.ref }}"
+            ./check-attribution.sh commits "origin/${{ github.event.pull_request.base.ref }}..HEAD"
+          else
+            ./check-attribution.sh commits -1
+          fi
+      - name: Check PR description
+        if: github.event_name == 'pull_request'
+        env:
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          printf '%s' "$PR_BODY" > /tmp/pr-body.txt
+          ./check-attribution.sh body /tmp/pr-body.txt
