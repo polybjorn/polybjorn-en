@@ -18,10 +18,18 @@ const byId = (id: string) => BASE_FIELDS.find(f => f.id === id);
 
 const deliverableField = byId('deliverable');
 const orderTypeField = byId('orderType');
-const aboutRestFields = ['projectName', 'description', 'fileUpload'].map(byId);
-const specFields = ['size', 'materialProperties', 'materialName', 'color', 'copyright'].map(byId);
+const aboutFields = ['projectName', 'description', 'fileUpload'].map(byId);
+const specFields = ['orderType', 'size', 'materialProperties', 'materialName', 'color', 'copyright'].map(byId);
 const timingFields = ['quantity', 'targetDate', 'budget'].map(byId);
-const contactFields = ['contactName', 'contactCompany', 'contactPhone', 'contactSignal', 'contactEmail', 'contactLocation', 'confidential'].map(byId);
+// Fields grouped onto rows. A name, a company, a phone number and a town are
+// all short values, and a box the width of the page invites a sentence - so
+// they pair off, and only the ones that can genuinely run long stay wide.
+const contactRows = [
+  ['contactName', 'contactCompany'],
+  ['contactPhone', 'contactSignal'],
+  ['contactEmail', 'contactLocation'],
+  ['confidential'],
+].map(row => row.map(byId));
 
 // Single source for the dots, the "2 / 4" counter and the screen-reader
 // announcement, so they cannot drift out of step with the actual stages.
@@ -72,7 +80,7 @@ const stageLabels = {
       line-height: 1.6;
       color: #ccc;
       text-align: center;
-      margin-bottom: 3rem;
+      margin-bottom: 1.5rem;
     }
 
     fieldset {
@@ -114,11 +122,42 @@ const stageLabels = {
       overflow: hidden;
     }
 
-    /* Progressive disclosure: each stage stays collapsed until the one
-       before it is answered, so the page grows instead of showing every
-       section (and the production-only requirement grid) up front. */
-    .stage-group[hidden] {
-      display: none;
+    /* Progressive disclosure is between sections now, not within them: the
+       page grows a section at a time instead of showing the whole form at
+       once. */
+    /* Fields that belong together share a row. Their own .field margins do the
+       vertical spacing, so there is no row-gap to double up with once a row
+       collapses to a single column. */
+    .field-row {
+      display: grid;
+      column-gap: 2rem;
+      align-items: start;
+    }
+
+    /* Pulled up hard against the row it belongs to. A field carries 1.4rem of
+       margin below it, which on its own left the shared mark adrift - and it
+       reads as adrift from the shorter of two columns in particular, since the
+       mark can only sit below the taller one. */
+    .pair-error {
+      font-size: 0.88rem;
+      color: #f0907f;
+      line-height: 1.4;
+      margin: -1.1rem 0 1.4rem;
+      text-align: center;
+    }
+
+    /* auto-fit rather than a viewport breakpoint: the row pairs whenever there
+       is room for two columns of a usable width and stacks when there is not,
+       measured against the space it actually has. A media query asks the wrong
+       question - it reads the viewport, which is not the same as the width this
+       row was given, and which browser zoom and a high-DPI display both shrink
+       out from under it. A 1280px screen at 250% zoom is 512 CSS pixels. */
+    .field-row-2 {
+      grid-template-columns: repeat(auto-fit, minmax(13.75rem, 1fr));
+    }
+
+    .field-row-3 {
+      grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
     }
 
     .continue-row {
@@ -148,13 +187,34 @@ const stageLabels = {
     }
 
     @media (prefers-reduced-motion: no-preference) {
-      .stage-group,
       fieldset.stage {
         transition: opacity 0.3s ease, transform 0.3s ease;
       }
       .stage-entering {
         opacity: 0;
         transform: translateY(8px);
+      }
+
+      /* A press should be felt, not just followed by something happening
+         further down the page. */
+      .continue-btn,
+      button[type="submit"] {
+        transition: transform 0.12s ease, background 0.15s ease,
+          border-color 0.15s ease, color 0.15s ease;
+      }
+
+      .continue-btn:active,
+      button[type="submit"]:active {
+        transform: scale(0.97);
+      }
+
+      .form-error {
+        animation: form-error-in 0.22s ease;
+      }
+
+      @keyframes form-error-in {
+        from { opacity: 0; transform: translateY(-4px); }
+        to { opacity: 1; transform: none; }
       }
     }
 
@@ -163,19 +223,66 @@ const stageLabels = {
       margin-top: 2.5rem;
     }
 
+    /* The warning belongs to the form above it, not to the button below it, so
+       when it appears it moves up towards the last field and leaves the button
+       its own space. Without a warning the button keeps the full gap. */
+    .submit-row:has(.form-error:not([hidden])) {
+      margin-top: 1.5rem;
+    }
+
+    /* The submit row is centred; a list of things to go and fix is not, so
+       this block sets itself back to the left. */
     .form-error {
       font-size: 0.92rem;
       color: #f0907f;
       line-height: 1.45;
-      margin: 0 0 1rem;
+      margin: 0 0 2.5rem;
+      text-align: left;
+      background: #2b2126;
+      border: 1px solid #7a4038;
+      border-radius: 8px;
+      padding: 0.8rem 1rem;
+    }
+
+    /* The heading, list and jump buttons are built by the script, so they carry
+       no data-astro-cid and a plain scoped selector would miss them. They are
+       :global(), anchored on the scoped container. */
+    .form-error :global(.form-error-heading) {
+      margin: 0;
+      font-weight: 600;
     }
 
     /* Text presentation forced, so it does not arrive as a colour emoji. The
        wording carries the meaning on its own - this is decoration, which is
        why the colour is not the only signal. */
-    .form-error::before {
+    .form-error :global(.form-error-heading::before) {
       content: '\26A0\FE0E';
       margin-right: 0.4rem;
+    }
+
+    .form-error :global(.form-error-list) {
+      margin: 0.55rem 0 0;
+      padding-left: 1.15rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+
+    /* Each entry takes you to the field it names - the list is long enough on a
+       phone that scrolling back to hunt for them would undo the point of it. */
+    .form-error :global(.form-error-jump) {
+      background: none;
+      border: none;
+      padding: 0;
+      font: inherit;
+      color: inherit;
+      text-align: left;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    .form-error :global(.form-error-jump:hover) {
+      color: #fff;
     }
 
     button[type="submit"] {
@@ -194,10 +301,12 @@ const stageLabels = {
       background: #85bcf2;
     }
 
-    .submit-note {
-      font-size: 0.85rem;
-      color: #888;
-      margin-top: 0.8rem;
+    .draft-note {
+      font-size: 0.92rem;
+      line-height: 1.45;
+      color: #9aa2ad;
+      text-align: center;
+      margin: 0 0 3.5rem;
     }
 
     /* Purely visual cue that the form has more stages ahead - the intro
@@ -264,6 +373,8 @@ const stageLabels = {
       <p class="intro">{td.intro}</p>
     </section>
 
+    <p class="draft-note">{td.submitNote}</p>
+
     <div class="progress-dots" aria-hidden="true">
       {STAGE_IDS.map(id => <span class="dot" data-dot={id}></span>)}
     </div>
@@ -286,20 +397,22 @@ const stageLabels = {
       </div>
 
       <fieldset id="stage-about" class="stage" tabindex="-1">
-        <legend class="section-heading">{td.sectionAbout}</legend>
+        <!--
+          Kept for the fieldset and for screen readers, hidden from the page:
+          the h1 two lines above already says "Fortell om delen din", so
+          "Om delen" was the same words twice. The later headings are not
+          redundant - they name different topics, and they arrive on their own
+          after a Continue rather than under a title that already covers them.
+        -->
+        <legend class="section-heading visually-hidden">{td.sectionAbout}</legend>
 
         <IntakeField field={deliverableField} lang={lang} td={td} />
         <input type="hidden" name="deliverable[]" value="model" id="deliverable-model-implied" disabled />
 
-        <div id="order-type-question" class="stage-group" tabindex="-1" hidden>
-          <IntakeField field={orderTypeField} lang={lang} td={td} />
-        </div>
+        {aboutFields.map(field => <IntakeField field={field} lang={lang} td={td} />)}
 
-        <div id="about-rest" class="stage-group" tabindex="-1" hidden>
-          {aboutRestFields.map(field => <IntakeField field={field} lang={lang} td={td} />)}
-          <div class="continue-row">
-            <button type="button" class="continue-btn" data-continue="about" disabled>{td.continueLabel}</button>
-          </div>
+        <div class="continue-row">
+          <button type="button" class="continue-btn" data-continue="about">{td.continueLabel}</button>
         </div>
       </fieldset>
 
@@ -307,7 +420,7 @@ const stageLabels = {
         <legend class="section-heading">{td.sectionSpec}</legend>
         {specFields.map(field => <IntakeField field={field} lang={lang} td={td} />)}
         <div class="continue-row">
-          <button type="button" class="continue-btn" data-continue="spec" disabled>{td.continueLabel}</button>
+          <button type="button" class="continue-btn" data-continue="spec">{td.continueLabel}</button>
         </div>
       </fieldset>
 
@@ -315,7 +428,7 @@ const stageLabels = {
         <legend class="section-heading">{td.sectionTiming}</legend>
         {timingFields.map(field => <IntakeField field={field} lang={lang} td={td} />)}
         <div class="continue-row">
-          <button type="button" class="continue-btn" data-continue="timing" disabled>{td.continueLabel}</button>
+          <button type="button" class="continue-btn" data-continue="timing">{td.continueLabel}</button>
         </div>
       </fieldset>
 
@@ -328,7 +441,23 @@ const stageLabels = {
           three fields all labelled "(optional)".
         -->
         <p class="section-intro">{td.sectionContactIntro}</p>
-        {contactFields.map(field => <IntakeField field={field} lang={lang} td={td} />)}
+        {contactRows.map(row => (
+          <>
+            <div class:list={['field-row', `field-row-${row.length}`]}>
+              {row.map(field => <IntakeField field={field} lang={lang} td={td} />)}
+            </div>
+            {/*
+              The "at least one of three" rule belongs to phone, Signal and
+              email together, so its mark goes under all three rather than
+              under whichever one happens to carry the validity. It sits after
+              the last of them; the message names the three itself, so it does
+              not depend on position to be understood.
+            */}
+            {row.some(field => field.id === 'contactEmail') && (
+              <p class="pair-error" id="contact-methods-error" hidden></p>
+            )}
+          </>
+        ))}
 
         <div class="submit-row">
           <!--
@@ -337,16 +466,21 @@ const stageLabels = {
             styled by the browser, written in the browser's UI language rather
             than the page's, and gone on the next scroll.
           -->
-          <p class="form-error" id="submit-error" role="alert" hidden></p>
+          <div class="form-error" id="submit-error" role="alert" hidden></div>
           <button type="submit">{td.submitLabel}</button>
-          <p class="submit-note">{td.submitNote}</p>
         </div>
       </fieldset>
     </form>
   </main>
 
-  <script define:vars={{ printOnlyFieldIds: PRINT_ONLY_FIELD_IDS, stageIds: STAGE_IDS, stageLabels, contactMethodRequired: td.contactMethodRequired, deliverableRequired: td.deliverableRequired, modelTickedNote: td.modelTickedNote, fileTooLarge: td.fileTooLarge, chooseFilesLabel: td.chooseFilesLabel, addFilesLabel: td.addFilesLabel, removeFileLabel: td.removeFileLabel, missingFieldMessage: td.missingFieldMessage, invalidEmailMessage: td.invalidEmailMessage, numberLocale: lang === 'no' ? 'nb-NO' : 'en-GB' }}>
+  <script define:vars={{ printOnlyFieldIds: PRINT_ONLY_FIELD_IDS, stageIds: STAGE_IDS, stageLabels, contactMethodRequired: td.contactMethodRequired, deliverableRequired: td.deliverableRequired, modelTickedNote: td.modelTickedNote, fileTooLarge: td.fileTooLarge, chooseFilesLabel: td.chooseFilesLabel, addFilesLabel: td.addFilesLabel, removeFileLabel: td.removeFileLabel, submitSummaryHeading: td.submitSummaryHeading, requiredFieldNote: td.requiredFieldNote, invalidEmailMessage: td.invalidEmailMessage, numberLocale: lang === 'no' ? 'nb-NO' : 'en-GB' }}>
     const form = document.getElementById('intake-form');
+
+    // Declared up here because syncDeliverable() runs during setup and clears
+    // field marks through it - left further down with the rest of the submit
+    // handling, it was still in its temporal dead zone and the whole script
+    // died on load.
+    let reportedControls = [];
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     // Reports whether it actually revealed anything, so callers can move
@@ -403,36 +537,7 @@ const stageLabels = {
       setActiveStage(nextStage.id, true);
     }
 
-    // A Continue button unlocks once every control in its own stage is valid,
-    // not just the required ones: an oversized attachment sets a custom
-    // validity on the file input, and gating on that blocks the section the
-    // file was chosen in instead of surfacing three sections later at submit.
-    const continueUpdaters = [];
-
-    function wireContinue(stageEl, button) {
-      function update() {
-        const controls = stageEl.querySelectorAll('input, select, textarea');
-        button.disabled = !Array.from(controls).every(control => control.checkValidity());
-      }
-      stageEl.addEventListener('input', update);
-      stageEl.addEventListener('change', update);
-      continueUpdaters.push(update);
-      update();
-    }
-
-    // A stage's own input/change listeners never see a change made in an
-    // earlier stage, so anything that alters a later stage's validity has to
-    // ask for a recount. Without this, choosing "just the 3D model" left the
-    // timing stage's Continue button disabled on a stale reading of a
-    // quantity field that is no longer in play, with nothing else in that
-    // section required - a dead end with no way forward.
-    function refreshContinueButtons() {
-      continueUpdaters.forEach(update => update());
-    }
-
     const stageAbout = document.getElementById('stage-about');
-    const orderTypeQuestion = document.getElementById('order-type-question');
-    const aboutRest = document.getElementById('about-rest');
     const stageSpec = document.getElementById('stage-spec');
     const stageTiming = document.getElementById('stage-timing');
     const stageContact = document.getElementById('stage-contact');
@@ -441,16 +546,13 @@ const stageLabels = {
     const continueSpec = form.querySelector('[data-continue="spec"]');
     const continueTiming = form.querySelector('[data-continue="timing"]');
 
-    wireContinue(stageAbout, continueAbout);
-    wireContinue(stageSpec, continueSpec);
-    wireContinue(stageTiming, continueTiming);
-
     const deliverableBoxes = Array.from(
       form.querySelectorAll('input[type="checkbox"][name="deliverable[]"]')
     );
     const printedBox = deliverableBoxes.find(box => box.value === 'printed');
     const modelBox = deliverableBoxes.find(box => box.value === 'model');
     const modelImplied = document.getElementById('deliverable-model-implied');
+    const modelNote = modelBox.closest('label').querySelector('.option-example');
 
     // Remembers whether the model was wanted on its own, so unticking the part
     // puts the box back as the visitor left it rather than leaving behind a
@@ -477,12 +579,16 @@ const stageLabels = {
         const wasUnticked = !modelBox.checked;
         modelBox.checked = true;
         modelBox.disabled = true;
+        // The note explains the greyed tick, so it belongs with the greyed
+        // tick - there is nothing for it to say while the box is a live choice.
+        if (modelNote) modelNote.classList.add('is-shown');
         // Greying it out removes it from the tab order, so a screen reader
         // never meets it. Announce the one thing seeing it would have told you.
         if (changed && wasUnticked) stageAnnounce.textContent = modelTickedNote;
       } else {
         modelBox.disabled = false;
         modelBox.checked = modelWantedAlone;
+        if (modelNote) modelNote.classList.remove('is-shown');
       }
 
       // A disabled control submits nothing, so the implied value rides in the
@@ -491,6 +597,7 @@ const stageLabels = {
 
       validateDeliverable();
       updateDeliverableFields();
+      clearFieldErrorIfResolved(printedBox);
     }
 
     // Print-only fields don't apply when nothing is being printed. They are
@@ -509,27 +616,12 @@ const stageLabels = {
           control.disabled = !printing;
         });
       });
-      refreshContinueButtons();
     }
 
-    // Deliverable reveals order type, which reveals the rest of "About the
-    // part" - two sequential reveals within the same first stage.
     form.addEventListener('change', (event) => {
-      if (event.target.name === 'deliverable[]') {
-        syncDeliverable(event.target);
-        if ((printedBox.checked || modelBox.checked) && reveal(orderTypeQuestion)) {
-          focusContainer(orderTypeQuestion);
-        }
-      }
-      if (event.target.name === 'orderType') {
-        if (reveal(aboutRest)) focusContainer(aboutRest);
-      }
+      if (event.target.name === 'deliverable[]') syncDeliverable(event.target);
     });
 
-    // Restores the reveal state when a browser repopulates the form on back
-    // navigation.
-    if (printedBox.checked || modelBox.checked) reveal(orderTypeQuestion);
-    if (form.querySelector('input[name="orderType"]:checked')) reveal(aboutRest);
     syncDeliverable(null);
 
     continueAbout.addEventListener('click', () => advance(continueAbout, stageSpec));
@@ -663,9 +755,8 @@ const stageLabels = {
       fileError.hidden = !oversized;
       fileError.textContent = oversized ? fileTooLarge : '';
 
-      // A removal is a click, not an input or change event, so neither the
-      // stage's own listeners nor the submit-error listeners would fire.
-      refreshContinueButtons();
+      // A removal is a click, not an input or change event, so the listeners
+      // that normally clear a warning would not fire.
       clearSubmitErrorIfResolved();
     }
 
@@ -685,10 +776,9 @@ const stageLabels = {
       renderFileList();
     });
 
-    // Send is never disabled. Every Continue button greys out until its own
-    // section is valid, but a section can be fixed on the spot, whereas the
-    // last button in a long form has to say what is wrong - a greyed-out Send
-    // with three "(optional)" contact fields above it explains nothing.
+    // Nothing in the form is gated: Continue always moves on, and Send is the
+    // only thing that refuses. So Send has to say what it is waiting for, in
+    // full - it is the first and only point at which anything is asked for.
     const submitError = document.getElementById('submit-error');
 
     function labelFor(control) {
@@ -699,39 +789,148 @@ const stageLabels = {
         source = group ? group.querySelector('legend') : null;
       }
       if (!source) return '';
-      const copy = source.cloneNode(true);
-      copy.querySelectorAll('.optional-tag').forEach(tag => tag.remove());
-      return copy.textContent.trim();
+      return source.textContent.trim();
     }
 
-    function messageFor(control) {
-      // setCustomValidity messages are ours already and say more than a field
-      // name could - the contact-method rule and the file size cap both land
-      // here.
+    // setCustomValidity messages are ours already and say more than a field
+    // name could - the contact-method rule, the deliverable rule and the file
+    // size cap all land here.
+    function summaryTextFor(control) {
       if (control.validity.customError) return control.validationMessage;
       if (control.validity.typeMismatch) return invalidEmailMessage;
-      return missingFieldMessage.replace('{field}', labelFor(control));
+      return labelFor(control);
     }
 
-    function firstInvalidControl() {
-      const controls = form.querySelectorAll('input, select, textarea');
+    // Beside the field itself the label would just repeat what is written above
+    // it, so a plain note does instead.
+    function inlineTextFor(control) {
+      if (control.validity.customError) return control.validationMessage;
+      if (control.validity.typeMismatch) return invalidEmailMessage;
+      return requiredFieldNote;
+    }
+
+    // Every control that is standing between the visitor and sending, not just
+    // the first. Nothing is gated on the way through the form any more, so
+    // pressing Send is the first moment anything is asked for - reporting one
+    // item at a time would mean pressing it once per missing answer.
+    function invalidControls() {
+      const seen = new Set();
+      const found = [];
       // Disabled controls are barred from validation, so the print-only fields
       // drop out of this on a model-only enquiry without special-casing.
-      return Array.from(controls).find(control => !control.checkValidity()) || null;
+      form.querySelectorAll('input, select, textarea').forEach(control => {
+        if (control.checkValidity()) return;
+        // A radio or checkbox group is one answer, however many inputs it has.
+        const key = control.type === 'radio' || control.type === 'checkbox'
+          ? control.name
+          : control.id || control.name;
+        if (seen.has(key)) return;
+        seen.add(key);
+        found.push(control);
+      });
+      return found;
     }
 
-    let reportedControl = null;
+    function goTo(control) {
+      // Scroll to the row, not the control: the file input is clipped to 1px
+      // and would put the viewport somewhere useless.
+      (control.closest('.field') || control).scrollIntoView({
+        behavior: prefersReducedMotion ? 'auto' : 'smooth',
+        block: 'center',
+      });
+      control.focus({ preventScroll: true });
+    }
 
-    function showSubmitError(control) {
-      reportedControl = control;
-      submitError.textContent = messageFor(control);
+    // The "at least one of three" rule is one question spread over three
+    // fields, so it gets one mark under all three rather than one under
+    // whichever field happens to carry the validity. Keyed by control name,
+    // falling back to id, since a checkbox group is addressed by name and a
+    // text field by either.
+    const SHARED_ERROR_SLOTS = {
+      contactPhone: 'contact-methods-error',
+      contactSignal: 'contact-methods-error',
+      contactEmail: 'contact-methods-error',
+    };
+
+    function fieldErrorFor(control) {
+      const shared = SHARED_ERROR_SLOTS[control.name] || SHARED_ERROR_SLOTS[control.id];
+      if (shared) return document.getElementById(shared);
+      const row = control.closest('.field');
+      return row ? row.querySelector('.field-error') : null;
+    }
+
+    // invalidControls() reports one control per radio or checkbox group, so an
+    // event from any other member of that group has to be mapped back to the
+    // one that was actually reported - otherwise picking the second option of a
+    // group never cleared the mark its first option had put up.
+    function reportedControlFor(control) {
+      return reportedControls.find(reported => reported === control
+        || ((reported.type === 'radio' || reported.type === 'checkbox')
+            && reported.name === control.name)) || null;
+    }
+
+    // Marks each offending field where it sits, and lists them all by the
+    // button. The list is the part that answers "what do I have to fill in",
+    // which is the question Send is being pressed to ask.
+    function showSubmitErrors(controls) {
+      reportedControls = controls;
+      submitError.textContent = '';
+
+      const heading = document.createElement('p');
+      heading.className = 'form-error-heading';
+      heading.textContent = submitSummaryHeading;
+
+      const list = document.createElement('ul');
+      list.className = 'form-error-list';
+
+      controls.forEach(control => {
+        const entry = document.createElement('li');
+        const jump = document.createElement('button');
+        jump.type = 'button';
+        jump.className = 'form-error-jump';
+        jump.textContent = summaryTextFor(control);
+        jump.addEventListener('click', () => goTo(control));
+        entry.append(jump);
+        list.append(entry);
+
+        const inline = fieldErrorFor(control);
+        if (inline) {
+          inline.textContent = inlineTextFor(control);
+          inline.hidden = false;
+        }
+      });
+
+      submitError.append(heading, list);
       submitError.hidden = false;
     }
 
     function clearSubmitError() {
-      reportedControl = null;
+      reportedControls.forEach(control => {
+        const inline = fieldErrorFor(control);
+        if (inline && inline.id !== 'fileUpload-error') {
+          inline.hidden = true;
+          inline.textContent = '';
+        }
+      });
+      reportedControls = [];
       submitError.hidden = true;
       submitError.textContent = '';
+    }
+
+    // One field being fixed should clear that field's own mark straight away,
+    // without waiting for the rest.
+    function clearFieldErrorIfResolved(control) {
+      const reported = reportedControlFor(control);
+      if (!reported || !reported.checkValidity()) return;
+      const inline = fieldErrorFor(reported);
+      if (!inline || inline.id === 'fileUpload-error') return;
+      // A slot shared by more than one question stays up until every question
+      // reporting through it has been answered.
+      const stillMissing = reportedControls.some(other =>
+        fieldErrorFor(other) === inline && !other.checkValidity());
+      if (stillMissing) return;
+      inline.hidden = true;
+      inline.textContent = '';
     }
 
     // Stub: no endpoint is wired up yet. See issue #2 for the mail-based
@@ -741,38 +940,38 @@ const stageLabels = {
     // POST that drops every attachment.
     form.addEventListener('submit', (event) => {
       event.preventDefault();
-      const invalid = firstInvalidControl();
-      if (invalid) {
-        showSubmitError(invalid);
-        // The message sits by the button, which is where the visitor is
-        // looking. If the offending field is somewhere they have scrolled past
-        // they have to be taken to it, so scroll to its row rather than the
-        // control itself - the file input is clipped to 1px and would put the
-        // viewport in the wrong place.
-        if (!stageContact.contains(invalid)) {
-          (invalid.closest('.field') || invalid).scrollIntoView({
-            behavior: prefersReducedMotion ? 'auto' : 'smooth',
-            block: 'center',
-          });
-        }
-        invalid.focus({ preventScroll: true });
+      const invalid = invalidControls();
+      if (invalid.length) {
+        clearSubmitError();
+        showSubmitErrors(invalid);
+        // The list is right by the button, where the visitor is already
+        // looking, so stay put unless the first thing missing is somewhere
+        // they have scrolled past.
+        if (!stageContact.contains(invalid[0])) goTo(invalid[0]);
+        else invalid[0].focus({ preventScroll: true });
         return;
       }
       clearSubmitError();
       console.log('Intake form submit is stubbed - no endpoint connected yet.', new FormData(form));
     });
 
-    // Clear as soon as the visitor fixes the one thing they were told about,
-    // not when the whole form finally validates. Whatever is wrong next waits
-    // for the next press of Send, rather than the message hopping from field
-    // to field while they are still typing.
+    // The whole warning goes once everything it listed has been answered; a
+    // single field being fixed only clears its own mark. The list does not
+    // shrink item by item while someone is typing - it is a record of what was
+    // asked for, not a live tally.
     function clearSubmitErrorIfResolved() {
       if (submitError.hidden) return;
-      if (!reportedControl || !reportedControl.isConnected || reportedControl.checkValidity()) {
+      if (reportedControls.every(control => !control.isConnected || control.checkValidity())) {
         clearSubmitError();
       }
     }
-    form.addEventListener('input', clearSubmitErrorIfResolved);
-    form.addEventListener('change', clearSubmitErrorIfResolved);
+    form.addEventListener('input', (event) => {
+      clearFieldErrorIfResolved(event.target);
+      clearSubmitErrorIfResolved();
+    });
+    form.addEventListener('change', (event) => {
+      clearFieldErrorIfResolved(event.target);
+      clearSubmitErrorIfResolved();
+    });
   </script>
 </Layout>
