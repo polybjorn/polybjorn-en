@@ -12,11 +12,6 @@ interface Props {
 
 const { field, lang, td } = Astro.props;
 
-// `oneOfRequired` fields (phone / Signal / email) are individually optional
-// but collectively required, so tagging each one "(optional)" would be a lie
-// by omission. The section intro carries the real rule instead.
-const showOptionalTag = !field.required && !field.oneOfRequired;
-
 // An option list is either plain ({ value, en, no }) or annotated with an
 // example ({ value, label, example }) - ORDER_TYPES and materialProperties
 // use the second shape.
@@ -26,10 +21,7 @@ const optionLabel = (opt: any) => (opt.label ? opt.label[lang] : opt[lang]);
 <div class="field" data-field={field.id}>
   {field.type === 'radio' || field.type === 'checkboxGroup' ? (
     <fieldset>
-      <legend class="field-label">
-        {field.label[lang]}
-        {showOptionalTag && <span class="optional-tag"> ({td.optionalTag})</span>}
-      </legend>
+      <legend class="field-label">{field.label[lang]}</legend>
       <div class="option-list">
         {field.options.map((opt: any) => (
           <label>
@@ -42,7 +34,9 @@ const optionLabel = (opt: any) => (opt.label ? opt.label[lang] : opt[lang]);
             {opt.example ? (
               <span class="option-text">
                 <span class="option-label">{optionLabel(opt)}</span>
-                <span class="option-example">{opt.example[lang]}</span>
+                <span
+                  class:list={['option-example', opt.showWhenLocked && 'option-example-toggle']}
+                >{opt.example[lang]}</span>
               </span>
             ) : (
               <span class="option-label">{optionLabel(opt)}</span>
@@ -65,10 +59,7 @@ const optionLabel = (opt: any) => (opt.label ? opt.label[lang] : opt[lang]);
     </div>
   ) : (
     <>
-      <label class="field-label" for={field.id}>
-        {field.label[lang]}
-        {showOptionalTag && <span class="optional-tag"> ({td.optionalTag})</span>}
-      </label>
+      <label class="field-label" for={field.id}>{field.label[lang]}</label>
 
       {field.type === 'textarea' && (
         <textarea id={field.id} name={field.id} required={field.required}></textarea>
@@ -100,9 +91,11 @@ const optionLabel = (opt: any) => (opt.label ? opt.label[lang] : opt[lang]);
             multiple={field.multiple}
             class="file-input-visually-hidden"
           />
-          <label for={field.id} class="file-trigger" id={`${field.id}-trigger`}>{td.chooseFilesLabel}</label>
+          <div class="file-pick">
+            <label for={field.id} class="file-trigger" id={`${field.id}-trigger`}>{td.chooseFilesLabel}</label>
+            {field.help && <p class="field-help file-help">{field.help[lang]}</p>}
+          </div>
           <ul class="file-list" id={`${field.id}-list`} hidden></ul>
-          <p class="field-error" id={`${field.id}-error`} hidden></p>
           <!--
             Only shown if the browser cannot rebuild a FileList, in which case
             adding and removing are not on offer and the native
@@ -123,7 +116,14 @@ const optionLabel = (opt: any) => (opt.label ? opt.label[lang] : opt[lang]);
       )}
     </>
   )}
-  {field.help && <p class="field-help">{field.help[lang]}</p>}
+  {field.help && field.type !== 'file' && <p class="field-help">{field.help[lang]}</p>}
+  <!--
+    Filled in by IntakeForm.astro when a submit is refused. Every field has one,
+    so nothing has to be created at the point of failure - and being rendered
+    here it carries this component's scope, which a script-created node would
+    not.
+  -->
+  <p class="field-error" id={`${field.id}-error`} hidden></p>
 </div>
 
 <style>
@@ -167,12 +167,6 @@ const optionLabel = (opt: any) => (opt.label ? opt.label[lang] : opt[lang]);
       .field fieldset legend.field-label {
         font-size: 1.1rem;
         margin-bottom: 0.7rem;
-      }
-
-      .optional-tag {
-        font-weight: 400;
-        color: #888;
-        font-size: 0.88rem;
       }
 
       .field-error {
@@ -227,8 +221,29 @@ const optionLabel = (opt: any) => (opt.label ? opt.label[lang] : opt[lang]);
         border: 0;
       }
 
+      .file-pick {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.9rem;
+      }
+
+      .file-help {
+        margin: 0;
+        flex: 1;
+      }
+
+      /* Beside a button there is not much width left, and this help is two
+         sentences - below about 600px it goes back under the button. */
+      @media (max-width: 600px) {
+        .file-pick {
+          flex-direction: column;
+          gap: 0.5rem;
+        }
+      }
+
       .file-trigger {
         display: inline-block;
+        flex-shrink: 0;
         font-family: 'Piazzolla', serif;
         font-size: 0.9rem;
         font-weight: 600;
@@ -366,5 +381,38 @@ const optionLabel = (opt: any) => (opt.label ? opt.label[lang] : opt[lang]);
         font-size: 0.86rem;
         color: #888;
         font-weight: 400;
+      }
+
+      /* Collapsed unless the script says otherwise. Without JS it simply never
+         appears, which is the same as before - it only ever explained a state
+         the script produces. */
+      .option-example-toggle {
+        max-height: 0;
+        opacity: 0;
+        overflow: hidden;
+        transform: translateY(-2px);
+      }
+
+      .option-example-toggle.is-shown {
+        max-height: 4rem;
+        opacity: 1;
+        transform: none;
+      }
+
+      @media (prefers-reduced-motion: no-preference) {
+        .option-example-toggle {
+          transition: max-height 0.22s ease, opacity 0.22s ease, transform 0.22s ease;
+        }
+
+        .file-trigger,
+        .file-list :global(.file-remove) {
+          transition: transform 0.12s ease, background 0.15s ease,
+            border-color 0.15s ease, color 0.15s ease;
+        }
+
+        .file-trigger:active,
+        .file-list :global(.file-remove:active) {
+          transform: scale(0.96);
+        }
       }
 </style>
