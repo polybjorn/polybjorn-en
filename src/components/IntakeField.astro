@@ -327,6 +327,18 @@ const optionLabel = (opt: any) => (opt.label ? opt.label[lang] : opt[lang]);
         flex-shrink: 0;
       }
 
+      /* A locked option: greyed, so "am I allowed to change this" is answered
+         before it is asked. The native disabled checkbox still draws its tick,
+         and the neighbouring option's description says why it is there. */
+      .option-list input:disabled ~ .option-label,
+      .option-list input:disabled ~ .option-text {
+        opacity: 0.6;
+      }
+
+      .option-list label:has(input:disabled) {
+        cursor: default;
+      }
+
       .option-text {
         display: flex;
         flex-direction: column;
