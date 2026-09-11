@@ -21,7 +21,7 @@ const orderTypeField = byId('orderType');
 const aboutRestFields = ['projectName', 'description', 'fileUpload'].map(byId);
 const specFields = ['size', 'materialProperties', 'materialName', 'color', 'copyright'].map(byId);
 const timingFields = ['quantity', 'targetDate', 'budget'].map(byId);
-const contactFields = ['contactName', 'contactCompany', 'contactPhone', 'contactSignal', 'contactEmail', 'contactLocation'].map(byId);
+const contactFields = ['contactName', 'contactCompany', 'contactPhone', 'contactSignal', 'contactEmail', 'contactLocation', 'confidential'].map(byId);
 
 // Single source for the dots, the "2 / 4" counter and the screen-reader
 // announcement, so they cannot drift out of step with the actual stages.
@@ -71,13 +71,6 @@ const stageLabels = {
       font-size: 1.02rem;
       line-height: 1.6;
       color: #ccc;
-      text-align: center;
-      margin-bottom: 1.5rem;
-    }
-
-    .confidentiality {
-      font-size: 0.92rem;
-      color: #9aa2ad;
       text-align: center;
       margin-bottom: 3rem;
     }
@@ -271,8 +264,6 @@ const stageLabels = {
       <p class="intro">{td.intro}</p>
     </section>
 
-    <p class="confidentiality">{td.confidentialityNote}</p>
-
     <div class="progress-dots" aria-hidden="true">
       {STAGE_IDS.map(id => <span class="dot" data-dot={id}></span>)}
     </div>
@@ -287,6 +278,8 @@ const stageLabels = {
         has to happen at the receiving endpoint, this form only carries the
         field.
       -->
+      <input type="hidden" name="lang" value={lang} />
+
       <div class="honeypot" aria-hidden="true">
         <label for="website">Website</label>
         <input type="text" id="website" name="website" tabindex="-1" autocomplete="off" />

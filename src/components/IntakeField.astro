@@ -51,6 +51,18 @@ const optionLabel = (opt: any) => (opt.label ? opt.label[lang] : opt[lang]);
         ))}
       </div>
     </fieldset>
+  ) : field.type === 'checkbox' ? (
+    /*
+      A lone checkbox labels itself, beside the box - not with a heading above
+      it like every other control here. It reuses .option-list so it lines up
+      with the radio and checkbox groups elsewhere in the form.
+    */
+    <div class="option-list">
+      <label>
+        <input type="checkbox" id={field.id} name={field.id} value="yes" />
+        <span class="option-label">{field.label[lang]}</span>
+      </label>
+    </div>
   ) : (
     <>
       <label class="field-label" for={field.id}>
