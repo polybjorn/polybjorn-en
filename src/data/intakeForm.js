@@ -46,13 +46,18 @@ export const ORDER_TYPES = [
 // decides whether print-specific fields below (material, colour/finish,
 // quantity) are relevant at all.
 //
-// The labels are bare on purpose. They used to be "Printed - a physical part"
-// and "Just the 3D model - I'll print it myself, or don't need it printed",
-// which said the same thing three times over: the question already names both
-// options, then each label repeated its own word, then glossed it - and the
-// second one managed to say "print" twice by itself. Unlike ORDER_TYPES below,
-// whose question does not name its options and whose examples carry real
-// information, there was nothing left here for a gloss to add.
+// The labels are bare on purpose, and were cut back in two passes. They began
+// as "Printed - a physical part" and "Just the 3D model - I'll print it myself,
+// or don't need it printed", which said the same thing three times over: the
+// question already names both options, then each label repeated its own word,
+// then glossed it - and the second one managed to say "print" twice by itself.
+// The "just"/"bare" went next, for the same reason one step down: the question
+// asks "or JUST the 3D model", so the exclusivity is already stated, and the
+// radio group enforces it anyway. What is left is the two things on offer.
+//
+// Unlike ORDER_TYPES below - whose question does not name its options, and
+// whose examples say something its labels do not - there was never anything
+// here for a gloss to add.
 export const DELIVERABLE_TYPES = [
   {
     value: 'printed',
@@ -61,8 +66,8 @@ export const DELIVERABLE_TYPES = [
   },
   {
     value: 'model-only',
-    en: 'Just the 3D model',
-    no: 'Bare 3D-modellen',
+    en: '3D model',
+    no: '3D-modell',
   },
 ];
 
