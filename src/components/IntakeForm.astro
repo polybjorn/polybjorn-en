@@ -80,7 +80,7 @@ const stageLabels = {
       line-height: 1.6;
       color: #ccc;
       text-align: center;
-      margin-bottom: 3rem;
+      margin-bottom: 1.5rem;
     }
 
     fieldset {
@@ -132,6 +132,18 @@ const stageLabels = {
       display: grid;
       column-gap: 2rem;
       align-items: start;
+    }
+
+    /* Pulled up hard against the row it belongs to. A field carries 1.4rem of
+       margin below it, which on its own left the shared mark adrift - and it
+       reads as adrift from the shorter of two columns in particular, since the
+       mark can only sit below the taller one. */
+    .pair-error {
+      font-size: 0.88rem;
+      color: #f0907f;
+      line-height: 1.4;
+      margin: -1.1rem 0 1.4rem;
+      text-align: center;
     }
 
     /* auto-fit rather than a viewport breakpoint: the row pairs whenever there
@@ -211,13 +223,20 @@ const stageLabels = {
       margin-top: 2.5rem;
     }
 
+    /* The warning belongs to the form above it, not to the button below it, so
+       when it appears it moves up towards the last field and leaves the button
+       its own space. Without a warning the button keeps the full gap. */
+    .submit-row:has(.form-error:not([hidden])) {
+      margin-top: 1.5rem;
+    }
+
     /* The submit row is centred; a list of things to go and fix is not, so
        this block sets itself back to the left. */
     .form-error {
       font-size: 0.92rem;
       color: #f0907f;
       line-height: 1.45;
-      margin: 0 0 1.2rem;
+      margin: 0 0 2.5rem;
       text-align: left;
       background: #2b2126;
       border: 1px solid #7a4038;
@@ -282,10 +301,12 @@ const stageLabels = {
       background: #85bcf2;
     }
 
-    .submit-note {
-      font-size: 0.85rem;
-      color: #888;
-      margin-top: 0.8rem;
+    .draft-note {
+      font-size: 0.92rem;
+      line-height: 1.45;
+      color: #9aa2ad;
+      text-align: center;
+      margin: 0 0 3.5rem;
     }
 
     /* Purely visual cue that the form has more stages ahead - the intro
@@ -352,6 +373,8 @@ const stageLabels = {
       <p class="intro">{td.intro}</p>
     </section>
 
+    <p class="draft-note">{td.submitNote}</p>
+
     <div class="progress-dots" aria-hidden="true">
       {STAGE_IDS.map(id => <span class="dot" data-dot={id}></span>)}
     </div>
@@ -383,10 +406,18 @@ const stageLabels = {
         -->
         <legend class="section-heading visually-hidden">{td.sectionAbout}</legend>
 
-        <div class="field-row field-row-2">
+        <div class="field-row field-row-2" id="opening-questions">
           <IntakeField field={deliverableField} lang={lang} td={td} />
           <IntakeField field={orderTypeField} lang={lang} td={td} />
         </div>
+        <!--
+          One mark for the pair rather than one each. The two questions are
+          different heights, so their own marks landed at different depths and
+          read as two faults rather than one prompt. Both are visibly
+          unanswered when they are unanswered, so the line does not have to name
+          which - the summary by Send does that, with a link.
+        -->
+        <p class="pair-error" id="opening-questions-error" hidden></p>
         <input type="hidden" name="deliverable[]" value="model" id="deliverable-model-implied" disabled />
 
         {aboutFields.map(field => <IntakeField field={field} lang={lang} td={td} />)}
@@ -422,9 +453,21 @@ const stageLabels = {
         -->
         <p class="section-intro">{td.sectionContactIntro}</p>
         {contactRows.map(row => (
-          <div class:list={['field-row', `field-row-${row.length}`]}>
-            {row.map(field => <IntakeField field={field} lang={lang} td={td} />)}
-          </div>
+          <>
+            <div class:list={['field-row', `field-row-${row.length}`]}>
+              {row.map(field => <IntakeField field={field} lang={lang} td={td} />)}
+            </div>
+            {/*
+              The "at least one of three" rule belongs to phone, Signal and
+              email together, so its mark goes under all three rather than
+              under whichever one happens to carry the validity. It sits after
+              the last of them; the message names the three itself, so it does
+              not depend on position to be understood.
+            */}
+            {row.some(field => field.id === 'contactEmail') && (
+              <p class="pair-error" id="contact-methods-error" hidden></p>
+            )}
+          </>
         ))}
 
         <div class="submit-row">
@@ -436,7 +479,6 @@ const stageLabels = {
           -->
           <div class="form-error" id="submit-error" role="alert" hidden></div>
           <button type="submit">{td.submitLabel}</button>
-          <p class="submit-note">{td.submitNote}</p>
         </div>
       </fieldset>
     </form>
@@ -810,9 +852,32 @@ const stageLabels = {
       control.focus({ preventScroll: true });
     }
 
+    // Questions that are really one question share one mark. Keyed by control
+    // name, falling back to id, since a radio or checkbox group is addressed by
+    // name and a text field by either.
+    const SHARED_ERROR_SLOTS = {
+      'deliverable[]': 'opening-questions-error',
+      orderType: 'opening-questions-error',
+      contactPhone: 'contact-methods-error',
+      contactSignal: 'contact-methods-error',
+      contactEmail: 'contact-methods-error',
+    };
+
     function fieldErrorFor(control) {
+      const shared = SHARED_ERROR_SLOTS[control.name] || SHARED_ERROR_SLOTS[control.id];
+      if (shared) return document.getElementById(shared);
       const row = control.closest('.field');
       return row ? row.querySelector('.field-error') : null;
+    }
+
+    // invalidControls() reports one control per radio or checkbox group, so an
+    // event from any other member of that group has to be mapped back to the
+    // one that was actually reported - otherwise picking the second option of a
+    // group never cleared the mark its first option had put up.
+    function reportedControlFor(control) {
+      return reportedControls.find(reported => reported === control
+        || ((reported.type === 'radio' || reported.type === 'checkbox')
+            && reported.name === control.name)) || null;
     }
 
     // Marks each offending field where it sits, and lists them all by the
@@ -866,13 +931,17 @@ const stageLabels = {
     // One field being fixed should clear that field's own mark straight away,
     // without waiting for the rest.
     function clearFieldErrorIfResolved(control) {
-      if (!reportedControls.includes(control)) return;
-      if (!control.checkValidity()) return;
-      const inline = fieldErrorFor(control);
-      if (inline && inline.id !== 'fileUpload-error') {
-        inline.hidden = true;
-        inline.textContent = '';
-      }
+      const reported = reportedControlFor(control);
+      if (!reported || !reported.checkValidity()) return;
+      const inline = fieldErrorFor(reported);
+      if (!inline || inline.id === 'fileUpload-error') return;
+      // A slot shared by more than one question stays up until every question
+      // reporting through it has been answered.
+      const stillMissing = reportedControls.some(other =>
+        fieldErrorFor(other) === inline && !other.checkValidity());
+      if (stillMissing) return;
+      inline.hidden = true;
+      inline.textContent = '';
     }
 
     // Stub: no endpoint is wired up yet. See issue #2 for the mail-based
