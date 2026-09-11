@@ -359,7 +359,14 @@ const stageLabels = {
       </div>
 
       <fieldset id="stage-about" class="stage" tabindex="-1">
-        <legend class="section-heading">{td.sectionAbout}</legend>
+        <!--
+          Kept for the fieldset and for screen readers, hidden from the page:
+          the h1 two lines above already says "Fortell om delen din", so
+          "Om delen" was the same words twice. The later headings are not
+          redundant - they name different topics, and they arrive on their own
+          after a Continue rather than under a title that already covers them.
+        -->
+        <legend class="section-heading visually-hidden">{td.sectionAbout}</legend>
 
         <div class="question-pair">
           <IntakeField field={deliverableField} lang={lang} td={td} />
