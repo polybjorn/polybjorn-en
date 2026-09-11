@@ -18,7 +18,7 @@ const byId = (id: string) => BASE_FIELDS.find(f => f.id === id);
 
 const deliverableField = byId('deliverable');
 const orderTypeField = byId('orderType');
-const aboutRestFields = ['projectName', 'description', 'fileUpload'].map(byId);
+const aboutFields = ['projectName', 'description', 'fileUpload'].map(byId);
 const specFields = ['size', 'materialProperties', 'materialName', 'color', 'copyright'].map(byId);
 const timingFields = ['quantity', 'targetDate', 'budget'].map(byId);
 const contactFields = ['contactName', 'contactCompany', 'contactPhone', 'contactSignal', 'contactEmail', 'contactLocation', 'confidential'].map(byId);
@@ -114,11 +114,23 @@ const stageLabels = {
       overflow: hidden;
     }
 
-    /* Progressive disclosure: each stage stays collapsed until the one
-       before it is answered, so the page grows instead of showing every
-       section (and the production-only requirement grid) up front. */
-    .stage-group[hidden] {
-      display: none;
+    /* Progressive disclosure is between sections now, not within them: the
+       page grows a section at a time instead of showing the whole form at
+       once. */
+    /* The two opening questions share a row. Their own .field margins do the
+       vertical spacing, so there is no row-gap to double up with when this
+       collapses to one column. */
+    .question-pair {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: 2rem;
+      align-items: start;
+    }
+
+    @media (max-width: 620px) {
+      .question-pair {
+        grid-template-columns: 1fr;
+      }
     }
 
     .continue-row {
@@ -148,7 +160,6 @@ const stageLabels = {
     }
 
     @media (prefers-reduced-motion: no-preference) {
-      .stage-group,
       fieldset.stage {
         transition: opacity 0.3s ease, transform 0.3s ease;
       }
@@ -350,18 +361,16 @@ const stageLabels = {
       <fieldset id="stage-about" class="stage" tabindex="-1">
         <legend class="section-heading">{td.sectionAbout}</legend>
 
-        <IntakeField field={deliverableField} lang={lang} td={td} />
-        <input type="hidden" name="deliverable[]" value="model" id="deliverable-model-implied" disabled />
-
-        <div id="order-type-question" class="stage-group" tabindex="-1" hidden>
+        <div class="question-pair">
+          <IntakeField field={deliverableField} lang={lang} td={td} />
           <IntakeField field={orderTypeField} lang={lang} td={td} />
         </div>
+        <input type="hidden" name="deliverable[]" value="model" id="deliverable-model-implied" disabled />
 
-        <div id="about-rest" class="stage-group" tabindex="-1" hidden>
-          {aboutRestFields.map(field => <IntakeField field={field} lang={lang} td={td} />)}
-          <div class="continue-row">
-            <button type="button" class="continue-btn" data-continue="about">{td.continueLabel}</button>
-          </div>
+        {aboutFields.map(field => <IntakeField field={field} lang={lang} td={td} />)}
+
+        <div class="continue-row">
+          <button type="button" class="continue-btn" data-continue="about">{td.continueLabel}</button>
         </div>
       </fieldset>
 
@@ -472,8 +481,6 @@ const stageLabels = {
     }
 
     const stageAbout = document.getElementById('stage-about');
-    const orderTypeQuestion = document.getElementById('order-type-question');
-    const aboutRest = document.getElementById('about-rest');
     const stageSpec = document.getElementById('stage-spec');
     const stageTiming = document.getElementById('stage-timing');
     const stageContact = document.getElementById('stage-contact');
@@ -554,24 +561,10 @@ const stageLabels = {
       });
     }
 
-    // Deliverable reveals order type, which reveals the rest of "About the
-    // part" - two sequential reveals within the same first stage.
     form.addEventListener('change', (event) => {
-      if (event.target.name === 'deliverable[]') {
-        syncDeliverable(event.target);
-        if ((printedBox.checked || modelBox.checked) && reveal(orderTypeQuestion)) {
-          focusContainer(orderTypeQuestion);
-        }
-      }
-      if (event.target.name === 'orderType') {
-        if (reveal(aboutRest)) focusContainer(aboutRest);
-      }
+      if (event.target.name === 'deliverable[]') syncDeliverable(event.target);
     });
 
-    // Restores the reveal state when a browser repopulates the form on back
-    // navigation.
-    if (printedBox.checked || modelBox.checked) reveal(orderTypeQuestion);
-    if (form.querySelector('input[name="orderType"]:checked')) reveal(aboutRest);
     syncDeliverable(null);
 
     continueAbout.addEventListener('click', () => advance(continueAbout, stageSpec));
