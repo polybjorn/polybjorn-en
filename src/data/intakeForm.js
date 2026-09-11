@@ -146,12 +146,21 @@ export const BASE_FIELDS = [
     id: 'fileUpload',
     type: 'file',
     required: false,
-    accept: '.jpg,.jpeg,.png,.heic,.pdf,.stp,.step,.stl,image/jpeg,image/png,image/heic,application/pdf,model/step,model/stl',
+    // No accept filter. It used to list the same formats the help text named,
+    // and narrowing the picker to them turned a preference into a rule: plenty
+    // of other formats can be opened at this end, and someone whose CAD tool
+    // exports .3mf or .obj would have found the file greyed out with no
+    // explanation. What can actually be accepted is a judgement made after
+    // reading the enquiry, not something a file picker should decide.
+    //
+    // This is a front-end affordance either way - accept never enforced
+    // anything, since a determined upload can ignore it. Real validation of
+    // what arrives belongs server-side (nixfleet#87).
     multiple: true,
     label: { en: 'Attach files', no: 'Legg ved filer' },
     help: {
-      en: 'Photos, a sketch, or a 3D file (STEP or STL). About 10 MB per file. A photo of a physical sample is a good start.',
-      no: 'Bilder, en skisse eller en 3D-fil (STEP eller STL). Ca. 10 MB per fil. Har du en fysisk prøve, er et bilde en god start.',
+      en: 'Photos, sketches or 3D files. About 10 MB per file.',
+      no: 'Bilder, skisser eller 3D-filer. Ca. 10 MB per fil.',
     },
   },
   {
