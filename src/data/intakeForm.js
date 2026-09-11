@@ -78,18 +78,20 @@ export const DELIVERABLE_TYPES = [
   {
     value: 'printed',
     label: { en: 'A printed part', no: 'Printet del' },
-    // Describes this option only. It sat on the question for a while, where it
-    // read as a note about the whole group - but it says nothing about the
-    // other choice, where "the model comes with what I print" is not just
-    // irrelevant but untrue of anything being ordered.
-    example: {
-      en: 'The 3D model comes with it.',
-      no: '3D-modellen følger med.',
-    },
   },
   {
     value: 'model',
     label: { en: 'A 3D model', no: '3D-modell' },
+    // Shown only while this option is locked by the one above (see
+    // IntakeForm.astro). It is there to explain a greyed tick, and there is no
+    // greyed tick to explain while this is a live choice - stating it
+    // permanently made it a standing claim about an option it does not
+    // describe.
+    showWhenLocked: true,
+    example: {
+      en: 'Included with a printed part.',
+      no: 'Følger med en printet del.',
+    },
   },
 ];
 
@@ -318,25 +320,17 @@ export const BASE_FIELDS = [
     // options). Its own field also drops the need to pattern-match "does
     // this look like a phone number" to decide whether to reveal a
     // separate "prefer Signal" checkbox.
-    //
-    // oneOfRequired marks the three that are collectively required but
-    // individually optional. IntakeForm.astro suppresses the "(optional)"
-    // tag on these: every one of them carrying it, with the real rule
-    // living only in a validation message at the end of the form, told a
-    // first-time visitor they could skip all three.
     id: 'contactPhone',
     type: 'text',
     inputType: 'tel',
     autocomplete: 'tel',
     required: false,
-    oneOfRequired: true,
     label: { en: 'Phone', no: 'Telefon' },
   },
   {
     id: 'contactSignal',
     type: 'text',
     required: false,
-    oneOfRequired: true,
     label: { en: 'Signal', no: 'Signal' },
     help: {
       en: 'Username or signal.me link.',
@@ -349,7 +343,6 @@ export const BASE_FIELDS = [
     inputType: 'email',
     autocomplete: 'email',
     required: false,
-    oneOfRequired: true,
     label: { en: 'Email', no: 'E-post' },
   },
   {
