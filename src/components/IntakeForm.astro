@@ -202,8 +202,7 @@ const stageLabels = {
       bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
       transform: translateX(-50%);
       display: flex;
-      align-items: center;
-      gap: 0.6rem;
+      gap: 0.55rem;
       margin: 0;
       padding: 0.55rem 0.9rem;
       background: rgba(30, 34, 40, 0.85);
@@ -211,21 +210,6 @@ const stageLabels = {
       border: 1px solid #3a3f47;
       border-radius: 999px;
       z-index: 100;
-    }
-
-    .progress-dots .dots {
-      display: flex;
-      gap: 0.55rem;
-    }
-
-    /* The dots alone are a 7px cue that is easy to miss on a phone - the
-       count spells out how much form is left. */
-    .progress-count {
-      font-family: 'Piazzolla', serif;
-      font-size: 0.75rem;
-      line-height: 1;
-      color: #8b939e;
-      font-variant-numeric: tabular-nums;
     }
 
     .progress-dots .dot {
@@ -275,10 +259,7 @@ const stageLabels = {
     <p class="confidentiality">{td.confidentialityNote}</p>
 
     <div class="progress-dots" aria-hidden="true">
-      <span class="dots">
-        {STAGE_IDS.map(id => <span class="dot" data-dot={id}></span>)}
-      </span>
-      <span class="progress-count" id="progress-count">1 / {STAGE_IDS.length}</span>
+      {STAGE_IDS.map(id => <span class="dot" data-dot={id}></span>)}
     </div>
 
     <!-- The dots are decorative; this is how a screen reader hears a stage change. -->
@@ -348,7 +329,7 @@ const stageLabels = {
     </form>
   </main>
 
-  <script define:vars={{ printOnlyFieldIds: PRINT_ONLY_FIELD_IDS, stageIds: STAGE_IDS, stageLabels, contactMethodRequired: td.contactMethodRequired, fileTooLarge: td.fileTooLarge }}>
+  <script define:vars={{ printOnlyFieldIds: PRINT_ONLY_FIELD_IDS, stageIds: STAGE_IDS, stageLabels, contactMethodRequired: td.contactMethodRequired, fileTooLarge: td.fileTooLarge, chooseFilesLabel: td.chooseFilesLabel, addFilesLabel: td.addFilesLabel, removeFileLabel: td.removeFileLabel, numberLocale: lang === 'no' ? 'nb-NO' : 'en-GB' }}>
     const form = document.getElementById('intake-form');
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -378,7 +359,6 @@ const stageLabels = {
       el.focus({ preventScroll: true });
     }
 
-    const progressCount = document.getElementById('progress-count');
     const stageAnnounce = document.getElementById('stage-announce');
     const dots = Object.fromEntries(stageIds.map(id => [id, document.querySelector('[data-dot="' + id + '"]')]));
 
@@ -391,7 +371,6 @@ const stageLabels = {
         if (i < activeIndex) dot.classList.add('dot-done');
         else if (i === activeIndex) dot.classList.add('dot-active');
       });
-      progressCount.textContent = (activeIndex + 1) + ' / ' + stageIds.length;
       // Only on a real stage change - announcing on page load would talk over
       // the heading a screen reader is already reading.
       if (announce) stageAnnounce.textContent = stageLabels[stageId] + ', ' + (activeIndex + 1) + ' / ' + stageIds.length;
@@ -514,22 +493,130 @@ const stageLabels = {
     // actually receives.
     const MAX_FILE_BYTES = 10 * 1024 * 1024;
     const fileInput = document.getElementById('fileUpload');
-    const fileStatus = document.getElementById('fileUpload-status');
+    const fileList = document.getElementById('fileUpload-list');
     const fileError = document.getElementById('fileUpload-error');
+    const fileTrigger = document.getElementById('fileUpload-trigger');
+    const fileFallbackNote = document.getElementById('fileUpload-fallback');
 
-    fileInput.addEventListener('change', () => {
-      const files = Array.from(fileInput.files);
-      const oversized = files.some(file => file.size > MAX_FILE_BYTES);
+    // A file input replaces its entire selection every time the picker is
+    // used, so a second go silently drops the first. Rebuilding the FileList
+    // through a DataTransfer is the only way to add to a selection or take a
+    // single file out of it, and it keeps the input carrying exactly what the
+    // list shows - so a plain form POST still sends the right set.
+    const canRebuildFileList = (() => {
+      try {
+        const probe = new DataTransfer();
+        probe.items.add(new File(['probe'], 'probe.txt'));
+        return probe.files.length === 1;
+      } catch (error) {
+        return false;
+      }
+    })();
+
+    // Without it there is nothing to offer but the native replace-the-lot
+    // behaviour, so say that rather than showing a Remove button that cannot
+    // work.
+    if (!canRebuildFileList) fileFallbackNote.hidden = false;
+
+    const sizeFormat = new Intl.NumberFormat(numberLocale, { maximumFractionDigits: 1 });
+
+    function formatSize(bytes) {
+      if (bytes < 1024) return sizeFormat.format(bytes) + ' B';
+      if (bytes < 1024 * 1024) return sizeFormat.format(bytes / 1024) + ' kB';
+      return sizeFormat.format(bytes / (1024 * 1024)) + ' MB';
+    }
+
+    // Same name, size and timestamp is the same file picked twice.
+    const fileKey = file => file.name + ':' + file.size + ':' + file.lastModified;
+
+    let selectedFiles = [];
+
+    function writeBackToInput() {
+      if (!canRebuildFileList) return;
+      const transfer = new DataTransfer();
+      selectedFiles.forEach(file => transfer.items.add(file));
+      fileInput.files = transfer.files;
+    }
+
+    function removeFile(file) {
+      const index = selectedFiles.indexOf(file);
+      selectedFiles = selectedFiles.filter(entry => entry !== file);
+      writeBackToInput();
+      renderFileList();
+      // The button that had focus no longer exists. Land on the row that took
+      // its place, or back on the picker once the list empties, rather than
+      // dropping focus to the top of the document.
+      const buttons = fileList.querySelectorAll('.file-remove');
+      if (buttons.length) buttons[Math.min(index, buttons.length - 1)].focus();
+      else fileInput.focus();
+    }
+
+    function renderFileList() {
+      // Built here rather than in the template, so these elements carry no
+      // data-astro-cid - their rules are :global(), anchored on the scoped
+      // .file-list in IntakeField.astro.
+      fileList.textContent = '';
+
+      selectedFiles.forEach(file => {
+        const row = document.createElement('li');
+        row.className = 'file-row';
+        if (file.size > MAX_FILE_BYTES) row.classList.add('file-row-over');
+
+        const name = document.createElement('span');
+        name.className = 'file-name';
+        name.textContent = file.name;
+
+        const size = document.createElement('span');
+        size.className = 'file-size';
+        size.textContent = formatSize(file.size);
+
+        row.append(name, size);
+
+        if (canRebuildFileList) {
+          const remove = document.createElement('button');
+          remove.type = 'button';
+          remove.className = 'file-remove';
+          remove.textContent = '\u00d7';
+          remove.setAttribute('aria-label', removeFileLabel.replace('{file}', file.name));
+          remove.addEventListener('click', () => removeFile(file));
+          row.append(remove);
+        }
+
+        fileList.append(row);
+      });
+
+      fileList.hidden = selectedFiles.length === 0;
+      fileTrigger.textContent = selectedFiles.length && canRebuildFileList ? addFilesLabel : chooseFilesLabel;
+
       // The input is clipped to 1px so the trigger label can carry Norwegian
       // text, which means a native validation bubble aimed at it lands on
       // something nobody can see. The custom validity still locks Continue
-      // (wireContinue checks every control, not just the required ones);
-      // this line is what the visitor actually reads.
+      // (wireContinue checks every control, not just the required ones); the
+      // flagged row and the error line are what the visitor actually reads.
+      const oversized = selectedFiles.some(file => file.size > MAX_FILE_BYTES);
       fileInput.setCustomValidity(oversized ? fileTooLarge : '');
       fileError.hidden = !oversized;
       fileError.textContent = oversized ? fileTooLarge : '';
-      fileStatus.hidden = files.length === 0;
-      fileStatus.textContent = files.map(file => file.name).join(', ');
+
+      // A removal is a click, not an input or change event, so the stage's own
+      // listeners would not recount on their own.
+      refreshContinueButtons();
+    }
+
+    fileInput.addEventListener('change', () => {
+      const picked = Array.from(fileInput.files);
+      if (canRebuildFileList) {
+        const seen = new Set(selectedFiles.map(fileKey));
+        picked.forEach(file => {
+          if (seen.has(fileKey(file))) return;
+          seen.add(fileKey(file));
+          selectedFiles.push(file);
+        });
+      } else {
+        selectedFiles = picked;
+      }
+      writeBackToInput();
+      renderFileList();
     });
 
     // Stub: no endpoint is wired up yet. See issue #2 for the mail-based

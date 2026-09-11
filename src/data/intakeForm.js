@@ -110,8 +110,8 @@ export const BASE_FIELDS = [
     multiple: true,
     label: { en: 'Attach files', no: 'Legg ved filer' },
     help: {
-      en: 'Photos, a sketch, or a 3D file (STEP or STL) - about 10 MB per file. Choosing files again replaces the whole list, so pick them in one go. For a physical sample, a photo is a good start - I may ask to borrow it if that\'s not enough.',
-      no: 'Bilder, en skisse, eller en 3D-fil (STEP eller STL) - ca. 10 MB per fil. Velger du filer på nytt, erstattes hele lista, så ta dem i én omgang. Har du en fysisk prøve, er et bilde en god start - jeg spør gjerne om å låne den hvis bildet ikke er nok.',
+      en: 'Photos, a sketch, or a 3D file (STEP or STL) - about 10 MB per file. Add them over several goes if it is easier, and remove any from the list. For a physical sample, a photo is a good start - I may ask to borrow it if that\'s not enough.',
+      no: 'Bilder, en skisse, eller en 3D-fil (STEP eller STL) - ca. 10 MB per fil. Legg dem gjerne til i flere omganger, og fjern det du vil fra lista. Har du en fysisk prøve, er et bilde en god start - jeg spør gjerne om å låne den hvis bildet ikke er nok.',
     },
   },
   {
