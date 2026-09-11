@@ -46,27 +46,30 @@ export const ORDER_TYPES = [
 // decides whether print-specific fields below (material, colour/finish,
 // quantity) are relevant at all.
 //
-// The labels are bare on purpose, and were cut back in two passes. They began
-// as "Printed - a physical part" and "Just the 3D model - I'll print it myself,
-// or don't need it printed", which said the same thing three times over: the
-// question already names both options, then each label repeated its own word,
-// then glossed it - and the second one managed to say "print" twice by itself.
-// The "just"/"bare" went next, for the same reason one step down: the question
-// asks "or JUST the 3D model", so the exclusivity is already stated, and the
-// radio group enforces it anyway. What is left is the two things on offer.
+// Question and labels were cut back together, over three passes, until no word
+// appeared twice in the block. The labels began as "Printed - a physical part"
+// and "Just the 3D model - I'll print it myself, or don't need it printed",
+// which stated the distinction three times: the question named both options,
+// each label repeated its own word, then glossed it - and the second one said
+// "print" twice by itself. The glosses went, then the "just"/"bare", which the
+// question was already supplying and the radio group enforces anyway.
 //
-// Unlike ORDER_TYPES below - whose question does not name its options, and
-// whose examples say something its labels do not - there was never anything
-// here for a gloss to add.
+// That left the duplication sitting in the question, which still spelled out
+// both labels. So the question went neutral and the labels carry the
+// distinction on their own. They are nouns because they answer "what", not
+// "is it".
+//
+// ORDER_TYPES below is deliberately not cut this way: its question does not
+// name its options, and its examples say something its labels do not.
 export const DELIVERABLE_TYPES = [
   {
     value: 'printed',
-    en: 'Printed',
-    no: 'Printet',
+    en: 'A printed part',
+    no: 'Printet del',
   },
   {
     value: 'model-only',
-    en: '3D model',
+    en: 'A 3D model',
     no: '3D-modell',
   },
 ];
@@ -85,7 +88,7 @@ export const BASE_FIELDS = [
     id: 'deliverable',
     type: 'radio',
     required: true,
-    label: { en: 'Do you need it printed, or just the 3D model?', no: 'Trenger du den printet, eller bare 3D-modellen?' },
+    label: { en: 'What do you need?', no: 'Hva trenger du?' },
     options: DELIVERABLE_TYPES,
   },
   {
