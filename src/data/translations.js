@@ -89,6 +89,8 @@ export const t = {
       addFilesLabel: "Add more files",
       removeFileLabel: "Remove {file}",
       fileReplaceNote: "Your browser replaces the whole list each time you choose files, so pick them in one go.",
+      missingFieldMessage: "Fill in \"{field}\" before sending.",
+      invalidEmailMessage: "That email address does not look right.",
     },
   },
   no: {
@@ -181,6 +183,8 @@ export const t = {
       addFilesLabel: "Legg til flere filer",
       removeFileLabel: "Fjern {file}",
       fileReplaceNote: "Nettleseren din erstatter hele lista hver gang du velger filer, så ta dem i én omgang.",
+      missingFieldMessage: "Fyll ut \"{field}\" før du sender.",
+      invalidEmailMessage: "E-postadressen ser ikke riktig ut.",
     },
   }
 }
