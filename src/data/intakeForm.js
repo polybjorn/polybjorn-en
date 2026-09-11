@@ -43,8 +43,8 @@ export const ORDER_TYPES = [
 // Printed vs. model-only is a separate axis from design certainty above -
 // someone with a finished design and someone still testing an idea can each
 // want either. It comes first in the form (see IntakeForm.astro) because it
-// decides whether print-specific fields below (material, colour/finish)
-// are relevant at all.
+// decides whether print-specific fields below (material, colour/finish,
+// quantity) are relevant at all.
 export const DELIVERABLE_TYPES = [
   {
     value: 'printed',
@@ -59,7 +59,13 @@ export const DELIVERABLE_TYPES = [
 ];
 
 // Fields that only make sense when something is actually being printed.
-export const PRINT_ONLY_FIELD_IDS = ['materialProperties', 'materialName', 'color'];
+// IntakeForm.astro hides these and disables their inputs for a model-only
+// request. Disabling (rather than clearing) is what keeps a model-only
+// customer from being gated on `quantity`, which is required on the printed
+// path: a disabled control is barred from constraint validation and left out
+// of the submitted FormData, while its value survives for anyone who
+// switches back to "printed".
+export const PRINT_ONLY_FIELD_IDS = ['materialProperties', 'materialName', 'color', 'quantity'];
 
 export const BASE_FIELDS = [
   {
@@ -104,8 +110,8 @@ export const BASE_FIELDS = [
     multiple: true,
     label: { en: 'Attach files', no: 'Legg ved filer' },
     help: {
-      en: 'Photos, a sketch, or a 3D file (STEP or STL) - about 10 MB per file. For a physical sample, a photo is a good start - I may ask to borrow it if that\'s not enough.',
-      no: 'Bilder, en skisse, eller en 3D-fil (STEP eller STL) - ca. 10 MB per fil. Har du en fysisk prøve, er et bilde en god start - jeg spør gjerne om å låne den hvis bildet ikke er nok.',
+      en: 'Photos, a sketch, or a 3D file (STEP or STL) - about 10 MB per file. Choosing files again replaces the whole list, so pick them in one go. For a physical sample, a photo is a good start - I may ask to borrow it if that\'s not enough.',
+      no: 'Bilder, en skisse, eller en 3D-fil (STEP eller STL) - ca. 10 MB per fil. Velger du filer på nytt, erstattes hele lista, så ta dem i én omgang. Har du en fysisk prøve, er et bilde en god start - jeg spør gjerne om å låne den hvis bildet ikke er nok.',
     },
   },
   {
@@ -113,6 +119,10 @@ export const BASE_FIELDS = [
     type: 'text',
     required: true,
     label: { en: 'How many do you need?', no: 'Hvor mange trenger du?' },
+    help: {
+      en: 'A number, or a range like "5 to 10" if you are not sure yet.',
+      no: 'Et antall, eller et spenn som "5 til 10" hvis du ikke er sikker ennå.',
+    },
   },
   {
     id: 'targetDate',
@@ -157,6 +167,10 @@ export const BASE_FIELDS = [
     type: 'text',
     required: false,
     label: { en: 'Approximate size (L x W x H)', no: 'Omtrentlig størrelse (L x B x H)' },
+    help: {
+      en: 'In millimetres or centimetres - say which. A rough guess is fine.',
+      no: 'I millimeter eller centimeter - si hvilken. Et grovt anslag går fint.',
+    },
   },
   {
     // Properties instead of a named filament - choosing between similar
@@ -168,10 +182,16 @@ export const BASE_FIELDS = [
     // ones are common enough to list here.
     //
     // Each option carries a concrete example, same pattern as ORDER_TYPES -
-    // "heat" alone gives a noob nothing to anchor to, and "flex" needs the
-    // example to disambiguate "the material itself should bend" (TPU)
-    // from "it occasionally gets bent by accident" (that's toughness,
+    // "heat" alone gives a noob nothing to anchor to, and the flex option
+    // needs its example to disambiguate "the material itself should bend"
+    // (TPU) from "it occasionally gets bent by accident" (that's toughness,
     // already covered by "wear").
+    //
+    // Every label reads as a completion of the question ("does it need to
+    // handle ... load without sagging?"). Two of them used not to: "Staying
+    // rigid under load" and "Needs to flex" were a gerund and a verb phrase
+    // sitting next to three noun phrases, and "Needs to flex" did not parse
+    // as something the part must *handle* at all.
     id: 'materialProperties',
     type: 'checkboxGroup',
     required: false,
@@ -192,7 +212,7 @@ export const BASE_FIELDS = [
       },
       {
         value: 'rigid',
-        label: { en: 'Staying rigid under load', no: 'Å holde seg stiv under belastning' },
+        label: { en: 'Load without sagging', no: 'Belastning uten å henge' },
         example: {
           en: "A shelf bracket, a mounting arm - shouldn't sag.",
           no: 'En hyllebrakett, en monteringsarm - skal ikke henge.',
@@ -200,9 +220,9 @@ export const BASE_FIELDS = [
       },
       {
         value: 'flex',
-        label: { en: 'Needs to flex', no: 'Trenger å bøye seg' },
+        label: { en: 'Being bent on purpose', no: 'Å bli bøyd med hensikt' },
         example: {
-          en: 'Bends on purpose - a hinge, a strap, a phone case.',
+          en: 'Bends by design - a hinge, a strap, a phone case.',
           no: 'Bøyer seg med hensikt - et hengsel, en stropp, et mobildeksel.',
         },
       },
@@ -221,6 +241,12 @@ export const BASE_FIELDS = [
     type: 'text',
     required: false,
     label: { en: 'Already know the material?', no: 'Vet du allerede hvilket materiale?' },
+    // Without an example this reads as a yes/no question with a text box
+    // under it, and gets answered "yes".
+    help: {
+      en: 'Name it if so - PETG, ASA, TPU, and so on. Leave it blank if not.',
+      no: 'Skriv det i så fall - PETG, ASA, TPU og så videre. La stå tomt hvis ikke.',
+    },
   },
   {
     // Back to "colour and finish" (not colour alone) now that the
@@ -236,12 +262,14 @@ export const BASE_FIELDS = [
     id: 'contactName',
     type: 'text',
     required: true,
+    autocomplete: 'name',
     label: { en: 'Name', no: 'Navn' },
   },
   {
     id: 'contactCompany',
     type: 'text',
     required: false,
+    autocomplete: 'organization',
     label: { en: 'Company', no: 'Firma' },
   },
   {
@@ -252,15 +280,25 @@ export const BASE_FIELDS = [
     // options). Its own field also drops the need to pattern-match "does
     // this look like a phone number" to decide whether to reveal a
     // separate "prefer Signal" checkbox.
+    //
+    // oneOfRequired marks the three that are collectively required but
+    // individually optional. IntakeForm.astro suppresses the "(optional)"
+    // tag on these: every one of them carrying it, with the real rule
+    // living only in a validation message at the end of the form, told a
+    // first-time visitor they could skip all three.
     id: 'contactPhone',
     type: 'text',
+    inputType: 'tel',
+    autocomplete: 'tel',
     required: false,
+    oneOfRequired: true,
     label: { en: 'Phone', no: 'Telefon' },
   },
   {
     id: 'contactSignal',
     type: 'text',
     required: false,
+    oneOfRequired: true,
     label: { en: 'Signal', no: 'Signal' },
     help: {
       en: 'Username or signal.me link.',
@@ -270,13 +308,22 @@ export const BASE_FIELDS = [
   {
     id: 'contactEmail',
     type: 'text',
+    inputType: 'email',
+    autocomplete: 'email',
     required: false,
+    oneOfRequired: true,
     label: { en: 'Email', no: 'E-post' },
   },
   {
     id: 'contactLocation',
     type: 'text',
     required: false,
-    label: { en: 'Location', no: 'Sted' },
+    autocomplete: 'address-level2',
+    label: { en: 'Town or area', no: 'Sted eller område' },
+    // "Location" on its own got read as "street address".
+    help: {
+      en: 'Roughly where you are, for postage or handover. No street address needed.',
+      no: 'Omtrent hvor du er, for frakt eller henting. Ingen gateadresse nødvendig.',
+    },
   },
 ];
