@@ -21,7 +21,15 @@ const orderTypeField = byId('orderType');
 const aboutFields = ['projectName', 'description', 'fileUpload'].map(byId);
 const specFields = ['size', 'materialProperties', 'materialName', 'color', 'copyright'].map(byId);
 const timingFields = ['quantity', 'targetDate', 'budget'].map(byId);
-const contactFields = ['contactName', 'contactCompany', 'contactPhone', 'contactSignal', 'contactEmail', 'contactLocation', 'confidential'].map(byId);
+// Fields grouped onto rows. A name, a company, a phone number and a town are
+// all short values, and a box the width of the page invites a sentence - so
+// they pair off, and only the ones that can genuinely run long stay wide.
+const contactRows = [
+  ['contactName', 'contactCompany'],
+  ['contactPhone', 'contactSignal'],
+  ['contactEmail', 'contactLocation'],
+  ['confidential'],
+].map(row => row.map(byId));
 
 // Single source for the dots, the "2 / 4" counter and the screen-reader
 // announcement, so they cannot drift out of step with the actual stages.
@@ -117,18 +125,28 @@ const stageLabels = {
     /* Progressive disclosure is between sections now, not within them: the
        page grows a section at a time instead of showing the whole form at
        once. */
-    /* The two opening questions share a row. Their own .field margins do the
-       vertical spacing, so there is no row-gap to double up with when this
-       collapses to one column. */
-    .question-pair {
+    /* Fields that belong together share a row. Their own .field margins do the
+       vertical spacing, so there is no row-gap to double up with once a row
+       collapses to a single column. */
+    .field-row {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
       column-gap: 2rem;
       align-items: start;
     }
 
+    .field-row-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .field-row-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    /* Everything stacks on a phone. Two short boxes side by side on a 360px
+       screen are two boxes too narrow to type in. */
     @media (max-width: 620px) {
-      .question-pair {
+      .field-row-2,
+      .field-row-3 {
         grid-template-columns: 1fr;
       }
     }
@@ -368,7 +386,7 @@ const stageLabels = {
         -->
         <legend class="section-heading visually-hidden">{td.sectionAbout}</legend>
 
-        <div class="question-pair">
+        <div class="field-row field-row-2">
           <IntakeField field={deliverableField} lang={lang} td={td} />
           <IntakeField field={orderTypeField} lang={lang} td={td} />
         </div>
@@ -406,7 +424,11 @@ const stageLabels = {
           three fields all labelled "(optional)".
         -->
         <p class="section-intro">{td.sectionContactIntro}</p>
-        {contactFields.map(field => <IntakeField field={field} lang={lang} td={td} />)}
+        {contactRows.map(row => (
+          <div class:list={['field-row', `field-row-${row.length}`]}>
+            {row.map(field => <IntakeField field={field} lang={lang} td={td} />)}
+          </div>
+        ))}
 
         <div class="submit-row">
           <!--

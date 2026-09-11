@@ -382,10 +382,12 @@ export const BASE_FIELDS = [
     required: false,
     autocomplete: 'address-level2',
     label: { en: 'Town or area', no: 'Sted eller område' },
-    // "Location" on its own got read as "street address".
+    // The old label was just "Location", which got read as "street address".
+    // "Town or area" carries that now, so the help only has to say what it is
+    // for.
     help: {
-      en: 'Roughly where you are, for postage or handover. No street address needed.',
-      no: 'Omtrent hvor du er, for frakt eller henting. Ingen gateadresse nødvendig.',
+      en: 'Roughly where you are, for postage or handover.',
+      no: 'Omtrent hvor du er, for frakt eller henting.',
     },
   },
 ];
