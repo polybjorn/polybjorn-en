@@ -12,6 +12,19 @@
 // more fields. The free-text description plus a follow-up conversation
 // covers it now.
 
+// This question opened the form next to the deliverable one for a while, and
+// it did not work there. "Hva trenger du?" and "Hva skal du bestille?" are near
+// synonyms in Norwegian, so two questions that mean quite different things read
+// as one asked twice - and the second needed example lines under both options
+// purely to explain what it was asking. They are also not peers: DELIVERABLE
+// branches the form, deciding whether material, colour and quantity exist,
+// while this one is recorded and changes nothing. Presenting them as a matched
+// pair implied a symmetry that was not there.
+//
+// So it lives in the Specification section now, with size, material and
+// ownership - the other questions about the design itself - and it is named for
+// what it asks.
+//
 // Order type used to have a third option ("production run" / "business
 // order") meant to gate the now-removed requirement grid. That was wrong: a
 // business ordering one already-finished part and a private customer with a
@@ -23,16 +36,18 @@
 // test," just a fuzzier version of it.
 export const ORDER_TYPES = [
   {
+    // No example. Under "how finished is the design?" the answer "finished"
+    // needs no gloss - the old one ("you know exactly what it should look
+    // like") only existed because the question used to be "what are you
+    // ordering?", which did not say what was being asked.
     value: 'one-off',
-    label: { en: 'A finished design', no: 'Et ferdig design' },
-    example: {
-      en: 'You know exactly what it should look like.',
-      no: 'Du vet nøyaktig hvordan den skal se ut.',
-    },
+    label: { en: 'Finished', no: 'Ferdig' },
   },
   {
     value: 'prototype',
-    label: { en: 'An idea to test', no: 'En idé du vil teste' },
+    label: { en: 'An idea I want to test', no: 'En idé jeg vil teste' },
+    // This one keeps its example: that it takes iterations is not something
+    // the label or the question says.
     example: {
       en: "Expect a few rounds before it's right.",
       no: 'Regn med noen runder før den sitter.',
@@ -119,7 +134,7 @@ export const BASE_FIELDS = [
     id: 'orderType',
     type: 'radio',
     required: true,
-    label: { en: 'What are you ordering?', no: 'Hva skal du bestille?' },
+    label: { en: 'How finished is the design?', no: 'Hvor ferdig er designet?' },
     options: ORDER_TYPES,
   },
   {

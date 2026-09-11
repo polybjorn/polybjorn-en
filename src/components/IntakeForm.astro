@@ -19,7 +19,7 @@ const byId = (id: string) => BASE_FIELDS.find(f => f.id === id);
 const deliverableField = byId('deliverable');
 const orderTypeField = byId('orderType');
 const aboutFields = ['projectName', 'description', 'fileUpload'].map(byId);
-const specFields = ['size', 'materialProperties', 'materialName', 'color', 'copyright'].map(byId);
+const specFields = ['orderType', 'size', 'materialProperties', 'materialName', 'color', 'copyright'].map(byId);
 const timingFields = ['quantity', 'targetDate', 'budget'].map(byId);
 // Fields grouped onto rows. A name, a company, a phone number and a town are
 // all short values, and a box the width of the page invites a sentence - so
@@ -406,18 +406,7 @@ const stageLabels = {
         -->
         <legend class="section-heading visually-hidden">{td.sectionAbout}</legend>
 
-        <div class="field-row field-row-2" id="opening-questions">
-          <IntakeField field={deliverableField} lang={lang} td={td} />
-          <IntakeField field={orderTypeField} lang={lang} td={td} />
-        </div>
-        <!--
-          One mark for the pair rather than one each. The two questions are
-          different heights, so their own marks landed at different depths and
-          read as two faults rather than one prompt. Both are visibly
-          unanswered when they are unanswered, so the line does not have to name
-          which - the summary by Send does that, with a link.
-        -->
-        <p class="pair-error" id="opening-questions-error" hidden></p>
+        <IntakeField field={deliverableField} lang={lang} td={td} />
         <input type="hidden" name="deliverable[]" value="model" id="deliverable-model-implied" disabled />
 
         {aboutFields.map(field => <IntakeField field={field} lang={lang} td={td} />)}
@@ -852,12 +841,12 @@ const stageLabels = {
       control.focus({ preventScroll: true });
     }
 
-    // Questions that are really one question share one mark. Keyed by control
-    // name, falling back to id, since a radio or checkbox group is addressed by
-    // name and a text field by either.
+    // The "at least one of three" rule is one question spread over three
+    // fields, so it gets one mark under all three rather than one under
+    // whichever field happens to carry the validity. Keyed by control name,
+    // falling back to id, since a checkbox group is addressed by name and a
+    // text field by either.
     const SHARED_ERROR_SLOTS = {
-      'deliverable[]': 'opening-questions-error',
-      orderType: 'opening-questions-error',
       contactPhone: 'contact-methods-error',
       contactSignal: 'contact-methods-error',
       contactEmail: 'contact-methods-error',
