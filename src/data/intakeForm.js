@@ -26,16 +26,16 @@ export const ORDER_TYPES = [
     value: 'one-off',
     label: { en: 'A finished design', no: 'Et ferdig design' },
     example: {
-      en: 'You already know exactly what it should look like.',
-      no: 'Du vet allerede nøyaktig hvordan den skal se ut.',
+      en: 'You know exactly what it should look like.',
+      no: 'Du vet nøyaktig hvordan den skal se ut.',
     },
   },
   {
     value: 'prototype',
     label: { en: 'An idea to test', no: 'En idé du vil teste' },
     example: {
-      en: "You're not sure yet - expect a few rounds before it's right.",
-      no: 'Du er ikke sikker ennå - regn med noen runder før den sitter.',
+      en: "Expect a few rounds before it's right.",
+      no: 'Regn med noen runder før den sitter.',
     },
   },
 ];
