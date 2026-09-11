@@ -331,6 +331,28 @@ export const BASE_FIELDS = [
     label: { en: 'Email', no: 'E-post' },
   },
   {
+    // Was a standing sub-header on every enquiry ("Enquiries are treated
+    // confidentially"), which promised blanket confidentiality to everyone
+    // whether they wanted it or not. Now an opt-in, unticked by default, so
+    // the promise is only made where it is asked for.
+    //
+    // Unticked submits nothing at all, which is how an HTML checkbox works and
+    // is the right failure direction here: absent means not confidential,
+    // exactly what unticked means. Anything downstream should treat a missing
+    // field as "no", never as "unknown".
+    id: 'confidential',
+    type: 'checkbox',
+    required: false,
+    label: {
+      en: 'Treat this enquiry as confidential',
+      no: 'Behandle henvendelsen konfidensielt',
+    },
+    help: {
+      en: 'Otherwise I may show the work, for example as a project on this site.',
+      no: 'Ellers kan jeg vise fram arbeidet, for eksempel som et prosjekt på nettsiden.',
+    },
+  },
+  {
     id: 'contactLocation',
     type: 'text',
     required: false,
