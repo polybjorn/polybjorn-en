@@ -1,7 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import { t } from '../data/translations.js';
-import { FULL_SPEC_ORDER_TYPES, BASE_FIELDS, EXTENDED_FIELDS } from '../data/intakeForm.js';
+import { BASE_FIELDS, PRINT_ONLY_FIELD_IDS } from '../data/intakeForm.js';
 import { ArrowLeft } from 'lucide-astro';
 
 interface Props {
@@ -15,11 +15,12 @@ const backHref = lang === 'no' ? '/no/3d-printing' : '/3d-printing';
 
 const byId = (id: string) => BASE_FIELDS.find(f => f.id === id);
 
-const aboutFields = ['orderType', 'projectName', 'description'].map(byId);
-const filesFields = ['existingFiles', 'fileUpload'].map(byId);
-const specFields = ['size', 'material', 'colorFinish', 'copyright'].map(byId);
-const timingFields = ['quantity', 'targetDate', 'replyUrgency', 'budget'].map(byId);
-const contactFields = ['contactName', 'contactCompany', 'contactPhone', 'contactPreferSignal', 'contactEmail', 'contactLocation'].map(byId);
+const deliverableField = byId('deliverable');
+const orderTypeField = byId('orderType');
+const aboutRestFields = ['projectName', 'description', 'fileUpload'].map(byId);
+const specFields = ['size', 'materialProperties', 'materialName', 'color', 'copyright'].map(byId);
+const timingFields = ['quantity', 'targetDate', 'budget'].map(byId);
+const contactFields = ['contactName', 'contactCompany', 'contactPhone', 'contactSignal', 'contactEmail', 'contactLocation'].map(byId);
 ---
 
 <Layout
@@ -39,7 +40,7 @@ const contactFields = ['contactName', 'contactCompany', 'contactPhone', 'contact
     main {
       max-width: 680px;
       margin: 0 auto;
-      padding: 4rem 2rem 5rem;
+      padding: 4rem 2rem 6.5rem;
     }
 
     .hero {
@@ -104,6 +105,15 @@ const contactFields = ['contactName', 'contactCompany', 'contactPhone', 'contact
       font-weight: 600;
     }
 
+    /* The two radio-group questions (deliverable, order type) need their
+       legend to read as clearly above their options, which share the same
+       weight and colour as this legend - so the hierarchy comes from size
+       here instead, not from dimming the options. */
+    .field fieldset legend.field-label {
+      font-size: 1.1rem;
+      margin-bottom: 0.7rem;
+    }
+
     .optional-tag {
       font-weight: 400;
       color: #888;
@@ -137,6 +147,50 @@ const contactFields = ['contactName', 'contactCompany', 'contactPhone', 'contact
       resize: vertical;
     }
 
+    /* Real input, not `hidden` - stays keyboard-focusable so Enter/Space
+       still opens the native picker. The visible trigger is the <label>
+       below; its focus ring is driven off this input's :focus-visible via
+       the sibling selector further down. */
+    .file-input-visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .file-trigger {
+      display: inline-block;
+      font-family: 'Piazzolla', serif;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #1e2228;
+      background: #6aaeee;
+      border-radius: 6px;
+      padding: 0.55rem 1rem;
+      cursor: pointer;
+    }
+
+    .file-trigger:hover {
+      background: #85bcf2;
+    }
+
+    .file-input-visually-hidden:focus-visible + .file-trigger {
+      outline: 2px solid #6aaeee;
+      outline-offset: 2px;
+    }
+
+    .file-status {
+      display: block;
+      margin-top: 0.5rem;
+      font-size: 0.88rem;
+      color: #888;
+    }
+
     input:focus-visible,
     textarea:focus-visible,
     select:focus-visible {
@@ -147,7 +201,7 @@ const contactFields = ['contactName', 'contactCompany', 'contactPhone', 'contact
     .option-list {
       display: flex;
       flex-direction: column;
-      gap: 0.5rem;
+      gap: 0.8rem;
     }
 
     .option-list label {
@@ -160,24 +214,27 @@ const contactFields = ['contactName', 'contactCompany', 'contactPhone', 'contact
     }
 
     .option-list input {
-      margin-top: 0.2rem;
+      margin-top: 0.25rem;
       flex-shrink: 0;
     }
 
-    .checkbox-field {
+    .option-text {
       display: flex;
-      align-items: flex-start;
-      gap: 0.6rem;
-      font-size: 0.95rem;
-      color: #ccc;
-      font-weight: 400;
-      margin-top: -0.6rem;
+      flex-direction: column;
+      gap: 0.15rem;
     }
 
-    .checkbox-field input {
-      margin-top: 0.2rem;
-      flex-shrink: 0;
+    .option-label {
+      color: #dde1e7;
+      font-weight: 600;
     }
+
+    .option-example {
+      font-size: 0.86rem;
+      color: #888;
+      font-weight: 400;
+    }
+
 
     .honeypot {
       position: absolute;
@@ -187,8 +244,48 @@ const contactFields = ['contactName', 'contactCompany', 'contactPhone', 'contact
       overflow: hidden;
     }
 
-    #requirements-section[hidden] {
+    /* Progressive disclosure: each stage stays collapsed until the one
+       before it is answered, so the page grows instead of showing every
+       section (and the production-only requirement grid) up front. */
+    .stage-group[hidden] {
       display: none;
+    }
+
+    .continue-row {
+      margin-top: 0.4rem;
+    }
+
+    .continue-btn {
+      font-family: 'Piazzolla', serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #dde1e7;
+      background: transparent;
+      border: 1px solid #4a5058;
+      border-radius: 8px;
+      padding: 0.6rem 1.4rem;
+      cursor: pointer;
+    }
+
+    .continue-btn:hover:not(:disabled) {
+      border-color: #6aaeee;
+      color: #fff;
+    }
+
+    .continue-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+      .stage-group,
+      fieldset.stage {
+        transition: opacity 0.3s ease, transform 0.3s ease;
+      }
+      .stage-entering {
+        opacity: 0;
+        transform: translateY(8px);
+      }
     }
 
     .submit-row {
@@ -218,6 +315,44 @@ const contactFields = ['contactName', 'contactCompany', 'contactPhone', 'contact
       margin-top: 0.8rem;
     }
 
+    /* Purely visual cue that the form has more stages ahead - the intro
+       already says so in words, this just makes it legible at a glance.
+       Fixed to the bottom of the viewport so it stays visible as the page
+       grows, rather than scrolling out of view above the current stage. */
+    .progress-dots {
+      position: fixed;
+      left: 50%;
+      bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+      transform: translateX(-50%);
+      display: flex;
+      gap: 0.55rem;
+      margin: 0;
+      padding: 0.55rem 0.9rem;
+      background: rgba(30, 34, 40, 0.85);
+      backdrop-filter: blur(4px);
+      border: 1px solid #3a3f47;
+      border-radius: 999px;
+      z-index: 100;
+    }
+
+    .progress-dots .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: transparent;
+      border: 1.5px solid #4a5058;
+    }
+
+    .progress-dots .dot.dot-active {
+      background: #6aaeee;
+      border-color: #6aaeee;
+    }
+
+    .progress-dots .dot.dot-done {
+      background: #4a5058;
+      border-color: #4a5058;
+    }
+
     .back-home {
       position: fixed;
       top: calc(1rem - 4px);
@@ -232,7 +367,7 @@ const contactFields = ['contactName', 'contactCompany', 'contactPhone', 'contact
     .back-home:hover { opacity: 1; color: #fff; }
 
     @media (max-width: 720px) {
-      main { padding: 2.5rem 1.25rem 3rem; }
+      main { padding: 2.5rem 1.25rem 4.5rem; }
       h1 { font-size: 1.8rem; }
     }
   </style>
@@ -247,6 +382,13 @@ const contactFields = ['contactName', 'contactCompany', 'contactPhone', 'contact
 
     <p class="confidentiality">{td.confidentialityNote}</p>
 
+    <div class="progress-dots" aria-hidden="true">
+      <span class="dot" data-dot="stage-about"></span>
+      <span class="dot" data-dot="stage-spec"></span>
+      <span class="dot" data-dot="stage-timing"></span>
+      <span class="dot" data-dot="stage-contact"></span>
+    </div>
+
     <form id="intake-form" novalidate>
       <!--
         Honeypot: real visitors never see or fill this. A submission that
@@ -259,62 +401,126 @@ const contactFields = ['contactName', 'contactCompany', 'contactPhone', 'contact
         <input type="text" id="website" name="website" tabindex="-1" autocomplete="off" />
       </div>
 
-      <fieldset>
+      <fieldset id="stage-about">
         <legend class="section-heading">{td.sectionAbout}</legend>
-        {aboutFields.map(field => (
+
+        <div class="field">
+          <fieldset>
+            <legend class="field-label">{deliverableField.label[lang]}</legend>
+            <div class="option-list">
+              {deliverableField.options.map(opt => (
+                <label>
+                  <input type="radio" name="deliverable" value={opt.value} required />
+                  <span class="option-label">{opt[lang]}</span>
+                </label>
+              ))}
+            </div>
+          </fieldset>
+        </div>
+
+        <div id="order-type-question" class="stage-group" hidden>
           <div class="field">
-            {field.type === 'radio' ? (
-              <fieldset>
-                <legend class="field-label">
-                  {field.label[lang]}
-                  {!field.required && <span class="optional-tag"> ({td.optionalTag})</span>}
-                </legend>
-                <div class="option-list">
-                  {field.options.map(opt => (
-                    <label>
-                      <input type="radio" name={field.id} value={opt.value} required={field.required} />
-                      <span>{opt[lang]}</span>
-                    </label>
-                  ))}
-                </div>
-              </fieldset>
-            ) : field.type === 'textarea' ? (
-              <>
-                <label class="field-label" for={field.id}>
-                  {field.label[lang]}
-                  {!field.required && <span class="optional-tag"> ({td.optionalTag})</span>}
-                </label>
-                <textarea id={field.id} name={field.id} required={field.required}></textarea>
-              </>
-            ) : (
-              <>
-                <label class="field-label" for={field.id}>
-                  {field.label[lang]}
-                  {!field.required && <span class="optional-tag"> ({td.optionalTag})</span>}
-                </label>
-                <input type="text" id={field.id} name={field.id} required={field.required} />
-              </>
-            )}
-            {field.help && <p class="field-help">{field.help[lang]}</p>}
+            <fieldset>
+              <legend class="field-label">{orderTypeField.label[lang]}</legend>
+              <div class="option-list">
+                {orderTypeField.options.map(opt => (
+                  <label>
+                    <input type="radio" name="orderType" value={opt.value} required />
+                    <span class="option-text">
+                      <span class="option-label">{opt.label[lang]}</span>
+                      <span class="option-example">{opt.example[lang]}</span>
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </fieldset>
           </div>
-        ))}
+        </div>
+
+        <div id="about-rest" class="stage-group" hidden>
+          {aboutRestFields.map(field => (
+            <div class="field">
+              {field.type === 'textarea' ? (
+                <>
+                  <label class="field-label" for={field.id}>
+                    {field.label[lang]}
+                    {!field.required && <span class="optional-tag"> ({td.optionalTag})</span>}
+                  </label>
+                  <textarea id={field.id} name={field.id} required={field.required}></textarea>
+                </>
+              ) : field.type === 'file' ? (
+                <>
+                  <label class="field-label" for={field.id}>
+                    {field.label[lang]}
+                    {!field.required && <span class="optional-tag"> ({td.optionalTag})</span>}
+                  </label>
+                  <!--
+                    The input stays real and focusable (visually hidden, not
+                    `hidden`) so the native file picker and keyboard use
+                    still work - "Browse"/"Choose File" is the browser's own
+                    UI language, not ours, so a styled label is the only way
+                    to get Norwegian text on the trigger itself.
+                  -->
+                  <input
+                    type="file"
+                    id={field.id}
+                    name={field.id}
+                    accept={field.accept}
+                    multiple={field.multiple}
+                    class="file-input-visually-hidden"
+                  />
+                  <label for={field.id} class="file-trigger">{td.chooseFilesLabel}</label>
+                  <span class="file-status" id={`${field.id}-status`} hidden></span>
+                </>
+              ) : (
+                <>
+                  <label class="field-label" for={field.id}>
+                    {field.label[lang]}
+                    {!field.required && <span class="optional-tag"> ({td.optionalTag})</span>}
+                  </label>
+                  <input type="text" id={field.id} name={field.id} required={field.required} />
+                </>
+              )}
+              {field.help && <p class="field-help">{field.help[lang]}</p>}
+            </div>
+          ))}
+          <div class="continue-row">
+            <button type="button" class="continue-btn" data-continue="about" disabled>{td.continueLabel}</button>
+          </div>
+        </div>
       </fieldset>
 
-      <fieldset>
-        <legend class="section-heading">{td.sectionFiles}</legend>
-        {filesFields.map(field => (
-          <div class="field">
-            {field.type === 'checkboxGroup' ? (
+      <fieldset id="stage-spec" class="stage" hidden>
+        <legend class="section-heading">{td.sectionSpec}</legend>
+        {specFields.map(field => (
+          <div class="field" data-field={field.id}>
+            {field.type === 'select' ? (
+              <>
+                <label class="field-label" for={field.id}>
+                  {field.label[lang]}
+                  {!field.required && <span class="optional-tag"> ({td.optionalTag})</span>}
+                </label>
+                <select id={field.id} name={field.id} required={field.required}>
+                  <option value="" disabled selected>{td.choosePlaceholder}</option>
+                  {field.options.map(opt => (
+                    <option value={opt.value}>{opt[lang]}</option>
+                  ))}
+                </select>
+              </>
+            ) : field.type === 'checkboxGroup' ? (
               <fieldset>
                 <legend class="field-label">
                   {field.label[lang]}
-                  {!field.required && <span class="optional-tag"> ({td.optionalTag})</span>}
+                  <span class="optional-tag"> ({td.optionalTag})</span>
                 </legend>
                 <div class="option-list">
                   {field.options.map(opt => (
                     <label>
                       <input type="checkbox" name={`${field.id}[]`} value={opt.value} />
-                      <span>{opt[lang]}</span>
+                      <span class="option-text">
+                        <span class="option-label">{opt.label[lang]}</span>
+                        <span class="option-example">{opt.example[lang]}</span>
+                      </span>
                     </label>
                   ))}
                 </div>
@@ -325,49 +531,21 @@ const contactFields = ['contactName', 'contactCompany', 'contactPhone', 'contact
                   {field.label[lang]}
                   {!field.required && <span class="optional-tag"> ({td.optionalTag})</span>}
                 </label>
-                <input type="file" id={field.id} name={field.id} accept={field.accept} multiple={field.multiple} />
-              </>
-            )}
-            {field.help && <p class="field-help">{field.help[lang]}</p>}
-          </div>
-        ))}
-      </fieldset>
-
-      <fieldset>
-        <legend class="section-heading">{td.sectionSpec}</legend>
-        {specFields.map(field => (
-          <div class="field">
-            {field.type === 'select' ? (
-              <>
-                <label class="field-label" for={field.id}>
-                  {field.label[lang]}
-                  {!field.required && <span class="optional-tag"> ({td.optionalTag})</span>}
-                </label>
-                <select id={field.id} name={field.id} required={field.required}>
-                  <option value="" disabled selected>{td.choosePlaceholder}</option>
-                  {field.options.map(opt => (
-                    <option value={opt.value}>{opt[lang]}</option>
-                  ))}
-                </select>
-              </>
-            ) : (
-              <>
-                <label class="field-label" for={field.id}>
-                  {field.label[lang]}
-                  {!field.required && <span class="optional-tag"> ({td.optionalTag})</span>}
-                </label>
                 <input type="text" id={field.id} name={field.id} required={field.required} />
               </>
             )}
             {field.help && <p class="field-help">{field.help[lang]}</p>}
           </div>
         ))}
+        <div class="continue-row">
+          <button type="button" class="continue-btn" data-continue="spec" disabled>{td.continueLabel}</button>
+        </div>
       </fieldset>
 
-      <fieldset>
+      <fieldset id="stage-timing" class="stage" hidden>
         <legend class="section-heading">{td.sectionTiming}</legend>
         {timingFields.map(field => (
-          <div class="field">
+          <div class="field" data-field={field.id}>
             {field.type === 'select' ? (
               <>
                 <label class="field-label" for={field.id}>
@@ -393,132 +571,193 @@ const contactFields = ['contactName', 'contactCompany', 'contactPhone', 'contact
             {field.help && <p class="field-help">{field.help[lang]}</p>}
           </div>
         ))}
+        <div class="continue-row">
+          <button type="button" class="continue-btn" data-continue="timing" disabled>{td.continueLabel}</button>
+        </div>
       </fieldset>
 
-      <fieldset id="requirements-section" hidden>
-        <legend class="section-heading">{td.sectionRequirements}</legend>
-        <p class="section-intro">{td.requirementsIntro}</p>
-        {EXTENDED_FIELDS.map(field => (
-          <div class="field">
-            {field.type === 'select' ? (
-              <>
-                <label class="field-label" for={field.id}>
-                  {field.label[lang]}
-                  <span class="optional-tag"> ({td.optionalTag})</span>
-                </label>
-                <select id={field.id} name={field.id}>
-                  <option value="" disabled selected>{td.choosePlaceholder}</option>
-                  {field.options.map(opt => (
-                    <option value={opt.value}>{opt[lang]}</option>
-                  ))}
-                </select>
-              </>
-            ) : (
-              <>
-                <label class="field-label" for={field.id}>
-                  {field.label[lang]}
-                  <span class="optional-tag"> ({td.optionalTag})</span>
-                </label>
-                <input type="text" id={field.id} name={field.id} />
-              </>
-            )}
-            {field.help && <p class="field-help">{field.help[lang]}</p>}
-          </div>
-        ))}
-      </fieldset>
-
-      <fieldset>
+      <fieldset id="stage-contact" class="stage" hidden>
         <legend class="section-heading">{td.sectionContact}</legend>
-        <p class="section-intro">{td.contactMethodNote}</p>
         {contactFields.map(field => (
-          <div class="field" id={field.type === 'checkbox' ? `field-${field.id}` : undefined} hidden={field.type === 'checkbox' || undefined}>
-            {field.type === 'checkbox' ? (
-              <label class="checkbox-field">
-                <input type="checkbox" id={field.id} name={field.id} />
-                <span>{field.label[lang]}</span>
-              </label>
-            ) : (
-              <>
-                <label class="field-label" for={field.id}>
-                  {field.label[lang]}
-                  {!field.required && <span class="optional-tag"> ({td.optionalTag})</span>}
-                </label>
-                <input type="text" id={field.id} name={field.id} required={field.required} />
-              </>
-            )}
+          <div class="field">
+            <label class="field-label" for={field.id}>
+              {field.label[lang]}
+              {!field.required && <span class="optional-tag"> ({td.optionalTag})</span>}
+            </label>
+            <input type="text" id={field.id} name={field.id} required={field.required} />
             {field.help && <p class="field-help">{field.help[lang]}</p>}
           </div>
         ))}
-      </fieldset>
 
-      <div class="submit-row">
-        <button type="submit">{td.submitLabel}</button>
-        <p class="submit-note">{td.submitNote}</p>
-      </div>
+        <div class="submit-row">
+          <button type="submit">{td.submitLabel}</button>
+          <p class="submit-note">{td.submitNote}</p>
+        </div>
+      </fieldset>
     </form>
   </main>
 
-  <script define:vars={{ fullSpecOrderTypes: FULL_SPEC_ORDER_TYPES, contactMethodRequired: td.contactMethodRequired, fileTooLarge: td.fileTooLarge }}>
+  <script define:vars={{ printOnlyFieldIds: PRINT_ONLY_FIELD_IDS, contactMethodRequired: td.contactMethodRequired, fileTooLarge: td.fileTooLarge }}>
     const form = document.getElementById('intake-form');
-    const requirementsSection = document.getElementById('requirements-section');
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    function updateRequirements() {
-      const selected = form.querySelector('input[name="orderType"]:checked');
-      requirementsSection.hidden = !selected || !fullSpecOrderTypes.includes(selected.value);
+    function reveal(el) {
+      if (!el || !el.hidden) return;
+      el.hidden = false;
+      if (prefersReducedMotion) return;
+      el.classList.add('stage-entering');
+      requestAnimationFrame(() => requestAnimationFrame(() => el.classList.remove('stage-entering')));
     }
 
-    form.addEventListener('change', (event) => {
-      if (event.target.name === 'orderType') updateRequirements();
-    });
-    updateRequirements();
+    function focusFirstField(el) {
+      const field = el.querySelector('input, select, textarea');
+      if (field) field.focus();
+    }
 
-    // Neither phone nor email is individually required - one of the two is.
+    function advance(button, nextStage) {
+      const row = button.closest('.continue-row');
+      if (row) row.hidden = true;
+      reveal(nextStage);
+      nextStage.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth', block: 'start' });
+      focusFirstField(nextStage);
+      setActiveDot(nextStage.id);
+    }
+
+    // Progress dots: purely decorative, tracks which stage is current.
+    const dotOrder = ['stage-about', 'stage-spec', 'stage-timing', 'stage-contact'];
+    const dots = Object.fromEntries(dotOrder.map(id => [id, document.querySelector(`[data-dot="${id}"]`)]));
+
+    function setActiveDot(stageId) {
+      const activeIndex = dotOrder.indexOf(stageId);
+      dotOrder.forEach((id, i) => {
+        const dot = dots[id];
+        dot.classList.remove('dot-done', 'dot-active');
+        if (i < activeIndex) dot.classList.add('dot-done');
+        else if (i === activeIndex) dot.classList.add('dot-active');
+      });
+    }
+
+    setActiveDot('stage-about');
+
+    // A Continue button unlocks once every required field in its own stage
+    // is valid.
+    function wireContinue(stageEl, button) {
+      function update() {
+        const required = stageEl.querySelectorAll('[required]');
+        button.disabled = !Array.from(required).every(f => f.checkValidity());
+      }
+      stageEl.addEventListener('input', update);
+      stageEl.addEventListener('change', update);
+      update();
+    }
+
+    const orderTypeQuestion = document.getElementById('order-type-question');
+    const aboutRest = document.getElementById('about-rest');
+    const stageSpec = document.getElementById('stage-spec');
+    const stageTiming = document.getElementById('stage-timing');
+    const stageContact = document.getElementById('stage-contact');
+
+    const continueAbout = form.querySelector('[data-continue="about"]');
+    const continueSpec = form.querySelector('[data-continue="spec"]');
+    const continueTiming = form.querySelector('[data-continue="timing"]');
+
+    wireContinue(aboutRest, continueAbout);
+    wireContinue(stageSpec, continueSpec);
+    wireContinue(stageTiming, continueTiming);
+
+    // Deliverable reveals order type, which reveals the rest of "About the
+    // part" - two sequential reveals within the same first stage.
+    form.addEventListener('change', (event) => {
+      if (event.target.name === 'deliverable') {
+        reveal(orderTypeQuestion);
+        focusFirstField(orderTypeQuestion);
+        updatePrintOnlyFields();
+        updateQuantityRequirement();
+      }
+      if (event.target.name === 'orderType') {
+        reveal(aboutRest);
+        focusFirstField(aboutRest);
+      }
+    });
+    if (form.querySelector('input[name="deliverable"]:checked')) reveal(orderTypeQuestion);
+    if (form.querySelector('input[name="orderType"]:checked')) reveal(aboutRest);
+
+    // Print-only fields (material, colour) don't apply to a model-only
+    // request - hidden rather than removed, so switching back to "printed"
+    // restores whatever was already filled in.
+    function updatePrintOnlyFields() {
+      const deliverable = form.querySelector('input[name="deliverable"]:checked');
+      const modelOnly = deliverable ? deliverable.value === 'model-only' : false;
+      printOnlyFieldIds.forEach(id => {
+        const wrapper = form.querySelector(`[data-field="${id}"]`);
+        if (wrapper) wrapper.hidden = modelOnly;
+      });
+    }
+    updatePrintOnlyFields();
+
+    // "How many do you need?" doesn't mean anything for a model-only
+    // request either, but unlike material/colour it's required - so
+    // hiding it also has to drop the required attribute, or a model-only
+    // customer would be stuck behind a Continue button gated on a field
+    // they can no longer see or fill in.
+    const quantityWrapper = form.querySelector('[data-field="quantity"]');
+    const quantityField = document.getElementById('quantity');
+
+    function updateQuantityRequirement() {
+      const deliverable = form.querySelector('input[name="deliverable"]:checked');
+      const modelOnly = deliverable ? deliverable.value === 'model-only' : false;
+      quantityWrapper.hidden = modelOnly;
+      quantityField.required = !modelOnly;
+    }
+    updateQuantityRequirement();
+
+    continueAbout.addEventListener('click', () => advance(continueAbout, stageSpec));
+
+    continueSpec.addEventListener('click', () => advance(continueSpec, stageTiming));
+
+    continueTiming.addEventListener('click', () => advance(continueTiming, stageContact));
+
+    // None of phone/Signal/email is individually required - one of the
+    // three is.
     const emailField = document.getElementById('contactEmail');
     const phoneField = document.getElementById('contactPhone');
+    const contactSignalField = document.getElementById('contactSignal');
 
     function validateContactMethod() {
-      const hasContact = emailField.value.trim() || phoneField.value.trim();
+      const hasContact = emailField.value.trim() || phoneField.value.trim() || contactSignalField.value.trim();
       emailField.setCustomValidity(hasContact ? '' : contactMethodRequired);
     }
 
     emailField.addEventListener('input', validateContactMethod);
     phoneField.addEventListener('input', validateContactMethod);
+    contactSignalField.addEventListener('input', validateContactMethod);
     validateContactMethod();
-
-    // The "prefer Signal" checkbox only makes sense for a phone number - a
-    // Signal username or signal.me link is unambiguous on its own.
-    const signalField = document.getElementById('field-contactPreferSignal');
-    const signalCheckbox = document.getElementById('contactPreferSignal');
-
-    function looksLikePhoneNumber(value) {
-      const trimmed = value.trim();
-      return /^[+\d][\d\s().-]*$/.test(trimmed) && trimmed.replace(/\D/g, '').length >= 5;
-    }
-
-    function updateSignalCheckbox() {
-      const show = looksLikePhoneNumber(phoneField.value);
-      signalField.hidden = !show;
-      if (!show) signalCheckbox.checked = false;
-    }
-
-    phoneField.addEventListener('input', updateSignalCheckbox);
-    updateSignalCheckbox();
 
     // Client-side only: a courtesy check against the advertised cap, not a
     // real limit - the endpoint still has to enforce this on what it
     // actually receives.
     const MAX_FILE_BYTES = 10 * 1024 * 1024;
     const fileInput = document.getElementById('fileUpload');
+    const fileStatus = document.getElementById('fileUpload-status');
 
     fileInput.addEventListener('change', () => {
       const oversized = Array.from(fileInput.files).some(file => file.size > MAX_FILE_BYTES);
       fileInput.setCustomValidity(oversized ? fileTooLarge : '');
+      fileStatus.hidden = fileInput.files.length === 0;
+      fileStatus.textContent = Array.from(fileInput.files).map(file => file.name).join(', ');
     });
 
     // Stub: no endpoint is wired up yet. See issue #2 for the mail-based
     // delivery design; this only needs to exist so the form is testable.
+    //
+    // The form is novalidate (native bubbles were fighting the stage
+    // reveal), so nothing blocks a bad submit unless reportValidity() is
+    // called explicitly - it still respects setCustomValidity (the
+    // contact-method gate) and every `required` field even with novalidate
+    // set, and shows the native error UI on whichever field is invalid.
     form.addEventListener('submit', (event) => {
       event.preventDefault();
+      if (!form.reportValidity()) return;
       console.log('Intake form submit is stubbed - no endpoint connected yet.', new FormData(form));
     });
   </script>
