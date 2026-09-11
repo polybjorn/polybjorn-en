@@ -170,6 +170,21 @@ const stageLabels = {
       margin-top: 2.5rem;
     }
 
+    .form-error {
+      font-size: 0.92rem;
+      color: #f0907f;
+      line-height: 1.45;
+      margin: 0 0 1rem;
+    }
+
+    /* Text presentation forced, so it does not arrive as a colour emoji. The
+       wording carries the meaning on its own - this is decoration, which is
+       why the colour is not the only signal. */
+    .form-error::before {
+      content: '\26A0\FE0E';
+      margin-right: 0.4rem;
+    }
+
     button[type="submit"] {
       font-family: 'Piazzolla', serif;
       font-size: 1.05rem;
@@ -322,6 +337,13 @@ const stageLabels = {
         {contactFields.map(field => <IntakeField field={field} lang={lang} td={td} />)}
 
         <div class="submit-row">
+          <!--
+            Send stays clickable. A disabled submit button explains nothing,
+            and the native validation bubble it would otherwise rely on is
+            styled by the browser, written in the browser's UI language rather
+            than the page's, and gone on the next scroll.
+          -->
+          <p class="form-error" id="submit-error" role="alert" hidden></p>
           <button type="submit">{td.submitLabel}</button>
           <p class="submit-note">{td.submitNote}</p>
         </div>
@@ -329,7 +351,7 @@ const stageLabels = {
     </form>
   </main>
 
-  <script define:vars={{ printOnlyFieldIds: PRINT_ONLY_FIELD_IDS, stageIds: STAGE_IDS, stageLabels, contactMethodRequired: td.contactMethodRequired, fileTooLarge: td.fileTooLarge, chooseFilesLabel: td.chooseFilesLabel, addFilesLabel: td.addFilesLabel, removeFileLabel: td.removeFileLabel, numberLocale: lang === 'no' ? 'nb-NO' : 'en-GB' }}>
+  <script define:vars={{ printOnlyFieldIds: PRINT_ONLY_FIELD_IDS, stageIds: STAGE_IDS, stageLabels, contactMethodRequired: td.contactMethodRequired, fileTooLarge: td.fileTooLarge, chooseFilesLabel: td.chooseFilesLabel, addFilesLabel: td.addFilesLabel, removeFileLabel: td.removeFileLabel, missingFieldMessage: td.missingFieldMessage, invalidEmailMessage: td.invalidEmailMessage, numberLocale: lang === 'no' ? 'nb-NO' : 'en-GB' }}>
     const form = document.getElementById('intake-form');
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -598,9 +620,10 @@ const stageLabels = {
       fileError.hidden = !oversized;
       fileError.textContent = oversized ? fileTooLarge : '';
 
-      // A removal is a click, not an input or change event, so the stage's own
-      // listeners would not recount on their own.
+      // A removal is a click, not an input or change event, so neither the
+      // stage's own listeners nor the submit-error listeners would fire.
       refreshContinueButtons();
+      clearSubmitErrorIfResolved();
     }
 
     fileInput.addEventListener('change', () => {
@@ -619,21 +642,94 @@ const stageLabels = {
       renderFileList();
     });
 
+    // Send is never disabled. Every Continue button greys out until its own
+    // section is valid, but a section can be fixed on the spot, whereas the
+    // last button in a long form has to say what is wrong - a greyed-out Send
+    // with three "(optional)" contact fields above it explains nothing.
+    const submitError = document.getElementById('submit-error');
+
+    function labelFor(control) {
+      let source = control.id ? form.querySelector('label[for="' + control.id + '"]') : null;
+      // Radio and checkbox groups are labelled by their fieldset's legend.
+      if (!source) {
+        const group = control.closest('fieldset');
+        source = group ? group.querySelector('legend') : null;
+      }
+      if (!source) return '';
+      const copy = source.cloneNode(true);
+      copy.querySelectorAll('.optional-tag').forEach(tag => tag.remove());
+      return copy.textContent.trim();
+    }
+
+    function messageFor(control) {
+      // setCustomValidity messages are ours already and say more than a field
+      // name could - the contact-method rule and the file size cap both land
+      // here.
+      if (control.validity.customError) return control.validationMessage;
+      if (control.validity.typeMismatch) return invalidEmailMessage;
+      return missingFieldMessage.replace('{field}', labelFor(control));
+    }
+
+    function firstInvalidControl() {
+      const controls = form.querySelectorAll('input, select, textarea');
+      // Disabled controls are barred from validation, so the print-only fields
+      // drop out of this on a model-only enquiry without special-casing.
+      return Array.from(controls).find(control => !control.checkValidity()) || null;
+    }
+
+    let reportedControl = null;
+
+    function showSubmitError(control) {
+      reportedControl = control;
+      submitError.textContent = messageFor(control);
+      submitError.hidden = false;
+    }
+
+    function clearSubmitError() {
+      reportedControl = null;
+      submitError.hidden = true;
+      submitError.textContent = '';
+    }
+
     // Stub: no endpoint is wired up yet. See issue #2 for the mail-based
     // delivery design; this only needs to exist so the form is testable.
     // method and enctype are set on the form already so that wiring it up
     // later is one action attribute, not a silent switch to a urlencoded
     // POST that drops every attachment.
-    //
-    // The form is novalidate (native bubbles were fighting the stage
-    // reveal), so nothing blocks a bad submit unless reportValidity() is
-    // called explicitly - it still respects setCustomValidity (the
-    // contact-method gate) and every required field even with novalidate
-    // set, and shows the native error UI on whichever field is invalid.
     form.addEventListener('submit', (event) => {
       event.preventDefault();
-      if (!form.reportValidity()) return;
+      const invalid = firstInvalidControl();
+      if (invalid) {
+        showSubmitError(invalid);
+        // The message sits by the button, which is where the visitor is
+        // looking. If the offending field is somewhere they have scrolled past
+        // they have to be taken to it, so scroll to its row rather than the
+        // control itself - the file input is clipped to 1px and would put the
+        // viewport in the wrong place.
+        if (!stageContact.contains(invalid)) {
+          (invalid.closest('.field') || invalid).scrollIntoView({
+            behavior: prefersReducedMotion ? 'auto' : 'smooth',
+            block: 'center',
+          });
+        }
+        invalid.focus({ preventScroll: true });
+        return;
+      }
+      clearSubmitError();
       console.log('Intake form submit is stubbed - no endpoint connected yet.', new FormData(form));
     });
+
+    // Clear as soon as the visitor fixes the one thing they were told about,
+    // not when the whole form finally validates. Whatever is wrong next waits
+    // for the next press of Send, rather than the message hopping from field
+    // to field while they are still typing.
+    function clearSubmitErrorIfResolved() {
+      if (submitError.hidden) return;
+      if (!reportedControl || !reportedControl.isConnected || reportedControl.checkValidity()) {
+        clearSubmitError();
+      }
+    }
+    form.addEventListener('input', clearSubmitErrorIfResolved);
+    form.addEventListener('change', clearSubmitErrorIfResolved);
   </script>
 </Layout>
