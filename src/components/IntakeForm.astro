@@ -103,41 +103,6 @@ const stageLabels = {
       line-height: 1.5;
     }
 
-    .field {
-      margin-bottom: 1.4rem;
-    }
-
-    .field label.field-label,
-    .field legend.field-label {
-      display: block;
-      font-size: 0.98rem;
-      color: #dde1e7;
-      margin-bottom: 0.4rem;
-      font-weight: 600;
-    }
-
-    /* The two radio-group questions (deliverable, order type) need their
-       legend to read as clearly above their options, which share the same
-       weight and colour as this legend - so the hierarchy comes from size
-       here instead, not from dimming the options. */
-    .field fieldset legend.field-label {
-      font-size: 1.1rem;
-      margin-bottom: 0.7rem;
-    }
-
-    .optional-tag {
-      font-weight: 400;
-      color: #888;
-      font-size: 0.88rem;
-    }
-
-    .field-error {
-      font-size: 0.88rem;
-      color: #f0907f;
-      margin: 0.4rem 0 0;
-      line-height: 1.4;
-    }
-
     .visually-hidden {
       position: absolute;
       width: 1px;
@@ -147,124 +112,6 @@ const stageLabels = {
       clip: rect(0, 0, 0, 0);
       white-space: nowrap;
     }
-
-    .field-help {
-      font-size: 0.88rem;
-      color: #888;
-      margin: 0.3rem 0 0;
-      line-height: 1.4;
-    }
-
-    input[type="text"],
-    input[type="email"],
-    input[type="tel"],
-    textarea,
-    select {
-      width: 100%;
-      background: #2a2e35;
-      border: 1px solid #3a3f47;
-      border-radius: 8px;
-      color: #dde1e7;
-      font-family: 'Piazzolla', serif;
-      /* Not below 1rem: iOS Safari zooms the viewport when a control with a
-         font under 16px takes focus, and each stage change focuses one. */
-      font-size: 1rem;
-      padding: 0.65rem 0.8rem;
-    }
-
-    textarea {
-      min-height: 6rem;
-      resize: vertical;
-    }
-
-    /* Real input, not `hidden` - stays keyboard-focusable so Enter/Space
-       still opens the native picker. The visible trigger is the <label>
-       below; its focus ring is driven off this input's :focus-visible via
-       the sibling selector further down. */
-    .file-input-visually-hidden {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      padding: 0;
-      margin: -1px;
-      overflow: hidden;
-      clip: rect(0, 0, 0, 0);
-      white-space: nowrap;
-      border: 0;
-    }
-
-    .file-trigger {
-      display: inline-block;
-      font-family: 'Piazzolla', serif;
-      font-size: 0.9rem;
-      font-weight: 600;
-      color: #1e2228;
-      background: #6aaeee;
-      border-radius: 6px;
-      padding: 0.55rem 1rem;
-      cursor: pointer;
-    }
-
-    .file-trigger:hover {
-      background: #85bcf2;
-    }
-
-    .file-input-visually-hidden:focus-visible + .file-trigger {
-      outline: 2px solid #6aaeee;
-      outline-offset: 2px;
-    }
-
-    .file-status {
-      display: block;
-      margin-top: 0.5rem;
-      font-size: 0.88rem;
-      color: #888;
-    }
-
-    input:focus-visible,
-    textarea:focus-visible,
-    select:focus-visible {
-      outline: 2px solid #6aaeee;
-      outline-offset: 2px;
-    }
-
-    .option-list {
-      display: flex;
-      flex-direction: column;
-      gap: 0.8rem;
-    }
-
-    .option-list label {
-      display: flex;
-      align-items: flex-start;
-      gap: 0.6rem;
-      font-size: 0.95rem;
-      color: #ccc;
-      font-weight: 400;
-    }
-
-    .option-list input {
-      margin-top: 0.25rem;
-      flex-shrink: 0;
-    }
-
-    .option-text {
-      display: flex;
-      flex-direction: column;
-      gap: 0.15rem;
-    }
-
-    .option-label {
-      color: #dde1e7;
-      font-weight: 600;
-    }
-
-    .option-example {
-      font-size: 0.86rem;
-      color: #888;
-      font-weight: 400;
-    }
-
 
     .honeypot {
       position: absolute;
@@ -415,8 +262,7 @@ const stageLabels = {
     @media (max-width: 720px) {
       main { padding: 2.5rem 1.25rem 4.5rem; }
       h1 { font-size: 1.8rem; }
-    }
-  </style>
+    }  </style>
 
   <a class="back-home" href={backHref} aria-label={tr.backHomeAria}><ArrowLeft size={28} strokeWidth={1.5} /></a>
 
