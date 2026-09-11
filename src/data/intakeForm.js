@@ -45,16 +45,24 @@ export const ORDER_TYPES = [
 // want either. It comes first in the form (see IntakeForm.astro) because it
 // decides whether print-specific fields below (material, colour/finish,
 // quantity) are relevant at all.
+//
+// The labels are bare on purpose. They used to be "Printed - a physical part"
+// and "Just the 3D model - I'll print it myself, or don't need it printed",
+// which said the same thing three times over: the question already names both
+// options, then each label repeated its own word, then glossed it - and the
+// second one managed to say "print" twice by itself. Unlike ORDER_TYPES below,
+// whose question does not name its options and whose examples carry real
+// information, there was nothing left here for a gloss to add.
 export const DELIVERABLE_TYPES = [
   {
     value: 'printed',
-    en: 'Printed - a physical part',
-    no: 'Printet - en fysisk del',
+    en: 'Printed',
+    no: 'Printet',
   },
   {
     value: 'model-only',
-    en: "Just the 3D model - I'll print it myself, or don't need it printed",
-    no: 'Bare 3D-modellen - jeg printer selv, eller trenger ikke print',
+    en: 'Just the 3D model',
+    no: 'Bare 3D-modellen',
   },
 ];
 
