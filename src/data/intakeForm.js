@@ -12,6 +12,19 @@
 // more fields. The free-text description plus a follow-up conversation
 // covers it now.
 
+// This question opened the form next to the deliverable one for a while, and
+// it did not work there. "Hva trenger du?" and "Hva skal du bestille?" are near
+// synonyms in Norwegian, so two questions that mean quite different things read
+// as one asked twice - and the second needed example lines under both options
+// purely to explain what it was asking. They are also not peers: DELIVERABLE
+// branches the form, deciding whether material, colour and quantity exist,
+// while this one is recorded and changes nothing. Presenting them as a matched
+// pair implied a symmetry that was not there.
+//
+// So it lives in the Specification section now, with size, material and
+// ownership - the other questions about the design itself - and it is named for
+// what it asks.
+//
 // Order type used to have a third option ("production run" / "business
 // order") meant to gate the now-removed requirement grid. That was wrong: a
 // business ordering one already-finished part and a private customer with a
@@ -23,19 +36,21 @@
 // test," just a fuzzier version of it.
 export const ORDER_TYPES = [
   {
+    // No example. Under "how finished is the design?" the answer "finished"
+    // needs no gloss - the old one ("you know exactly what it should look
+    // like") only existed because the question used to be "what are you
+    // ordering?", which did not say what was being asked.
     value: 'one-off',
-    label: { en: 'A finished design', no: 'Et ferdig design' },
-    example: {
-      en: 'You already know exactly what it should look like.',
-      no: 'Du vet allerede nøyaktig hvordan den skal se ut.',
-    },
+    label: { en: 'Finished', no: 'Ferdig' },
   },
   {
     value: 'prototype',
-    label: { en: 'An idea to test', no: 'En idé du vil teste' },
+    label: { en: 'An idea I want to test', no: 'En idé jeg vil teste' },
+    // This one keeps its example: that it takes iterations is not something
+    // the label or the question says.
     example: {
-      en: "You're not sure yet - expect a few rounds before it's right.",
-      no: 'Du er ikke sikker ennå - regn med noen runder før den sitter.',
+      en: "Expect a few rounds before it's right.",
+      no: 'Regn med noen runder før den sitter.',
     },
   },
 ];
@@ -78,18 +93,20 @@ export const DELIVERABLE_TYPES = [
   {
     value: 'printed',
     label: { en: 'A printed part', no: 'Printet del' },
-    // Describes this option only. It sat on the question for a while, where it
-    // read as a note about the whole group - but it says nothing about the
-    // other choice, where "the model comes with what I print" is not just
-    // irrelevant but untrue of anything being ordered.
-    example: {
-      en: 'The 3D model comes with it.',
-      no: '3D-modellen følger med.',
-    },
   },
   {
     value: 'model',
     label: { en: 'A 3D model', no: '3D-modell' },
+    // Shown only while this option is locked by the one above (see
+    // IntakeForm.astro). It is there to explain a greyed tick, and there is no
+    // greyed tick to explain while this is a live choice - stating it
+    // permanently made it a standing claim about an option it does not
+    // describe.
+    showWhenLocked: true,
+    example: {
+      en: 'Included with a printed part.',
+      no: 'Følger med en printet del.',
+    },
   },
 ];
 
@@ -117,7 +134,7 @@ export const BASE_FIELDS = [
     id: 'orderType',
     type: 'radio',
     required: true,
-    label: { en: 'What are you ordering?', no: 'Hva skal du bestille?' },
+    label: { en: 'How finished is the design?', no: 'Hvor ferdig er designet?' },
     options: ORDER_TYPES,
   },
   {
@@ -144,12 +161,21 @@ export const BASE_FIELDS = [
     id: 'fileUpload',
     type: 'file',
     required: false,
-    accept: '.jpg,.jpeg,.png,.heic,.pdf,.stp,.step,.stl,image/jpeg,image/png,image/heic,application/pdf,model/step,model/stl',
+    // No accept filter. It used to list the same formats the help text named,
+    // and narrowing the picker to them turned a preference into a rule: plenty
+    // of other formats can be opened at this end, and someone whose CAD tool
+    // exports .3mf or .obj would have found the file greyed out with no
+    // explanation. What can actually be accepted is a judgement made after
+    // reading the enquiry, not something a file picker should decide.
+    //
+    // This is a front-end affordance either way - accept never enforced
+    // anything, since a determined upload can ignore it. Real validation of
+    // what arrives belongs server-side (nixfleet#87).
     multiple: true,
     label: { en: 'Attach files', no: 'Legg ved filer' },
     help: {
-      en: 'Photos, a sketch, or a 3D file (STEP or STL). About 10 MB per file. A photo of a physical sample is a good start.',
-      no: 'Bilder, en skisse eller en 3D-fil (STEP eller STL). Ca. 10 MB per fil. Har du en fysisk prøve, er et bilde en god start.',
+      en: 'Photos, sketches or 3D files. 10 MB per file.',
+      no: 'Bilder, skisser eller 3D-filer. 10 MB per fil.',
     },
   },
   {
@@ -184,9 +210,16 @@ export const BASE_FIELDS = [
     ],
   },
   {
+    // Not required, and deliberately so. This is the one question on the form
+    // with legal weight, which is exactly why nothing here may answer it on a
+    // customer's behalf: an assumed "no design yet" recorded against someone
+    // who actually holds a licensed file is a false statement on the question
+    // where being wrong costs the most. Left blank it arrives blank, which is
+    // honest, and the answer gets asked for directly - the same reasoning that
+    // removed the requirement grid.
     id: 'copyright',
     type: 'select',
-    required: true,
+    required: false,
     label: { en: 'Who owns the design?', no: 'Hvem eier designet?' },
     // Parallel noun-phrase style throughout - these used to mix full
     // sentences ("It's my own design") with bare fragments ("A licensed or
@@ -318,25 +351,17 @@ export const BASE_FIELDS = [
     // options). Its own field also drops the need to pattern-match "does
     // this look like a phone number" to decide whether to reveal a
     // separate "prefer Signal" checkbox.
-    //
-    // oneOfRequired marks the three that are collectively required but
-    // individually optional. IntakeForm.astro suppresses the "(optional)"
-    // tag on these: every one of them carrying it, with the real rule
-    // living only in a validation message at the end of the form, told a
-    // first-time visitor they could skip all three.
     id: 'contactPhone',
     type: 'text',
     inputType: 'tel',
     autocomplete: 'tel',
     required: false,
-    oneOfRequired: true,
     label: { en: 'Phone', no: 'Telefon' },
   },
   {
     id: 'contactSignal',
     type: 'text',
     required: false,
-    oneOfRequired: true,
     label: { en: 'Signal', no: 'Signal' },
     help: {
       en: 'Username or signal.me link.',
@@ -349,7 +374,6 @@ export const BASE_FIELDS = [
     inputType: 'email',
     autocomplete: 'email',
     required: false,
-    oneOfRequired: true,
     label: { en: 'Email', no: 'E-post' },
   },
   {
@@ -371,7 +395,7 @@ export const BASE_FIELDS = [
     },
     help: {
       en: 'Otherwise I may show the work, for example as a project on this site.',
-      no: 'Ellers kan jeg vise fram arbeidet, for eksempel som et prosjekt på nettsiden.',
+      no: 'Ellers kan jeg vise fram arbeidet, for eksempel som et prosjekt på denne nettsiden.',
     },
   },
   {
@@ -380,10 +404,12 @@ export const BASE_FIELDS = [
     required: false,
     autocomplete: 'address-level2',
     label: { en: 'Town or area', no: 'Sted eller område' },
-    // "Location" on its own got read as "street address".
+    // The old label was just "Location", which got read as "street address".
+    // "Town or area" carries that now, so the help only has to say what it is
+    // for.
     help: {
-      en: 'Roughly where you are, for postage or handover. No street address needed.',
-      no: 'Omtrent hvor du er, for frakt eller henting. Ingen gateadresse nødvendig.',
+      en: 'Roughly where you are, for postage or handover.',
+      no: 'Omtrent hvor du er, for frakt eller henting.',
     },
   },
 ];
