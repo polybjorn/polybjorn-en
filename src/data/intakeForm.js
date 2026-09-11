@@ -380,7 +380,7 @@ export const BASE_FIELDS = [
     },
     help: {
       en: 'Otherwise I may show the work, for example as a project on this site.',
-      no: 'Ellers kan jeg vise fram arbeidet, for eksempel som et prosjekt på nettsiden.',
+      no: 'Ellers kan jeg vise fram arbeidet, for eksempel som et prosjekt på denne nettsiden.',
     },
   },
   {
