@@ -1,0 +1,109 @@
+---
+// One row of the intake form. All four stages render their fields through
+// this, so a change to the label/optional-tag/help pattern lands everywhere
+// at once - the three stages used to carry near-identical copies of this
+// markup and had already started to drift (the checkbox group hardcoded its
+// "(optional)" tag instead of deriving it).
+interface Props {
+  field: any;
+  lang: 'en' | 'no';
+  td: any;
+}
+
+const { field, lang, td } = Astro.props;
+
+// `oneOfRequired` fields (phone / Signal / email) are individually optional
+// but collectively required, so tagging each one "(optional)" would be a lie
+// by omission. The section intro carries the real rule instead.
+const showOptionalTag = !field.required && !field.oneOfRequired;
+
+// An option list is either plain ({ value, en, no }) or annotated with an
+// example ({ value, label, example }) - ORDER_TYPES and materialProperties
+// use the second shape.
+const optionLabel = (opt: any) => (opt.label ? opt.label[lang] : opt[lang]);
+---
+
+<div class="field" data-field={field.id}>
+  {field.type === 'radio' || field.type === 'checkboxGroup' ? (
+    <fieldset>
+      <legend class="field-label">
+        {field.label[lang]}
+        {showOptionalTag && <span class="optional-tag"> ({td.optionalTag})</span>}
+      </legend>
+      <div class="option-list">
+        {field.options.map((opt: any) => (
+          <label>
+            <input
+              type={field.type === 'radio' ? 'radio' : 'checkbox'}
+              name={field.type === 'radio' ? field.id : `${field.id}[]`}
+              value={opt.value}
+              required={field.type === 'radio' ? field.required : undefined}
+            />
+            {opt.example ? (
+              <span class="option-text">
+                <span class="option-label">{optionLabel(opt)}</span>
+                <span class="option-example">{opt.example[lang]}</span>
+              </span>
+            ) : (
+              <span class="option-label">{optionLabel(opt)}</span>
+            )}
+          </label>
+        ))}
+      </div>
+    </fieldset>
+  ) : (
+    <>
+      <label class="field-label" for={field.id}>
+        {field.label[lang]}
+        {showOptionalTag && <span class="optional-tag"> ({td.optionalTag})</span>}
+      </label>
+
+      {field.type === 'textarea' && (
+        <textarea id={field.id} name={field.id} required={field.required}></textarea>
+      )}
+
+      {field.type === 'select' && (
+        <select id={field.id} name={field.id} required={field.required}>
+          <option value="" disabled selected>{td.choosePlaceholder}</option>
+          {field.options.map((opt: any) => (
+            <option value={opt.value}>{optionLabel(opt)}</option>
+          ))}
+        </select>
+      )}
+
+      {field.type === 'file' && (
+        <>
+          <!--
+            The input stays real and focusable (visually hidden, not
+            `hidden`) so the native file picker and keyboard use still work -
+            "Browse"/"Choose File" is the browser's own UI language, not
+            ours, so a styled label is the only way to get Norwegian text on
+            the trigger itself.
+          -->
+          <input
+            type="file"
+            id={field.id}
+            name={field.id}
+            accept={field.accept}
+            multiple={field.multiple}
+            class="file-input-visually-hidden"
+          />
+          <label for={field.id} class="file-trigger">{td.chooseFilesLabel}</label>
+          <span class="file-status" id={`${field.id}-status`} hidden></span>
+          <p class="field-error" id={`${field.id}-error`} hidden></p>
+        </>
+      )}
+
+      {field.type === 'text' && (
+        <input
+          type={field.inputType || 'text'}
+          id={field.id}
+          name={field.id}
+          required={field.required}
+          autocomplete={field.autocomplete}
+        />
+      )}
+    </>
+  )}
+  {field.help && <p class="field-help">{field.help[lang]}</p>}
+</div>
