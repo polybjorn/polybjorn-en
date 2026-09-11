@@ -195,9 +195,16 @@ export const BASE_FIELDS = [
     ],
   },
   {
+    // Not required, and deliberately so. This is the one question on the form
+    // with legal weight, which is exactly why nothing here may answer it on a
+    // customer's behalf: an assumed "no design yet" recorded against someone
+    // who actually holds a licensed file is a false statement on the question
+    // where being wrong costs the most. Left blank it arrives blank, which is
+    // honest, and the answer gets asked for directly - the same reasoning that
+    // removed the requirement grid.
     id: 'copyright',
     type: 'select',
-    required: true,
+    required: false,
     label: { en: 'Who owns the design?', no: 'Hvem eier designet?' },
     // Parallel noun-phrase style throughout - these used to mix full
     // sentences ("It's my own design") with bare fragments ("A licensed or
