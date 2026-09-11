@@ -1,39 +1,74 @@
 // Client intake form for the 3D printing page (issue #2).
 //
-// BASE_FIELDS apply to every enquiry. EXTENDED_FIELDS are the paper sheet's
-// KRAV grid (Addidé ordrebeskrivelse v1.0, page 2) and only appear when the
-// order type is one that needs fixed specifications - a business ordering a
-// production part, not someone who wants a single bracket. Material, colour
-// and size live in BASE_FIELDS already, so the 12 KRAV rows are split 3/9
-// between the two lists rather than repeated.
+// The form (IntakeForm.astro) reveals these fields progressively, section by
+// section, rather than all at once - see the stage logic there.
 //
-// The grid asks for the requested value only (the "request" column). The
-// achieved column from the paper sheet is job-note bookkeeping, not
-// client-facing, and stays out of this form - as does OPPSUMMERING
-// (machine, hours, material cost, price tier).
+// The paper client sheet this is based on (Addidé ordrebeskrivelse v1.0) had
+// a KRAV grid on page 2 - wall thickness, tolerance, humidity, UV exposure,
+// and so on - gated behind a "needs formal spec" checkbox. That grid and its
+// gate were cut: for the rare enquiry precise enough to need that level of
+// detail, it gets worked out directly (call/email), not through a web form -
+// so the grid never actually saved a round of back-and-forth, it was just
+// more fields. The free-text description plus a follow-up conversation
+// covers it now.
 
+// Order type used to have a third option ("production run" / "business
+// order") meant to gate the now-removed requirement grid. That was wrong: a
+// business ordering one already-finished part and a private customer with a
+// strict spec both exist, so "is the design settled" and "are there formal
+// specs to hit" were never the same fact. This is just the design-certainty
+// question - DELIVERABLE_TYPES below is the separate printed-vs-model-only
+// question. A third point on this one ("a problem to solve") was tried and
+// dropped too - it never held up as genuinely distinct from "an idea to
+// test," just a fuzzier version of it.
 export const ORDER_TYPES = [
   {
     value: 'one-off',
-    en: 'A single part, replacement, or small batch (a handful of the same part)',
-    no: 'En enkelt del, erstatningsdel, eller en liten batch (noen få like deler)',
+    label: { en: 'A finished design', no: 'Et ferdig design' },
+    example: {
+      en: 'You already know exactly what it should look like.',
+      no: 'Du vet allerede nøyaktig hvordan den skal se ut.',
+    },
   },
   {
     value: 'prototype',
-    en: 'A prototype or concept model, to test or iterate on',
-    no: 'En prototype eller konseptmodell, til testing eller videreutvikling',
-  },
-  {
-    value: 'production',
-    en: 'A production order with fixed specifications (material, tolerances, quantities)',
-    no: 'En produksjonsordre med faste spesifikasjoner (materiale, toleranser, antall)',
+    label: { en: 'An idea to test', no: 'En idé du vil teste' },
+    example: {
+      en: "You're not sure yet - expect a few rounds before it's right.",
+      no: 'Du er ikke sikker ennå - regn med noen runder før den sitter.',
+    },
   },
 ];
 
-// Order types that pull in the full requirement grid.
-export const FULL_SPEC_ORDER_TYPES = ['production'];
+// Printed vs. model-only is a separate axis from design certainty above -
+// someone with a finished design and someone still testing an idea can each
+// want either. It comes first in the form (see IntakeForm.astro) because it
+// decides whether print-specific fields below (material, colour/finish)
+// are relevant at all.
+export const DELIVERABLE_TYPES = [
+  {
+    value: 'printed',
+    en: 'Printed - a physical part',
+    no: 'Printet - en fysisk del',
+  },
+  {
+    value: 'model-only',
+    en: "Just the 3D model - I'll print it myself, or don't need it printed",
+    no: 'Bare 3D-modellen - jeg printer selv, eller trenger ikke print',
+  },
+];
+
+// Fields that only make sense when something is actually being printed.
+export const PRINT_ONLY_FIELD_IDS = ['materialProperties', 'materialName', 'color'];
 
 export const BASE_FIELDS = [
+  {
+    id: 'deliverable',
+    type: 'radio',
+    required: true,
+    label: { en: 'Do you need it printed, or just the 3D model?', no: 'Trenger du den printet, eller bare 3D-modellen?' },
+    options: DELIVERABLE_TYPES,
+  },
   {
     id: 'orderType',
     type: 'radio',
@@ -62,19 +97,6 @@ export const BASE_FIELDS = [
     },
   },
   {
-    id: 'existingFiles',
-    type: 'checkboxGroup',
-    required: false,
-    label: { en: 'Do you already have any of these?', no: 'Har du allerede noe av dette?' },
-    options: [
-      { value: 'step-stl', en: 'A STEP or STL file', no: 'En STEP- eller STL-fil' },
-      { value: 'sketch', en: 'A sketch or drawing', no: 'En skisse eller tegning' },
-      { value: 'photo', en: 'A photo', no: 'Et bilde' },
-      { value: 'sample', en: 'A physical sample', no: 'En fysisk prøve' },
-      { value: 'none', en: 'Nothing yet - starting from a description', no: 'Ingenting ennå - starter fra en beskrivelse' },
-    ],
-  },
-  {
     id: 'fileUpload',
     type: 'file',
     required: false,
@@ -82,8 +104,8 @@ export const BASE_FIELDS = [
     multiple: true,
     label: { en: 'Attach files', no: 'Legg ved filer' },
     help: {
-      en: 'Photos, sketches, or a 3D model file (STEP or STL) if you have one. jpg, png, heic, pdf, step or stl, about 10 MB per file. Optional.',
-      no: 'Bilder, skisser, eller en 3D-modellfil (STEP eller STL) hvis du har en. jpg, png, heic, pdf, step eller stl, ca. 10 MB per fil. Valgfritt.',
+      en: 'Photos, a sketch, or a 3D file (STEP or STL) - about 10 MB per file. For a physical sample, a photo is a good start - I may ask to borrow it if that\'s not enough.',
+      no: 'Bilder, en skisse, eller en 3D-fil (STEP eller STL) - ca. 10 MB per fil. Har du en fysisk prøve, er et bilde en god start - jeg spør gjerne om å låne den hvis bildet ikke er nok.',
     },
   },
   {
@@ -98,21 +120,6 @@ export const BASE_FIELDS = [
     required: false,
     label: { en: 'When do you need the part by?', no: 'Når trenger du delen?' },
     help: { en: 'A date, or "no fixed date" is fine.', no: 'En dato, eller "ingen fast frist" går fint.' },
-  },
-  {
-    id: 'replyUrgency',
-    type: 'select',
-    required: true,
-    label: { en: 'How urgent is a reply?', no: 'Hvor raskt trenger du svar?' },
-    help: {
-      en: 'Separate from the part deadline above - how soon you want to hear back from me.',
-      no: 'Uavhengig av fristen over - hvor raskt du ønsker tilbakemelding fra meg.',
-    },
-    options: [
-      { value: 'exploring', en: 'Just exploring for now', no: 'Utforsker bare foreløpig' },
-      { value: 'this-week', en: 'Would like a reply this week', no: 'Ønsker svar denne uken' },
-      { value: 'urgent', en: 'Urgent - please get back to me as soon as you can', no: 'Haster - ta kontakt så snart du kan' },
-    ],
   },
   {
     id: 'budget',
@@ -133,12 +140,16 @@ export const BASE_FIELDS = [
     type: 'select',
     required: true,
     label: { en: 'Who owns the design?', no: 'Hvem eier designet?' },
+    // Parallel noun-phrase style throughout - these used to mix full
+    // sentences ("It's my own design") with bare fragments ("A licensed or
+    // purchased file"), which read as inconsistent once all five options
+    // are visible together in the dropdown.
     options: [
-      { value: 'own', en: "It's my own design", no: 'Det er mitt eget design' },
+      { value: 'own', en: 'My own design', no: 'Mitt eget design' },
       { value: 'licensed', en: 'A licensed or purchased file', no: 'En lisensiert eller kjøpt fil' },
       { value: 'scan', en: 'A scan of an existing part', no: 'En skann av en eksisterende del' },
-      { value: 'permitted', en: "Someone else's design - I have permission to share it", no: 'Andres design - jeg har lov til å dele det' },
-      { value: 'none-yet', en: "There's no design yet - starting from a description", no: 'Det finnes ikke noe design ennå - starter fra en beskrivelse' },
+      { value: 'permitted', en: "Someone else's design - shared with permission", no: 'Andres design - delt med tillatelse' },
+      { value: 'none-yet', en: 'No design yet - starting from a description', no: 'Ikke noe design ennå - starter fra en beskrivelse' },
     ],
   },
   {
@@ -148,21 +159,75 @@ export const BASE_FIELDS = [
     label: { en: 'Approximate size (L x W x H)', no: 'Omtrentlig størrelse (L x B x H)' },
   },
   {
-    id: 'material',
-    type: 'select',
+    // Properties instead of a named filament - choosing between similar
+    // materials (e.g. PETG vs. ASA for outdoor use, or a reinforced CF/GF
+    // blend for "rigid") is a judgement call that belongs with whoever's
+    // printing it, not the customer. Nothing checked means no special
+    // requirements. materialName below is the escape hatch for anyone who
+    // already has a specific material in mind, not limited to whichever
+    // ones are common enough to list here.
+    //
+    // Each option carries a concrete example, same pattern as ORDER_TYPES -
+    // "heat" alone gives a noob nothing to anchor to, and "flex" needs the
+    // example to disambiguate "the material itself should bend" (TPU)
+    // from "it occasionally gets bent by accident" (that's toughness,
+    // already covered by "wear").
+    id: 'materialProperties',
+    type: 'checkboxGroup',
     required: false,
-    label: { en: 'Material preference', no: 'Materialpreferanse' },
+    label: { en: 'Does it need to handle any of these?', no: 'Må den tåle noe av dette?' },
     options: [
-      { value: 'not-sure', en: "Not sure - I'd like a recommendation", no: 'Ikke sikker - ønsker en anbefaling' },
-      { value: 'pla', en: 'PLA', no: 'PLA' },
-      { value: 'petg', en: 'PETG', no: 'PETG' },
-      { value: 'abs-asa', en: 'ABS / ASA', no: 'ABS / ASA' },
-      { value: 'tpu', en: 'TPU (flexible)', no: 'TPU (fleksibel)' },
-      { value: 'other', en: 'Other (describe below)', no: 'Annet (beskriv under)' },
+      {
+        value: 'outdoor',
+        label: { en: 'Outdoors or in the sun', no: 'Utendørs eller i sol' },
+        example: { en: 'Garden furniture, a car, a boat.', no: 'Hagemøbler, en bil, en båt.' },
+      },
+      {
+        value: 'heat',
+        label: { en: 'Heat', no: 'Varme' },
+        example: {
+          en: 'A stove, an engine bay, hot water - not just warm hands.',
+          no: 'En komfyr, motorrom, varmt vann - ikke bare varme hender.',
+        },
+      },
+      {
+        value: 'rigid',
+        label: { en: 'Staying rigid under load', no: 'Å holde seg stiv under belastning' },
+        example: {
+          en: "A shelf bracket, a mounting arm - shouldn't sag.",
+          no: 'En hyllebrakett, en monteringsarm - skal ikke henge.',
+        },
+      },
+      {
+        value: 'flex',
+        label: { en: 'Needs to flex', no: 'Trenger å bøye seg' },
+        example: {
+          en: 'Bends on purpose - a hinge, a strap, a phone case.',
+          no: 'Bøyer seg med hensikt - et hengsel, en stropp, et mobildeksel.',
+        },
+      },
+      {
+        value: 'wear',
+        label: { en: 'Everyday bumps and wear', no: 'Daglig bruk og støt' },
+        example: {
+          en: 'Gets picked up, knocked, or dropped a lot.',
+          no: 'Blir løftet, dyttet eller mistet i bakken ofte.',
+        },
+      },
     ],
   },
   {
-    id: 'colorFinish',
+    id: 'materialName',
+    type: 'text',
+    required: false,
+    label: { en: 'Already know the material?', no: 'Vet du allerede hvilket materiale?' },
+  },
+  {
+    // Back to "colour and finish" (not colour alone) now that the
+    // requirement grid's surfaceQuality field is gone - finish has no
+    // other structured home, and leaving it to the free-text description
+    // alone would lose it for most enquiries.
+    id: 'color',
     type: 'text',
     required: false,
     label: { en: 'Colour and finish preference', no: 'Farge- og overflatepreferanse' },
@@ -180,22 +245,26 @@ export const BASE_FIELDS = [
     label: { en: 'Company', no: 'Firma' },
   },
   {
+    // Signal used to be folded into the phone field ("Phone or Signal"),
+    // which read as if it were one contact method when it's really two -
+    // and it made the section intro's "phone or email, at least one" claim
+    // technically inaccurate (Signal wasn't actually one of the two named
+    // options). Its own field also drops the need to pattern-match "does
+    // this look like a phone number" to decide whether to reveal a
+    // separate "prefer Signal" checkbox.
     id: 'contactPhone',
     type: 'text',
     required: false,
-    label: { en: 'Phone or Signal', no: 'Telefon eller Signal' },
-    help: {
-      en: 'A phone number, or your Signal username or signal.me link.',
-      no: 'Et telefonnummer, eller Signal-brukernavnet eller signal.me-lenken din.',
-    },
+    label: { en: 'Phone', no: 'Telefon' },
   },
   {
-    id: 'contactPreferSignal',
-    type: 'checkbox',
+    id: 'contactSignal',
+    type: 'text',
     required: false,
-    label: {
-      en: "I'd rather be reached there on Signal",
-      no: 'Jeg vil helst bli kontaktet der på Signal',
+    label: { en: 'Signal', no: 'Signal' },
+    help: {
+      en: 'Username or signal.me link.',
+      no: 'Brukernavn eller signal.me-lenke.',
     },
   },
   {
@@ -209,92 +278,5 @@ export const BASE_FIELDS = [
     type: 'text',
     required: false,
     label: { en: 'Location', no: 'Sted' },
-  },
-];
-
-// The requirement grid: request column only, shown for FULL_SPEC_ORDER_TYPES.
-export const EXTENDED_FIELDS = [
-  {
-    id: 'wallThickness',
-    type: 'text',
-    required: false,
-    label: { en: 'Minimum wall thickness', no: 'Minste godstykkelse' },
-  },
-  {
-    id: 'temperatureRange',
-    type: 'text',
-    required: false,
-    label: { en: 'Temperature range the part must withstand', no: 'Temperaturområde delen må tåle' },
-  },
-  {
-    id: 'humidity',
-    type: 'select',
-    required: false,
-    label: { en: 'Humidity or moisture exposure', no: 'Fukt- eller luftfuktighetseksponering' },
-    options: [
-      { value: 'none', en: 'None expected', no: 'Ingen forventet' },
-      { value: 'occasional', en: 'Occasional damp or splashes', no: 'Fukt eller sprut av og til' },
-      { value: 'constant', en: 'Constant high humidity', no: 'Konstant høy luftfuktighet' },
-      { value: 'submerged', en: 'Submerged or in standing water', no: 'Nedsenket eller i stillestående vann' },
-    ],
-  },
-  {
-    id: 'uvOutdoor',
-    type: 'select',
-    required: false,
-    label: { en: 'Outdoors or in direct sunlight?', no: 'Utendørs eller i direkte sollys?' },
-    options: [
-      { value: 'no', en: 'No', no: 'Nei' },
-      { value: 'partial', en: 'Partial or occasional', no: 'Delvis eller av og til' },
-      { value: 'yes', en: 'Yes, most of the time', no: 'Ja, mesteparten av tiden' },
-    ],
-  },
-  {
-    id: 'impactResistance',
-    type: 'text',
-    required: false,
-    label: { en: 'Impact resistance needed', no: 'Nødvendig slagfasthet' },
-    help: {
-      en: 'e.g. light handling, occasional knocks, heavy impact.',
-      no: 'f.eks. lett håndtering, av og til støt, kraftige slag.',
-    },
-  },
-  {
-    id: 'rigidity',
-    type: 'select',
-    required: false,
-    label: { en: 'Rigid or flexible?', no: 'Stiv eller fleksibel?' },
-    options: [
-      { value: 'rigid', en: 'Rigid', no: 'Stiv' },
-      { value: 'semi-flexible', en: 'Semi-flexible', no: 'Delvis fleksibel' },
-      { value: 'flexible', en: 'Flexible', no: 'Fleksibel' },
-    ],
-  },
-  {
-    id: 'tolerance',
-    type: 'text',
-    required: false,
-    label: { en: 'Tolerance or fit requirement', no: 'Toleranse- eller pasningskrav' },
-    help: {
-      en: 'e.g. must fit into an existing part - describe it.',
-      no: 'f.eks. må passe inn i en eksisterende del - beskriv den.',
-    },
-  },
-  {
-    id: 'surfaceQuality',
-    type: 'select',
-    required: false,
-    label: { en: 'Surface finish requirement', no: 'Krav til overflate' },
-    options: [
-      { value: 'standard', en: 'Standard print finish', no: 'Standard printoverflate' },
-      { value: 'smooth', en: 'Smoothed or sanded', no: 'Glattet eller pusset' },
-      { value: 'paint-ready', no: 'Klar for maling', en: 'Paint-ready' },
-    ],
-  },
-  {
-    id: 'weight',
-    type: 'text',
-    required: false,
-    label: { en: 'Weight target or limit', no: 'Vektmål eller -grense' },
   },
 ];
