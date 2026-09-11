@@ -77,7 +77,7 @@ export const t = {
       sectionSpec: "Specification",
       sectionTiming: "Timing and budget",
       sectionContact: "About you",
-      sectionContactIntro: "Phone, Signal or email - give at least one so I can get back to you. More than one is welcome if you have a preference.",
+      sectionContactIntro: "Phone, Signal or email - give at least one so I can get back to you. Fill in as many as you like.",
       contactMethodRequired: "Give a phone number, Signal, or an email so I can get back to you.",
       optionalTag: "optional",
       choosePlaceholder: "Choose an option",
@@ -86,6 +86,9 @@ export const t = {
       submitNote: "Sending is not yet connected - this is a draft of the form.",
       fileTooLarge: "One or more files are larger than 10 MB - please attach smaller files.",
       chooseFilesLabel: "Choose files",
+      addFilesLabel: "Add more files",
+      removeFileLabel: "Remove {file}",
+      fileReplaceNote: "Your browser replaces the whole list each time you choose files, so pick them in one go.",
     },
   },
   no: {
@@ -166,7 +169,7 @@ export const t = {
       sectionSpec: "Spesifikasjon",
       sectionTiming: "Tidsramme og budsjett",
       sectionContact: "Om deg",
-      sectionContactIntro: "Telefon, Signal eller e-post - oppgi minst én så jeg kan ta kontakt. Gjerne flere hvis du har en preferanse.",
+      sectionContactIntro: "Telefon, Signal eller e-post - oppgi minst én så jeg kan ta kontakt. Fyll gjerne ut flere.",
       contactMethodRequired: "Oppgi et telefonnummer, Signal eller en e-postadresse så jeg kan ta kontakt.",
       optionalTag: "valgfritt",
       choosePlaceholder: "Velg et alternativ",
@@ -175,6 +178,9 @@ export const t = {
       submitNote: "Innsending er ikke koblet til noe ennå - dette er et utkast av skjemaet.",
       fileTooLarge: "Én eller flere filer er større enn 10 MB - last opp mindre filer.",
       chooseFilesLabel: "Velg filer",
+      addFilesLabel: "Legg til flere filer",
+      removeFileLabel: "Fjern {file}",
+      fileReplaceNote: "Nettleseren din erstatter hele lista hver gang du velger filer, så ta dem i én omgang.",
     },
   }
 }
