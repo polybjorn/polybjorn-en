@@ -3,6 +3,7 @@ import Layout from '../layouts/Layout.astro';
 import { t } from '../data/translations.js';
 import { BASE_FIELDS, PRINT_ONLY_FIELD_IDS } from '../data/intakeForm.js';
 import { ArrowLeft } from 'lucide-astro';
+import IntakeField from './IntakeField.astro';
 
 interface Props {
   lang: 'en' | 'no';
@@ -21,6 +22,16 @@ const aboutRestFields = ['projectName', 'description', 'fileUpload'].map(byId);
 const specFields = ['size', 'materialProperties', 'materialName', 'color', 'copyright'].map(byId);
 const timingFields = ['quantity', 'targetDate', 'budget'].map(byId);
 const contactFields = ['contactName', 'contactCompany', 'contactPhone', 'contactSignal', 'contactEmail', 'contactLocation'].map(byId);
+
+// Single source for the dots, the "2 / 4" counter and the screen-reader
+// announcement, so they cannot drift out of step with the actual stages.
+const STAGE_IDS = ['stage-about', 'stage-spec', 'stage-timing', 'stage-contact'];
+const stageLabels = {
+  'stage-about': td.sectionAbout,
+  'stage-spec': td.sectionSpec,
+  'stage-timing': td.sectionTiming,
+  'stage-contact': td.sectionContact,
+};
 ---
 
 <Layout
@@ -120,6 +131,23 @@ const contactFields = ['contactName', 'contactCompany', 'contactPhone', 'contact
       font-size: 0.88rem;
     }
 
+    .field-error {
+      font-size: 0.88rem;
+      color: #f0907f;
+      margin: 0.4rem 0 0;
+      line-height: 1.4;
+    }
+
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+    }
+
     .field-help {
       font-size: 0.88rem;
       color: #888;
@@ -128,8 +156,8 @@ const contactFields = ['contactName', 'contactCompany', 'contactPhone', 'contact
     }
 
     input[type="text"],
-    input[type="date"],
-    input[type="file"],
+    input[type="email"],
+    input[type="tel"],
     textarea,
     select {
       width: 100%;
@@ -138,7 +166,9 @@ const contactFields = ['contactName', 'contactCompany', 'contactPhone', 'contact
       border-radius: 8px;
       color: #dde1e7;
       font-family: 'Piazzolla', serif;
-      font-size: 0.98rem;
+      /* Not below 1rem: iOS Safari zooms the viewport when a control with a
+         font under 16px takes focus, and each stage change focuses one. */
+      font-size: 1rem;
       padding: 0.65rem 0.8rem;
     }
 
@@ -325,7 +355,8 @@ const contactFields = ['contactName', 'contactCompany', 'contactPhone', 'contact
       bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
       transform: translateX(-50%);
       display: flex;
-      gap: 0.55rem;
+      align-items: center;
+      gap: 0.6rem;
       margin: 0;
       padding: 0.55rem 0.9rem;
       background: rgba(30, 34, 40, 0.85);
@@ -333,6 +364,21 @@ const contactFields = ['contactName', 'contactCompany', 'contactPhone', 'contact
       border: 1px solid #3a3f47;
       border-radius: 999px;
       z-index: 100;
+    }
+
+    .progress-dots .dots {
+      display: flex;
+      gap: 0.55rem;
+    }
+
+    /* The dots alone are a 7px cue that is easy to miss on a phone - the
+       count spells out how much form is left. */
+    .progress-count {
+      font-family: 'Piazzolla', serif;
+      font-size: 0.75rem;
+      line-height: 1;
+      color: #8b939e;
+      font-variant-numeric: tabular-nums;
     }
 
     .progress-dots .dot {
@@ -383,13 +429,16 @@ const contactFields = ['contactName', 'contactCompany', 'contactPhone', 'contact
     <p class="confidentiality">{td.confidentialityNote}</p>
 
     <div class="progress-dots" aria-hidden="true">
-      <span class="dot" data-dot="stage-about"></span>
-      <span class="dot" data-dot="stage-spec"></span>
-      <span class="dot" data-dot="stage-timing"></span>
-      <span class="dot" data-dot="stage-contact"></span>
+      <span class="dots">
+        {STAGE_IDS.map(id => <span class="dot" data-dot={id}></span>)}
+      </span>
+      <span class="progress-count" id="progress-count">1 / {STAGE_IDS.length}</span>
     </div>
 
-    <form id="intake-form" novalidate>
+    <!-- The dots are decorative; this is how a screen reader hears a stage change. -->
+    <p class="visually-hidden" id="stage-announce" aria-live="polite"></p>
+
+    <form id="intake-form" method="post" enctype="multipart/form-data" novalidate>
       <!--
         Honeypot: real visitors never see or fill this. A submission that
         arrives with it non-empty is worth dropping server-side - the check
@@ -401,193 +450,49 @@ const contactFields = ['contactName', 'contactCompany', 'contactPhone', 'contact
         <input type="text" id="website" name="website" tabindex="-1" autocomplete="off" />
       </div>
 
-      <fieldset id="stage-about">
+      <fieldset id="stage-about" class="stage" tabindex="-1">
         <legend class="section-heading">{td.sectionAbout}</legend>
 
-        <div class="field">
-          <fieldset>
-            <legend class="field-label">{deliverableField.label[lang]}</legend>
-            <div class="option-list">
-              {deliverableField.options.map(opt => (
-                <label>
-                  <input type="radio" name="deliverable" value={opt.value} required />
-                  <span class="option-label">{opt[lang]}</span>
-                </label>
-              ))}
-            </div>
-          </fieldset>
+        <IntakeField field={deliverableField} lang={lang} td={td} />
+
+        <div id="order-type-question" class="stage-group" tabindex="-1" hidden>
+          <IntakeField field={orderTypeField} lang={lang} td={td} />
         </div>
 
-        <div id="order-type-question" class="stage-group" hidden>
-          <div class="field">
-            <fieldset>
-              <legend class="field-label">{orderTypeField.label[lang]}</legend>
-              <div class="option-list">
-                {orderTypeField.options.map(opt => (
-                  <label>
-                    <input type="radio" name="orderType" value={opt.value} required />
-                    <span class="option-text">
-                      <span class="option-label">{opt.label[lang]}</span>
-                      <span class="option-example">{opt.example[lang]}</span>
-                    </span>
-                  </label>
-                ))}
-              </div>
-            </fieldset>
-          </div>
-        </div>
-
-        <div id="about-rest" class="stage-group" hidden>
-          {aboutRestFields.map(field => (
-            <div class="field">
-              {field.type === 'textarea' ? (
-                <>
-                  <label class="field-label" for={field.id}>
-                    {field.label[lang]}
-                    {!field.required && <span class="optional-tag"> ({td.optionalTag})</span>}
-                  </label>
-                  <textarea id={field.id} name={field.id} required={field.required}></textarea>
-                </>
-              ) : field.type === 'file' ? (
-                <>
-                  <label class="field-label" for={field.id}>
-                    {field.label[lang]}
-                    {!field.required && <span class="optional-tag"> ({td.optionalTag})</span>}
-                  </label>
-                  <!--
-                    The input stays real and focusable (visually hidden, not
-                    `hidden`) so the native file picker and keyboard use
-                    still work - "Browse"/"Choose File" is the browser's own
-                    UI language, not ours, so a styled label is the only way
-                    to get Norwegian text on the trigger itself.
-                  -->
-                  <input
-                    type="file"
-                    id={field.id}
-                    name={field.id}
-                    accept={field.accept}
-                    multiple={field.multiple}
-                    class="file-input-visually-hidden"
-                  />
-                  <label for={field.id} class="file-trigger">{td.chooseFilesLabel}</label>
-                  <span class="file-status" id={`${field.id}-status`} hidden></span>
-                </>
-              ) : (
-                <>
-                  <label class="field-label" for={field.id}>
-                    {field.label[lang]}
-                    {!field.required && <span class="optional-tag"> ({td.optionalTag})</span>}
-                  </label>
-                  <input type="text" id={field.id} name={field.id} required={field.required} />
-                </>
-              )}
-              {field.help && <p class="field-help">{field.help[lang]}</p>}
-            </div>
-          ))}
+        <div id="about-rest" class="stage-group" tabindex="-1" hidden>
+          {aboutRestFields.map(field => <IntakeField field={field} lang={lang} td={td} />)}
           <div class="continue-row">
             <button type="button" class="continue-btn" data-continue="about" disabled>{td.continueLabel}</button>
           </div>
         </div>
       </fieldset>
 
-      <fieldset id="stage-spec" class="stage" hidden>
+      <fieldset id="stage-spec" class="stage" tabindex="-1" hidden>
         <legend class="section-heading">{td.sectionSpec}</legend>
-        {specFields.map(field => (
-          <div class="field" data-field={field.id}>
-            {field.type === 'select' ? (
-              <>
-                <label class="field-label" for={field.id}>
-                  {field.label[lang]}
-                  {!field.required && <span class="optional-tag"> ({td.optionalTag})</span>}
-                </label>
-                <select id={field.id} name={field.id} required={field.required}>
-                  <option value="" disabled selected>{td.choosePlaceholder}</option>
-                  {field.options.map(opt => (
-                    <option value={opt.value}>{opt[lang]}</option>
-                  ))}
-                </select>
-              </>
-            ) : field.type === 'checkboxGroup' ? (
-              <fieldset>
-                <legend class="field-label">
-                  {field.label[lang]}
-                  <span class="optional-tag"> ({td.optionalTag})</span>
-                </legend>
-                <div class="option-list">
-                  {field.options.map(opt => (
-                    <label>
-                      <input type="checkbox" name={`${field.id}[]`} value={opt.value} />
-                      <span class="option-text">
-                        <span class="option-label">{opt.label[lang]}</span>
-                        <span class="option-example">{opt.example[lang]}</span>
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              </fieldset>
-            ) : (
-              <>
-                <label class="field-label" for={field.id}>
-                  {field.label[lang]}
-                  {!field.required && <span class="optional-tag"> ({td.optionalTag})</span>}
-                </label>
-                <input type="text" id={field.id} name={field.id} required={field.required} />
-              </>
-            )}
-            {field.help && <p class="field-help">{field.help[lang]}</p>}
-          </div>
-        ))}
+        {specFields.map(field => <IntakeField field={field} lang={lang} td={td} />)}
         <div class="continue-row">
           <button type="button" class="continue-btn" data-continue="spec" disabled>{td.continueLabel}</button>
         </div>
       </fieldset>
 
-      <fieldset id="stage-timing" class="stage" hidden>
+      <fieldset id="stage-timing" class="stage" tabindex="-1" hidden>
         <legend class="section-heading">{td.sectionTiming}</legend>
-        {timingFields.map(field => (
-          <div class="field" data-field={field.id}>
-            {field.type === 'select' ? (
-              <>
-                <label class="field-label" for={field.id}>
-                  {field.label[lang]}
-                  {!field.required && <span class="optional-tag"> ({td.optionalTag})</span>}
-                </label>
-                <select id={field.id} name={field.id} required={field.required}>
-                  <option value="" disabled selected>{td.choosePlaceholder}</option>
-                  {field.options.map(opt => (
-                    <option value={opt.value}>{opt[lang]}</option>
-                  ))}
-                </select>
-              </>
-            ) : (
-              <>
-                <label class="field-label" for={field.id}>
-                  {field.label[lang]}
-                  {!field.required && <span class="optional-tag"> ({td.optionalTag})</span>}
-                </label>
-                <input type="text" id={field.id} name={field.id} required={field.required} />
-              </>
-            )}
-            {field.help && <p class="field-help">{field.help[lang]}</p>}
-          </div>
-        ))}
+        {timingFields.map(field => <IntakeField field={field} lang={lang} td={td} />)}
         <div class="continue-row">
           <button type="button" class="continue-btn" data-continue="timing" disabled>{td.continueLabel}</button>
         </div>
       </fieldset>
 
-      <fieldset id="stage-contact" class="stage" hidden>
+      <fieldset id="stage-contact" class="stage" tabindex="-1" hidden>
         <legend class="section-heading">{td.sectionContact}</legend>
-        {contactFields.map(field => (
-          <div class="field">
-            <label class="field-label" for={field.id}>
-              {field.label[lang]}
-              {!field.required && <span class="optional-tag"> ({td.optionalTag})</span>}
-            </label>
-            <input type="text" id={field.id} name={field.id} required={field.required} />
-            {field.help && <p class="field-help">{field.help[lang]}</p>}
-          </div>
-        ))}
+        <!--
+          Phone, Signal and email are each optional on their own but one of
+          the three is required. Without this line the only statement of that
+          rule was a validation message at the very end of the form, under
+          three fields all labelled "(optional)".
+        -->
+        <p class="section-intro">{td.sectionContactIntro}</p>
+        {contactFields.map(field => <IntakeField field={field} lang={lang} td={td} />)}
 
         <div class="submit-row">
           <button type="submit">{td.submitLabel}</button>
@@ -597,58 +502,91 @@ const contactFields = ['contactName', 'contactCompany', 'contactPhone', 'contact
     </form>
   </main>
 
-  <script define:vars={{ printOnlyFieldIds: PRINT_ONLY_FIELD_IDS, contactMethodRequired: td.contactMethodRequired, fileTooLarge: td.fileTooLarge }}>
+  <script define:vars={{ printOnlyFieldIds: PRINT_ONLY_FIELD_IDS, stageIds: STAGE_IDS, stageLabels, contactMethodRequired: td.contactMethodRequired, fileTooLarge: td.fileTooLarge }}>
     const form = document.getElementById('intake-form');
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+    // Reports whether it actually revealed anything, so callers can move
+    // focus on the first reveal only. Re-answering the deliverable or
+    // order-type question from further down the form used to yank focus (and
+    // with it, on a phone, the on-screen keyboard) back up to a section the
+    // visitor had already passed.
     function reveal(el) {
-      if (!el || !el.hidden) return;
+      if (!el || !el.hidden) return false;
       el.hidden = false;
-      if (prefersReducedMotion) return;
-      el.classList.add('stage-entering');
-      requestAnimationFrame(() => requestAnimationFrame(() => el.classList.remove('stage-entering')));
+      if (!prefersReducedMotion) {
+        el.classList.add('stage-entering');
+        requestAnimationFrame(() => requestAnimationFrame(() => el.classList.remove('stage-entering')));
+      }
+      return true;
     }
 
-    function focusFirstField(el) {
-      const field = el.querySelector('input, select, textarea');
-      if (field) field.focus();
+    // Focus the revealed container (each carries tabindex="-1"), not the
+    // first field inside it. Focusing a text input opens the keyboard the
+    // instant a radio is tapped, and the first field is not always visible:
+    // quantity is hidden on the model-only path, and focus() on a hidden
+    // element silently does nothing, which dropped keyboard users back at the
+    // top of the document. preventScroll keeps focus from fighting the smooth
+    // scroll in advance().
+    function focusContainer(el) {
+      el.focus({ preventScroll: true });
     }
+
+    const progressCount = document.getElementById('progress-count');
+    const stageAnnounce = document.getElementById('stage-announce');
+    const dots = Object.fromEntries(stageIds.map(id => [id, document.querySelector('[data-dot="' + id + '"]')]));
+
+    function setActiveStage(stageId, announce) {
+      const activeIndex = stageIds.indexOf(stageId);
+      stageIds.forEach((id, i) => {
+        const dot = dots[id];
+        if (!dot) return;
+        dot.classList.remove('dot-done', 'dot-active');
+        if (i < activeIndex) dot.classList.add('dot-done');
+        else if (i === activeIndex) dot.classList.add('dot-active');
+      });
+      progressCount.textContent = (activeIndex + 1) + ' / ' + stageIds.length;
+      // Only on a real stage change - announcing on page load would talk over
+      // the heading a screen reader is already reading.
+      if (announce) stageAnnounce.textContent = stageLabels[stageId] + ', ' + (activeIndex + 1) + ' / ' + stageIds.length;
+    }
+
+    setActiveStage('stage-about', false);
 
     function advance(button, nextStage) {
       const row = button.closest('.continue-row');
       if (row) row.hidden = true;
       reveal(nextStage);
       nextStage.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth', block: 'start' });
-      focusFirstField(nextStage);
-      setActiveDot(nextStage.id);
+      focusContainer(nextStage);
+      setActiveStage(nextStage.id, true);
     }
 
-    // Progress dots: purely decorative, tracks which stage is current.
-    const dotOrder = ['stage-about', 'stage-spec', 'stage-timing', 'stage-contact'];
-    const dots = Object.fromEntries(dotOrder.map(id => [id, document.querySelector(`[data-dot="${id}"]`)]));
+    // A Continue button unlocks once every control in its own stage is valid,
+    // not just the required ones: an oversized attachment sets a custom
+    // validity on the file input, and gating on that blocks the section the
+    // file was chosen in instead of surfacing three sections later at submit.
+    const continueUpdaters = [];
 
-    function setActiveDot(stageId) {
-      const activeIndex = dotOrder.indexOf(stageId);
-      dotOrder.forEach((id, i) => {
-        const dot = dots[id];
-        dot.classList.remove('dot-done', 'dot-active');
-        if (i < activeIndex) dot.classList.add('dot-done');
-        else if (i === activeIndex) dot.classList.add('dot-active');
-      });
-    }
-
-    setActiveDot('stage-about');
-
-    // A Continue button unlocks once every required field in its own stage
-    // is valid.
     function wireContinue(stageEl, button) {
       function update() {
-        const required = stageEl.querySelectorAll('[required]');
-        button.disabled = !Array.from(required).every(f => f.checkValidity());
+        const controls = stageEl.querySelectorAll('input, select, textarea');
+        button.disabled = !Array.from(controls).every(control => control.checkValidity());
       }
       stageEl.addEventListener('input', update);
       stageEl.addEventListener('change', update);
+      continueUpdaters.push(update);
       update();
+    }
+
+    // A stage's own input/change listeners never see a change made in an
+    // earlier stage, so anything that alters a later stage's validity has to
+    // ask for a recount. Without this, choosing "just the 3D model" left the
+    // timing stage's Continue button disabled on a stale reading of a
+    // quantity field that is no longer in play, with nothing else in that
+    // section required - a dead end with no way forward.
+    function refreshContinueButtons() {
+      continueUpdaters.forEach(update => update());
     }
 
     const orderTypeQuestion = document.getElementById('order-type-question');
@@ -665,60 +603,52 @@ const contactFields = ['contactName', 'contactCompany', 'contactPhone', 'contact
     wireContinue(stageSpec, continueSpec);
     wireContinue(stageTiming, continueTiming);
 
+    // Print-only fields don't apply to a model-only request. They are hidden
+    // and disabled rather than cleared: a disabled control is barred from
+    // constraint validation and left out of the submitted FormData, so a
+    // model-only visitor is not gated on quantity (required on the printed
+    // path) and no stale material or quantity value rides along on a
+    // model-only enquiry - while anything already typed survives a switch
+    // back to "printed".
+    function updateDeliverableFields() {
+      const checked = form.querySelector('input[name="deliverable"]:checked');
+      const modelOnly = checked ? checked.value === 'model-only' : false;
+      printOnlyFieldIds.forEach(id => {
+        const wrapper = form.querySelector('[data-field="' + id + '"]');
+        if (!wrapper) return;
+        wrapper.hidden = modelOnly;
+        wrapper.querySelectorAll('input, select, textarea').forEach(control => {
+          control.disabled = modelOnly;
+        });
+      });
+      refreshContinueButtons();
+    }
+
     // Deliverable reveals order type, which reveals the rest of "About the
     // part" - two sequential reveals within the same first stage.
     form.addEventListener('change', (event) => {
       if (event.target.name === 'deliverable') {
-        reveal(orderTypeQuestion);
-        focusFirstField(orderTypeQuestion);
-        updatePrintOnlyFields();
-        updateQuantityRequirement();
+        updateDeliverableFields();
+        if (reveal(orderTypeQuestion)) focusContainer(orderTypeQuestion);
       }
       if (event.target.name === 'orderType') {
-        reveal(aboutRest);
-        focusFirstField(aboutRest);
+        if (reveal(aboutRest)) focusContainer(aboutRest);
       }
     });
+
+    // Restores the reveal state when a browser repopulates the form on back
+    // navigation.
     if (form.querySelector('input[name="deliverable"]:checked')) reveal(orderTypeQuestion);
     if (form.querySelector('input[name="orderType"]:checked')) reveal(aboutRest);
-
-    // Print-only fields (material, colour) don't apply to a model-only
-    // request - hidden rather than removed, so switching back to "printed"
-    // restores whatever was already filled in.
-    function updatePrintOnlyFields() {
-      const deliverable = form.querySelector('input[name="deliverable"]:checked');
-      const modelOnly = deliverable ? deliverable.value === 'model-only' : false;
-      printOnlyFieldIds.forEach(id => {
-        const wrapper = form.querySelector(`[data-field="${id}"]`);
-        if (wrapper) wrapper.hidden = modelOnly;
-      });
-    }
-    updatePrintOnlyFields();
-
-    // "How many do you need?" doesn't mean anything for a model-only
-    // request either, but unlike material/colour it's required - so
-    // hiding it also has to drop the required attribute, or a model-only
-    // customer would be stuck behind a Continue button gated on a field
-    // they can no longer see or fill in.
-    const quantityWrapper = form.querySelector('[data-field="quantity"]');
-    const quantityField = document.getElementById('quantity');
-
-    function updateQuantityRequirement() {
-      const deliverable = form.querySelector('input[name="deliverable"]:checked');
-      const modelOnly = deliverable ? deliverable.value === 'model-only' : false;
-      quantityWrapper.hidden = modelOnly;
-      quantityField.required = !modelOnly;
-    }
-    updateQuantityRequirement();
+    updateDeliverableFields();
 
     continueAbout.addEventListener('click', () => advance(continueAbout, stageSpec));
-
     continueSpec.addEventListener('click', () => advance(continueSpec, stageTiming));
-
     continueTiming.addEventListener('click', () => advance(continueTiming, stageContact));
 
-    // None of phone/Signal/email is individually required - one of the
-    // three is.
+    // None of phone/Signal/email is individually required - one of the three
+    // is. The message is parked on the email field so reportValidity() has
+    // somewhere to show it.
     const emailField = document.getElementById('contactEmail');
     const phoneField = document.getElementById('contactPhone');
     const contactSignalField = document.getElementById('contactSignal');
@@ -739,21 +669,33 @@ const contactFields = ['contactName', 'contactCompany', 'contactPhone', 'contact
     const MAX_FILE_BYTES = 10 * 1024 * 1024;
     const fileInput = document.getElementById('fileUpload');
     const fileStatus = document.getElementById('fileUpload-status');
+    const fileError = document.getElementById('fileUpload-error');
 
     fileInput.addEventListener('change', () => {
-      const oversized = Array.from(fileInput.files).some(file => file.size > MAX_FILE_BYTES);
+      const files = Array.from(fileInput.files);
+      const oversized = files.some(file => file.size > MAX_FILE_BYTES);
+      // The input is clipped to 1px so the trigger label can carry Norwegian
+      // text, which means a native validation bubble aimed at it lands on
+      // something nobody can see. The custom validity still locks Continue
+      // (wireContinue checks every control, not just the required ones);
+      // this line is what the visitor actually reads.
       fileInput.setCustomValidity(oversized ? fileTooLarge : '');
-      fileStatus.hidden = fileInput.files.length === 0;
-      fileStatus.textContent = Array.from(fileInput.files).map(file => file.name).join(', ');
+      fileError.hidden = !oversized;
+      fileError.textContent = oversized ? fileTooLarge : '';
+      fileStatus.hidden = files.length === 0;
+      fileStatus.textContent = files.map(file => file.name).join(', ');
     });
 
     // Stub: no endpoint is wired up yet. See issue #2 for the mail-based
     // delivery design; this only needs to exist so the form is testable.
+    // method and enctype are set on the form already so that wiring it up
+    // later is one action attribute, not a silent switch to a urlencoded
+    // POST that drops every attachment.
     //
     // The form is novalidate (native bubbles were fighting the stage
     // reveal), so nothing blocks a bad submit unless reportValidity() is
     // called explicitly - it still respects setCustomValidity (the
-    // contact-method gate) and every `required` field even with novalidate
+    // contact-method gate) and every required field even with novalidate
     // set, and shows the native error UI on whichever field is invalid.
     form.addEventListener('submit', (event) => {
       event.preventDefault();
