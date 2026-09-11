@@ -59,18 +59,37 @@ export const ORDER_TYPES = [
 // distinction on their own. They are nouns because they answer "what", not
 // "is it".
 //
-// ORDER_TYPES below is deliberately not cut this way: its question does not
-// name its options, and its examples say something its labels do not.
+// One choice, not two ticks. This was briefly a checkbox group where ticking
+// the part also ticked the model, to show that a print includes the file -
+// but that made everyone decide about the file, including the many who have no
+// opinion on it, and a box that ticks itself reads as a glitch rather than as
+// generosity. The form only needs one fact here: is anything being printed.
+//
+// So both are checkboxes, and ticking the part ticks the model and then locks
+// it: the bundle is shown, and it is visibly not up for negotiation. An earlier
+// version left the model tick undoable, which turned out to be the confusing
+// part - not the tick appearing, but not knowing whether you were allowed to
+// remove it. Greying it out answers that before it is asked.
+//
+// The printed option keeps its description. A greyed tick on its own says
+// "unavailable" as readily as "included"; the sentence is what makes it the
+// second one.
 export const DELIVERABLE_TYPES = [
   {
     value: 'printed',
-    en: 'A printed part',
-    no: 'Printet del',
+    label: { en: 'A printed part', no: 'Printet del' },
+    // Describes this option only. It sat on the question for a while, where it
+    // read as a note about the whole group - but it says nothing about the
+    // other choice, where "the model comes with what I print" is not just
+    // irrelevant but untrue of anything being ordered.
+    example: {
+      en: 'The 3D model comes with it.',
+      no: '3D-modellen følger med.',
+    },
   },
   {
-    value: 'model-only',
-    en: 'A 3D model',
-    no: '3D-modell',
+    value: 'model',
+    label: { en: 'A 3D model', no: '3D-modell' },
   },
 ];
 
@@ -79,14 +98,17 @@ export const DELIVERABLE_TYPES = [
 // request. Disabling (rather than clearing) is what keeps a model-only
 // customer from being gated on `quantity`, which is required on the printed
 // path: a disabled control is barred from constraint validation and left out
-// of the submitted FormData, while its value survives for anyone who
-// switches back to "printed".
+// of the submitted FormData, while its value survives for anyone who switches
+// back to "printed".
 export const PRINT_ONLY_FIELD_IDS = ['materialProperties', 'materialName', 'color', 'quantity'];
 
 export const BASE_FIELDS = [
   {
+    // A checkbox group with its own "at least one" rule, enforced in
+    // IntakeForm.astro - there is no native required for a group of
+    // checkboxes the way there is for a radio group.
     id: 'deliverable',
-    type: 'radio',
+    type: 'checkboxGroup',
     required: true,
     label: { en: 'What do you need?', no: 'Hva trenger du?' },
     options: DELIVERABLE_TYPES,
