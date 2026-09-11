@@ -296,6 +296,7 @@ const stageLabels = {
         <legend class="section-heading">{td.sectionAbout}</legend>
 
         <IntakeField field={deliverableField} lang={lang} td={td} />
+        <input type="hidden" name="deliverable[]" value="model" id="deliverable-model-implied" disabled />
 
         <div id="order-type-question" class="stage-group" tabindex="-1" hidden>
           <IntakeField field={orderTypeField} lang={lang} td={td} />
@@ -351,7 +352,7 @@ const stageLabels = {
     </form>
   </main>
 
-  <script define:vars={{ printOnlyFieldIds: PRINT_ONLY_FIELD_IDS, stageIds: STAGE_IDS, stageLabels, contactMethodRequired: td.contactMethodRequired, fileTooLarge: td.fileTooLarge, chooseFilesLabel: td.chooseFilesLabel, addFilesLabel: td.addFilesLabel, removeFileLabel: td.removeFileLabel, missingFieldMessage: td.missingFieldMessage, invalidEmailMessage: td.invalidEmailMessage, numberLocale: lang === 'no' ? 'nb-NO' : 'en-GB' }}>
+  <script define:vars={{ printOnlyFieldIds: PRINT_ONLY_FIELD_IDS, stageIds: STAGE_IDS, stageLabels, contactMethodRequired: td.contactMethodRequired, deliverableRequired: td.deliverableRequired, modelTickedNote: td.modelTickedNote, fileTooLarge: td.fileTooLarge, chooseFilesLabel: td.chooseFilesLabel, addFilesLabel: td.addFilesLabel, removeFileLabel: td.removeFileLabel, missingFieldMessage: td.missingFieldMessage, invalidEmailMessage: td.invalidEmailMessage, numberLocale: lang === 'no' ? 'nb-NO' : 'en-GB' }}>
     const form = document.getElementById('intake-form');
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -436,6 +437,7 @@ const stageLabels = {
       continueUpdaters.forEach(update => update());
     }
 
+    const stageAbout = document.getElementById('stage-about');
     const orderTypeQuestion = document.getElementById('order-type-question');
     const aboutRest = document.getElementById('about-rest');
     const stageSpec = document.getElementById('stage-spec');
@@ -446,26 +448,72 @@ const stageLabels = {
     const continueSpec = form.querySelector('[data-continue="spec"]');
     const continueTiming = form.querySelector('[data-continue="timing"]');
 
-    wireContinue(aboutRest, continueAbout);
+    wireContinue(stageAbout, continueAbout);
     wireContinue(stageSpec, continueSpec);
     wireContinue(stageTiming, continueTiming);
 
-    // Print-only fields don't apply to a model-only request. They are hidden
-    // and disabled rather than cleared: a disabled control is barred from
-    // constraint validation and left out of the submitted FormData, so a
-    // model-only visitor is not gated on quantity (required on the printed
-    // path) and no stale material or quantity value rides along on a
-    // model-only enquiry - while anything already typed survives a switch
-    // back to "printed".
+    const deliverableBoxes = Array.from(
+      form.querySelectorAll('input[type="checkbox"][name="deliverable[]"]')
+    );
+    const printedBox = deliverableBoxes.find(box => box.value === 'printed');
+    const modelBox = deliverableBoxes.find(box => box.value === 'model');
+    const modelImplied = document.getElementById('deliverable-model-implied');
+
+    // Remembers whether the model was wanted on its own, so unticking the part
+    // puts the box back as the visitor left it rather than leaving behind a
+    // tick they never made.
+    let modelWantedAlone = false;
+
+    // A group of checkboxes has no native "at least one" rule the way a radio
+    // group does, so it gets the same treatment as the contact methods: the
+    // message is parked on the first box for the submit handler to find.
+    function validateDeliverable() {
+      const anyTicked = printedBox.checked || modelBox.checked;
+      printedBox.setCustomValidity(anyTicked ? '' : deliverableRequired);
+    }
+
+    // A print includes its model, so ticking the part ticks the model and then
+    // locks it. Leaving it undoable was the confusing part of an earlier
+    // version: not the tick appearing, but not knowing whether it was allowed
+    // to be removed.
+    function syncDeliverable(changed) {
+      if (changed === modelBox) modelWantedAlone = modelBox.checked;
+
+      const printing = printedBox.checked;
+      if (printing) {
+        const wasUnticked = !modelBox.checked;
+        modelBox.checked = true;
+        modelBox.disabled = true;
+        // Greying it out removes it from the tab order, so a screen reader
+        // never meets it. Announce the one thing seeing it would have told you.
+        if (changed && wasUnticked) stageAnnounce.textContent = modelTickedNote;
+      } else {
+        modelBox.disabled = false;
+        modelBox.checked = modelWantedAlone;
+      }
+
+      // A disabled control submits nothing, so the implied value rides in the
+      // hidden field while the visible one is locked.
+      modelImplied.disabled = !printing;
+
+      validateDeliverable();
+      updateDeliverableFields();
+    }
+
+    // Print-only fields don't apply when nothing is being printed. They are
+    // hidden and disabled rather than cleared: a disabled control is barred
+    // from constraint validation and left out of the submitted FormData, so
+    // someone wanting only the model is not gated on quantity (required once
+    // there is a print) and no stale material or quantity value rides along -
+    // while anything already typed survives ticking the box again.
     function updateDeliverableFields() {
-      const checked = form.querySelector('input[name="deliverable"]:checked');
-      const modelOnly = checked ? checked.value === 'model-only' : false;
+      const printing = printedBox.checked;
       printOnlyFieldIds.forEach(id => {
         const wrapper = form.querySelector('[data-field="' + id + '"]');
         if (!wrapper) return;
-        wrapper.hidden = modelOnly;
+        wrapper.hidden = !printing;
         wrapper.querySelectorAll('input, select, textarea').forEach(control => {
-          control.disabled = modelOnly;
+          control.disabled = !printing;
         });
       });
       refreshContinueButtons();
@@ -474,9 +522,11 @@ const stageLabels = {
     // Deliverable reveals order type, which reveals the rest of "About the
     // part" - two sequential reveals within the same first stage.
     form.addEventListener('change', (event) => {
-      if (event.target.name === 'deliverable') {
-        updateDeliverableFields();
-        if (reveal(orderTypeQuestion)) focusContainer(orderTypeQuestion);
+      if (event.target.name === 'deliverable[]') {
+        syncDeliverable(event.target);
+        if ((printedBox.checked || modelBox.checked) && reveal(orderTypeQuestion)) {
+          focusContainer(orderTypeQuestion);
+        }
       }
       if (event.target.name === 'orderType') {
         if (reveal(aboutRest)) focusContainer(aboutRest);
@@ -485,9 +535,9 @@ const stageLabels = {
 
     // Restores the reveal state when a browser repopulates the form on back
     // navigation.
-    if (form.querySelector('input[name="deliverable"]:checked')) reveal(orderTypeQuestion);
+    if (printedBox.checked || modelBox.checked) reveal(orderTypeQuestion);
     if (form.querySelector('input[name="orderType"]:checked')) reveal(aboutRest);
-    updateDeliverableFields();
+    syncDeliverable(null);
 
     continueAbout.addEventListener('click', () => advance(continueAbout, stageSpec));
     continueSpec.addEventListener('click', () => advance(continueSpec, stageTiming));
