@@ -45,16 +45,29 @@ export const ORDER_TYPES = [
 // want either. It comes first in the form (see IntakeForm.astro) because it
 // decides whether print-specific fields below (material, colour/finish,
 // quantity) are relevant at all.
+//
+// The labels are bare on purpose, and were cut back in two passes. They began
+// as "Printed - a physical part" and "Just the 3D model - I'll print it myself,
+// or don't need it printed", which said the same thing three times over: the
+// question already names both options, then each label repeated its own word,
+// then glossed it - and the second one managed to say "print" twice by itself.
+// The "just"/"bare" went next, for the same reason one step down: the question
+// asks "or JUST the 3D model", so the exclusivity is already stated, and the
+// radio group enforces it anyway. What is left is the two things on offer.
+//
+// Unlike ORDER_TYPES below - whose question does not name its options, and
+// whose examples say something its labels do not - there was never anything
+// here for a gloss to add.
 export const DELIVERABLE_TYPES = [
   {
     value: 'printed',
-    en: 'Printed - a physical part',
-    no: 'Printet - en fysisk del',
+    en: 'Printed',
+    no: 'Printet',
   },
   {
     value: 'model-only',
-    en: "Just the 3D model - I'll print it myself, or don't need it printed",
-    no: 'Bare 3D-modellen - jeg printer selv, eller trenger ikke print',
+    en: '3D model',
+    no: '3D-modell',
   },
 ];
 
@@ -110,8 +123,8 @@ export const BASE_FIELDS = [
     multiple: true,
     label: { en: 'Attach files', no: 'Legg ved filer' },
     help: {
-      en: 'Photos, a sketch, or a 3D file (STEP or STL) - about 10 MB per file. Add them over several goes if it is easier, and remove any from the list. For a physical sample, a photo is a good start - I may ask to borrow it if that\'s not enough.',
-      no: 'Bilder, en skisse, eller en 3D-fil (STEP eller STL) - ca. 10 MB per fil. Legg dem gjerne til i flere omganger, og fjern det du vil fra lista. Har du en fysisk prøve, er et bilde en god start - jeg spør gjerne om å låne den hvis bildet ikke er nok.',
+      en: 'Photos, a sketch, or a 3D file (STEP or STL). About 10 MB per file. A photo of a physical sample is a good start.',
+      no: 'Bilder, en skisse eller en 3D-fil (STEP eller STL). Ca. 10 MB per fil. Har du en fysisk prøve, er et bilde en god start.',
     },
   },
   {
