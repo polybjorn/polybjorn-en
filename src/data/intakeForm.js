@@ -159,8 +159,8 @@ export const BASE_FIELDS = [
     multiple: true,
     label: { en: 'Attach files', no: 'Legg ved filer' },
     help: {
-      en: 'Photos, sketches or 3D files. About 10 MB per file.',
-      no: 'Bilder, skisser eller 3D-filer. Ca. 10 MB per fil.',
+      en: 'Photos, sketches or 3D files. 10 MB per file.',
+      no: 'Bilder, skisser eller 3D-filer. 10 MB per fil.',
     },
   },
   {

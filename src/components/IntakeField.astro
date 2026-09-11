@@ -223,7 +223,7 @@ const optionLabel = (opt: any) => (opt.label ? opt.label[lang] : opt[lang]);
 
       .file-pick {
         display: flex;
-        align-items: flex-start;
+        align-items: center;
         gap: 0.9rem;
       }
 
@@ -237,6 +237,7 @@ const optionLabel = (opt: any) => (opt.label ? opt.label[lang] : opt[lang]);
       @media (max-width: 600px) {
         .file-pick {
           flex-direction: column;
+          align-items: flex-start;
           gap: 0.5rem;
         }
       }
