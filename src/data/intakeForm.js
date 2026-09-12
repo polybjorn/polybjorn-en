@@ -169,6 +169,10 @@ export const BASE_FIELDS = [
     // anything, since a determined upload can ignore it. Real validation of
     // what arrives belongs server-side (nixfleet#87).
     multiple: true,
+    // Hidden, not removed: the field's own button says "Velg filer" two lines
+    // below, so the heading above it was the same instruction twice. The text
+    // still names the question in the receipt and for a screen reader.
+    labelHidden: true,
     label: { en: 'Attach files', no: 'Legg ved filer' },
     help: {
       en: 'Photos, sketches or 3D files. 10 MB per file.',
@@ -238,7 +242,7 @@ export const BASE_FIELDS = [
     id: 'quantity',
     type: 'text',
     required: false,
-    label: { en: 'How many do you need?', no: 'Hvor mange trenger du?' },
+    label: { en: 'How many?', no: 'Hvor mange?' },
     placeholder: { en: '5, or 5 to 10', no: '5, eller 5 til 10' },
   },
   {
@@ -282,7 +286,7 @@ export const BASE_FIELDS = [
     // The six below the fold. Half of these questions only come up in specific
     // work, and a requirement nobody has is still a line everybody reads.
     advancedLabel: { en: 'Special requirements', no: 'Spesielle krav' },
-    label: { en: 'Does any of this matter for the part?', no: 'Er noe av dette viktig for delen?' },
+    label: { en: 'Important for the part?', no: 'Viktig for delen?' },
     options: [
       {
         // "Hele året" carries the frost, which is the point of the label: a

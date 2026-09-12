@@ -70,6 +70,26 @@ for (const { path, lang } of PAGES) {
     assert.equal(css(value).marginLeft, '0px', "the browser's default dd indent is off");
   });
 
+  test(`${lang}: the file field is named once on screen, twice underneath`, async () => {
+    const dom = loadPage(path, { styles: true });
+    const doc = dom.window.document;
+    const field = doc.querySelector('[data-field="fileUpload"]');
+
+    // The button is the only visible name: a heading above it saying the same
+    // thing was the instruction twice.
+    assert.ok(field.querySelector('.file-trigger').textContent.trim().length > 0);
+
+    // The text survives, because the receipt reads .field-label for the
+    // attachments row and a screen reader wants the heading too.
+    const label = field.querySelector('.field-label');
+    assert.ok(label, 'removing it would leave the attachments row unnamed');
+    assert.equal(label.tagName, 'SPAN', 'a second <label for> would join the control name, where it was redundant');
+
+    const style = dom.window.getComputedStyle(label);
+    assert.equal(style.position, 'absolute');
+    assert.equal(style.width, '1px');
+  });
+
   test(`${lang}: the submit warning is centred, not pinned to Send`, async () => {
     const dom = loadPage(path, { styles: true });
     dom.window.fetch = async () => { throw new Error('offline'); };

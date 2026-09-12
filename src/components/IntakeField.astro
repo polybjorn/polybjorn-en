@@ -129,9 +129,23 @@ const placeholder = field.placeholder
     </div>
   ) : (
     <>
-      <label class="field-label" id={`${field.id}-label`} for={field.id}>{field.label[lang]}{field.required && (
-        <span class="required-mark" aria-hidden="true"></span>
-      )}</label>
+      {field.labelHidden ? (
+        /*
+          A span rather than a label, and not a second one for the control. The
+          file field's own button already says "Velg filer" directly underneath,
+          so a heading above it saying "Legg ved filer" was the same instruction
+          twice - but the text still has two jobs: naming the question in the
+          receipt, which reads .field-label, and giving a screen reader the same
+          heading sighted readers get from the button. A second <label for> would
+          add it to the control's accessible name instead, which is where it was
+          already redundant.
+        */
+        <span class="field-label field-label-hidden" id={`${field.id}-label`}>{field.label[lang]}</span>
+      ) : (
+        <label class="field-label" id={`${field.id}-label`} for={field.id}>{field.label[lang]}{field.required && (
+          <span class="required-mark" aria-hidden="true"></span>
+        )}</label>
+      )}
 
       {field.type === 'textarea' && (
         <textarea
@@ -619,6 +633,16 @@ const placeholder = field.placeholder
          still opens the native picker. The visible trigger is the <label>
          below; its focus ring is driven off this input's :focus-visible via
          the sibling selector further down. */
+      .field-label-hidden {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+      }
+
       .file-input-visually-hidden {
         position: absolute;
         width: 1px;
