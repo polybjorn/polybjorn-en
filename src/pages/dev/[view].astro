@@ -21,7 +21,12 @@
 import IntakeForm from '../../components/IntakeForm.astro';
 
 export function getStaticPaths() {
-  if (!import.meta.env.DEV) return [];
+  // Two ways in, and neither is the deploy. `astro dev` has them while someone
+  // is working; `npm run build:preview` puts them in a static build, so a
+  // preview can be served from a machine of ours rather than reviewed by
+  // starting a dev server by hand. A plain `npm run build` - what deploys -
+  // still emits no dev/ directory at all.
+  if (!import.meta.env.DEV && process.env.PREVIEW !== '1') return [];
   return [
     { params: { view: 'enquiry-sent' }, props: { lang: 'en' as const } },
     { params: { view: 'enquiry-sent-no' }, props: { lang: 'no' as const } },
