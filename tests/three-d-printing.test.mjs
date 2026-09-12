@@ -37,17 +37,20 @@ for (const { path, lang, href } of PAGES) {
     assert.ok(existsSync(join(DIST, href.replace(/^\//, ''), 'index.html')), `${href} is not in dist`);
   });
 
-  test(`${lang}: what the form cannot carry is said next to the button`, () => {
-    const doc = loadPage(path).window.document;
-    const note = doc.querySelector('.scope-note');
+  test(`${lang}: the button is the only filled block`, () => {
+    // A fill on this page means something can be pressed. Everything below the
+    // hero used to be a filled, rounded box - images, services and the contact
+    // block, at two greys against a third - so nothing was lifted because
+    // everything was. Keeping this true is a decision, not an accident.
+    const dom = loadPage(path, { styles: true });
+    const doc = dom.window.document;
+    const fill = el => dom.window.getComputedStyle(el).backgroundColor;
+    const unset = fill(doc.querySelector('.hero'));
 
-    // The five-hour block is the one commercial term the form does not ask
-    // about, and the only sentence that survived the section it used to live
-    // in. It sits under the CTA because that is where someone is deciding what
-    // they are committing to.
-    assert.ok(note, 'losing this leaves the page with nothing the form does not already say');
-    assert.match(note.textContent, /fem timer|five-hour/);
-    assert.ok(note.compareDocumentPosition(doc.querySelector('.enquiry-cta')) & 2, 'it follows the button');
+    assert.notEqual(fill(doc.querySelector('.enquiry-cta')), unset, 'the one action is filled');
+    for (const el of doc.querySelectorAll('.service, .examples-grid .example, .contact-cta')) {
+      assert.equal(fill(el), unset, el.className + ' is not something you press');
+    }
   });
 
   test(`${lang}: the direct contact methods are still offered`, () => {
