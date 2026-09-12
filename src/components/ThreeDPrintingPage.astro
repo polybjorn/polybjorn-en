@@ -83,13 +83,13 @@ const serviceOrder = [
     .services {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 1.5rem;
+      /* Wider gaps than the cards had padding, because the space is now the
+         only thing separating one service from the next. */
+      gap: 2.2rem 3rem;
     }
 
     .service {
-      background: #2a2e35;
-      border-radius: 10px;
-      padding: 1.4rem 1.5rem;
+      padding: 0;
     }
 
     .service-head {
@@ -139,7 +139,6 @@ const serviceOrder = [
     }
 
     .examples-grid .example {
-      background: #2a2e35;
       border-radius: 8px;
       overflow: hidden;
       aspect-ratio: 1 / 1;
@@ -197,9 +196,8 @@ const serviceOrder = [
 
     .contact-cta {
       text-align: center;
-      padding: 2rem 1.5rem;
-      background: #23272e;
-      border-radius: 10px;
+      border-top: 1px solid #333840;
+      padding: 2.2rem 0 0;
     }
 
     .contact-cta p {
