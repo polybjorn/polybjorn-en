@@ -92,6 +92,18 @@ export const t = {
       submitSummaryHeading: "This much I need before you can send it:",
       requiredFieldNote: "Needs an answer.",
       invalidEmailMessage: "That email address does not look right.",
+      sendingLabel: "Sending",
+      sentMessage: "Sent. I will be in touch.",
+      // The endpoint answers with a code, not a sentence, so every message a
+      // visitor reads is written here. Most of its rejections reuse a message
+      // this file already has: too large per file, no contact method, an email
+      // address that does not parse. These are the ones only it can raise.
+      sendFailed: "Could not send. Try again, or email post@polybjorn.com.",
+      sendRateLimited: "Too many enquiries just now. Try again in a minute.",
+      attachmentsTooLarge: "The attachments come to more than 20 MB in total.",
+      tooManyFiles: "Attach at most 10 files.",
+      fileTypeRejected: "{file} is not a format I can take here. Send it by email once we are in touch.",
+      fileContentRejected: "{file} does not look like the format its name says.",
     },
   },
   no: {
@@ -187,6 +199,14 @@ export const t = {
       submitSummaryHeading: "Så mye trenger jeg før du kan sende:",
       requiredFieldNote: "Må fylles ut.",
       invalidEmailMessage: "E-postadressen ser ikke riktig ut.",
+      sendingLabel: "Sender",
+      sentMessage: "Sendt. Jeg tar kontakt.",
+      sendFailed: "Kunne ikke sende. Prøv igjen, eller send e-post til post@polybjorn.com.",
+      sendRateLimited: "For mange henvendelser akkurat nå. Prøv igjen om et minutt.",
+      attachmentsTooLarge: "Vedleggene er til sammen mer enn 20 MB.",
+      tooManyFiles: "Legg ved maks 10 filer.",
+      fileTypeRejected: "{file} er ikke et format jeg kan ta imot her. Send den på e-post når vi har fått kontakt.",
+      fileContentRejected: "{file} ser ikke ut som formatet navnet sier.",
     },
   }
 }
