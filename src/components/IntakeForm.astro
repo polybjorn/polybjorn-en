@@ -1764,7 +1764,21 @@ const stageLabels = {
     function showSent() {
       buildReceipt();
       form.hidden = true;
+
+      // The page's own heading and intro were written to get someone to fill
+      // the form in. Once they have, "Fortell om delen din" asks for something
+      // already done and the intro explains a form that is no longer there, so
+      // the heading becomes the confirmation and the intro goes. The page is a
+      // record now, and this is its title.
+      const heading = document.querySelector('.hero h1');
+      const intro = document.querySelector('.hero .intro');
+      if (heading) heading.textContent = sentMessage;
+      if (intro) intro.hidden = true;
+
+      // Still set, still role="status", but out of sight: a changed heading is
+      // not announced, and this is what tells a screen reader the send landed.
       sentMessageEl.textContent = sentMessage;
+      sentMessageEl.classList.add('visually-hidden');
       submitDone.hidden = false;
       submitDone.focus({ preventScroll: true });
       submitDone.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth', block: 'center' });
