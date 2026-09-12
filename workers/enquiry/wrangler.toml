@@ -1,0 +1,31 @@
+name = "polybjorn-enquiry"
+main = "index.js"
+compatibility_date = "2026-09-12"
+
+# Both zones are proxied through Cloudflare with GitHub Pages as the origin, so
+# the endpoint sits on the site's own hostname and the form posts same-origin:
+# no CORS, and no new host in the CSP. This pattern is more specific than the
+# `polybjorn.com/*` route the language redirect worker runs on, so it wins for
+# this path and that worker keeps everything else.
+routes = [
+  { pattern = "polybjorn.no/api/enquiry*", zone_name = "polybjorn.no" },
+  { pattern = "polybjorn.com/api/enquiry*", zone_name = "polybjorn.com" },
+]
+
+# Created with: wrangler kv namespace create ENQUIRIES
+# Paste the id it prints here. Submissions live in it only until pi-rovar pulls
+# them, with a 14 day TTL as a backstop.
+kv_namespaces = [
+  { binding = "ENQUIRIES", id = "REPLACE_WITH_KV_NAMESPACE_ID" }
+]
+
+# A burst limit per IP. The period can only be 10 or 60 seconds, so this stops a
+# flood rather than a slow drip; the daily ceiling in index.js covers the rest.
+# namespace_id is a number local to this worker, not an account resource.
+[[ratelimits]]
+name = "ENQUIRY_RATELIMIT"
+namespace_id = "1001"
+simple = { limit = 3, period = 60 }
+
+# PULL_TOKEN is a secret, not a var: wrangler secret put PULL_TOKEN
+# The same value goes in sops on pi-rovar (nixfleet#112).
