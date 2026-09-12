@@ -1,7 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import { t } from '../data/translations.js';
-import { BASE_FIELDS, PRINT_ONLY_FIELD_IDS } from '../data/intakeForm.js';
+import { BASE_FIELDS } from '../data/intakeForm.js';
 import { ArrowLeft } from 'lucide-astro';
 import IntakeField from './IntakeField.astro';
 
@@ -16,20 +16,42 @@ const backHref = lang === 'no' ? '/no/3d-printing' : '/3d-printing';
 
 const byId = (id: string) => BASE_FIELDS.find(f => f.id === id);
 
-const deliverableField = byId('deliverable');
-const orderTypeField = byId('orderType');
 const aboutFields = ['projectName', 'description', 'fileUpload'].map(byId);
-const specFields = ['orderType', 'size', 'materialProperties', 'materialName', 'color', 'copyright'].map(byId);
-const timingFields = ['quantity', 'targetDate', 'budget'].map(byId);
-// Fields grouped onto rows. A name, a company, a phone number and a town are
-// all short values, and a box the width of the page invites a sentence - so
-// they pair off, and only the ones that can genuinely run long stay wide.
+const specRows = [
+  ['orderType'],
+  ['size'],
+  ['materialProperties'],
+  ['materialName', 'color'],
+  ['copyright'],
+].map(row => row.map(byId));
+// Fields grouped onto rows. A date, a budget bracket, a name, a company, a
+// phone number and a town are all short values, and a box the width of the page
+// invites a sentence - so they pair off, and only the ones that can genuinely
+// run long stay wide. A quantity is short too, but it has nothing to pair with
+// here: the other two questions in its section belong together.
+const timingRows = [
+  ['quantity'],
+  ['targetDate', 'budget'],
+].map(row => row.map(byId));
+// Paired across, read down: who you are on the left - name, company, town -
+// and how to reach you on the right. The rows are what the grid fills, so the
+// pairing here is horizontal and the two columns are the result.
 const contactRows = [
-  ['contactName', 'contactCompany'],
-  ['contactPhone', 'contactSignal'],
-  ['contactEmail', 'contactLocation'],
+  ['contactName', 'contactPhone'],
+  ['contactCompany', 'contactEmail'],
+  ['contactLocation', 'contactSignal'],
   ['confidential'],
 ].map(row => row.map(byId));
+
+// The three that answer the "at least one" rule between them. Their shared mark
+// goes under the last row holding one of them, wherever that ends up - naming a
+// field instead left the mark stranded mid-column the first time the order
+// changed.
+const CONTACT_METHOD_IDS = ['contactPhone', 'contactSignal', 'contactEmail'];
+const lastContactMethodRow = contactRows.reduce(
+  (last, row, i) => (row.some(field => CONTACT_METHOD_IDS.includes(field.id)) ? i : last),
+  0,
+);
 
 // Single source for the dots, the "2 / 4" counter and the screen-reader
 // announcement, so they cannot drift out of step with the actual stages.
@@ -59,7 +81,9 @@ const stageLabels = {
     main {
       max-width: 680px;
       margin: 0 auto;
-      padding: 4rem 2rem 6.5rem;
+      /* The bottom was clearing a progress bar fixed to the viewport. That
+         marker lives on the cards now, so this is just breathing room. */
+      padding: 4rem 2rem 4rem;
     }
 
     .hero {
@@ -89,11 +113,31 @@ const stageLabels = {
       margin: 0 0 2.5rem;
     }
 
-    legend, .section-heading {
-      font-size: 1.2rem;
+    /* Each section is a card. The form is long, and a single column of fields
+       on one flat background gave nothing to navigate by when scrolling back
+       through it - the sections were only separated by empty space, which reads
+       as more of the same. */
+    fieldset.stage {
+      background: #23272e;
+      border: 1px solid #333840;
+      border-radius: 12px;
+      padding: 1.6rem 1.6rem 1.8rem;
+      margin: 0 0 1.5rem;
+    }
+
+    /* Not a bigger, bolder version of a question label - a different kind of
+       text altogether. Competing on size was the problem: 1.2rem/700 above a
+       question legend at 1.1rem/600 is a tenth of a rem and a shade of grey,
+       which is not a hierarchy. Small, spaced and in the page accent instead,
+       so it reads as the name of the block rather than as the loudest question
+       in it. */
+    .section-heading {
+      font-size: 0.8rem;
       font-weight: 700;
-      color: #fff;
-      margin-bottom: 1.2rem;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: #6aaeee;
+      margin: 0 0 1.4rem;
       padding: 0;
     }
 
@@ -140,7 +184,7 @@ const stageLabels = {
        mark can only sit below the taller one. */
     .pair-error {
       font-size: 0.88rem;
-      color: #f0907f;
+      color: #e8b775;
       line-height: 1.4;
       margin: -1.1rem 0 1.4rem;
       text-align: center;
@@ -160,7 +204,20 @@ const stageLabels = {
       grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
     }
 
+    /* Centred, like Send at the end of the form - the button that moves you on
+       sits in the same place in the page whichever section you are in. */
+    /* The one question in "Om deg" that is not about reaching you, and a lone
+       checkbox under two columns of boxes reads as a field somebody left
+       half-finished. A rule above it makes the space around it deliberate: a
+       different kind of question, not a column that ran out. */
+    .field-row:has([data-field="confidential"]) {
+      border-top: 1px solid #333840;
+      padding-top: 1.4rem;
+      margin-top: 0.4rem;
+    }
+
     .continue-row {
+      text-align: center;
       margin-top: 0.4rem;
     }
 
@@ -208,7 +265,8 @@ const stageLabels = {
         transform: scale(0.97);
       }
 
-      .form-error {
+      .form-error,
+      .pair-error:not([hidden]) {
         animation: form-error-in 0.22s ease;
       }
 
@@ -230,18 +288,20 @@ const stageLabels = {
       margin-top: 1.5rem;
     }
 
-    /* The submit row is centred; a list of things to go and fix is not, so
-       this block sets itself back to the left. */
+    /* One line, so the box is the width of that line rather than the width of
+       the form - a sentence pinned to the left of a full-width panel is mostly
+       empty panel. It sits over the button it belongs to, centred with it. */
     .form-error {
       font-size: 0.92rem;
-      color: #f0907f;
+      color: #e8b775;
       line-height: 1.45;
-      margin: 0 0 2.5rem;
-      text-align: left;
-      background: #2b2126;
-      border: 1px solid #7a4038;
+      width: fit-content;
+      max-width: 100%;
+      margin: 0 auto 2rem;
+      background: #2c2419;
+      border: 1px solid #7a5a30;
       border-radius: 8px;
-      padding: 0.8rem 1rem;
+      padding: 0.7rem 1rem;
     }
 
     /* The heading, list and jump buttons are built by the script, so they carry
@@ -258,31 +318,6 @@ const stageLabels = {
     .form-error :global(.form-error-heading::before) {
       content: '\26A0\FE0E';
       margin-right: 0.4rem;
-    }
-
-    .form-error :global(.form-error-list) {
-      margin: 0.55rem 0 0;
-      padding-left: 1.15rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.3rem;
-    }
-
-    /* Each entry takes you to the field it names - the list is long enough on a
-       phone that scrolling back to hunt for them would undo the point of it. */
-    .form-error :global(.form-error-jump) {
-      background: none;
-      border: none;
-      padding: 0;
-      font: inherit;
-      color: inherit;
-      text-align: left;
-      text-decoration: underline;
-      cursor: pointer;
-    }
-
-    .form-error :global(.form-error-jump:hover) {
-      color: #fff;
     }
 
     button[type="submit"] {
@@ -320,42 +355,42 @@ const stageLabels = {
       outline: none;
     }
 
-    /* Purely visual cue that the form has more stages ahead - the intro
-       already says so in words, this just makes it legible at a glance.
-       Fixed to the bottom of the viewport so it stays visible as the page
-       grows, rather than scrolling out of view above the current stage. */
-    .progress-dots {
-      position: fixed;
-      left: 50%;
-      bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
-      transform: translateX(-50%);
+    /* Where this card sits in the sequence, marked on the card itself. It was
+       a bar fixed to the bottom of the viewport, which put it in the same place
+       as the Continue button at the end of every card - two centred things at
+       the bottom of the screen, overlapping each other more often than not.
+       Read off the card it belongs to, the marker needs no script either: the
+       card you are on is the last one there is, so its own position is the
+       progress. */
+    .stage-header {
       display: flex;
-      gap: 0.55rem;
-      margin: 0;
-      padding: 0.55rem 0.9rem;
-      background: rgba(30, 34, 40, 0.85);
-      backdrop-filter: blur(4px);
-      border: 1px solid #3a3f47;
-      border-radius: 999px;
-      z-index: 100;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.4rem;
     }
 
-    .progress-dots .dot {
-      width: 7px;
-      height: 7px;
+    .stage-header .section-heading {
+      margin: 0;
+    }
+
+    .stage-dots {
+      display: flex;
+      gap: 0.45rem;
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+
+    .stage-dots .dot {
+      width: 6px;
+      height: 6px;
       border-radius: 50%;
       background: transparent;
       border: 1.5px solid #4a5058;
     }
 
-    .progress-dots .dot.dot-active {
+    .stage-dots .dot.dot-here {
       background: #6aaeee;
       border-color: #6aaeee;
-    }
-
-    .progress-dots .dot.dot-done {
-      background: #4a5058;
-      border-color: #4a5058;
     }
 
     .back-home {
@@ -372,8 +407,11 @@ const stageLabels = {
     .back-home:hover { opacity: 1; color: #fff; }
 
     @media (max-width: 720px) {
-      main { padding: 2.5rem 1.25rem 4.5rem; }
+      main { padding: 2.5rem 1.25rem 3rem; }
       h1 { font-size: 1.8rem; }
+      /* A card on a phone is nearly the whole screen width, so its padding
+         comes out of the room the fields have. */
+      fieldset.stage { padding: 1.15rem 1.15rem 1.4rem; }
     }  </style>
 
   <a class="back-home" href={backHref} aria-label={tr.backHomeAria}><ArrowLeft size={28} strokeWidth={1.5} /></a>
@@ -385,10 +423,6 @@ const stageLabels = {
     </section>
 
     <p class="draft-note">{td.submitNote}</p>
-
-    <div class="progress-dots" aria-hidden="true">
-      {STAGE_IDS.map(id => <span class="dot" data-dot={id}></span>)}
-    </div>
 
     <!-- The dots are decorative; this is how a screen reader hears a stage change. -->
     <p class="visually-hidden" id="stage-announce" aria-live="polite"></p>
@@ -415,10 +449,13 @@ const stageLabels = {
           redundant - they name different topics, and they arrive on their own
           after a Continue rather than under a title that already covers them.
         -->
-        <legend class="section-heading visually-hidden">{td.sectionAbout}</legend>
+        <legend class="visually-hidden">{td.sectionAbout}</legend>
 
-        <IntakeField field={deliverableField} lang={lang} td={td} />
-        <input type="hidden" name="deliverable[]" value="model" id="deliverable-model-implied" disabled />
+        <div class="stage-header">
+          <div class="stage-dots" aria-hidden="true">
+            {STAGE_IDS.map(sid => <span class:list={['dot', sid === 'stage-about' && 'dot-here']}></span>)}
+          </div>
+        </div>
 
         {aboutFields.map(field => <IntakeField field={field} lang={lang} td={td} />)}
 
@@ -428,23 +465,70 @@ const stageLabels = {
       </fieldset>
 
       <fieldset id="stage-spec" class="stage" tabindex="-1" hidden>
-        <legend class="section-heading">{td.sectionSpec}</legend>
-        {specFields.map(field => <IntakeField field={field} lang={lang} td={td} />)}
+        <legend class="visually-hidden">{td.sectionSpec}</legend>
+        <!--
+          The visible heading is a paragraph, not the legend: a legend inside a
+          fieldset with a border is drawn into the border itself, which a card
+          with rounded corners has nowhere sensible to put. The legend stays for
+          the accessibility tree, so this copy is aria-hidden rather than read
+          out twice.
+        -->
+        <div class="stage-header">
+          <p class="section-heading" aria-hidden="true">{td.sectionSpec}</p>
+          <div class="stage-dots" aria-hidden="true">
+            {STAGE_IDS.map(sid => <span class:list={['dot', sid === 'stage-spec' && 'dot-here']}></span>)}
+          </div>
+        </div>
+        {specRows.map(row => (
+          <div class:list={['field-row', `field-row-${row.length}`]}>
+            {row.map(field => <IntakeField field={field} lang={lang} td={td} />)}
+          </div>
+        ))}
         <div class="continue-row">
           <button type="button" class="continue-btn" data-continue="spec">{td.continueLabel}</button>
         </div>
       </fieldset>
 
       <fieldset id="stage-timing" class="stage" tabindex="-1" hidden>
-        <legend class="section-heading">{td.sectionTiming}</legend>
-        {timingFields.map(field => <IntakeField field={field} lang={lang} td={td} />)}
+        <legend class="visually-hidden">{td.sectionTiming}</legend>
+        <!--
+          The visible heading is a paragraph, not the legend: a legend inside a
+          fieldset with a border is drawn into the border itself, which a card
+          with rounded corners has nowhere sensible to put. The legend stays for
+          the accessibility tree, so this copy is aria-hidden rather than read
+          out twice.
+        -->
+        <div class="stage-header">
+          <p class="section-heading" aria-hidden="true">{td.sectionTiming}</p>
+          <div class="stage-dots" aria-hidden="true">
+            {STAGE_IDS.map(sid => <span class:list={['dot', sid === 'stage-timing' && 'dot-here']}></span>)}
+          </div>
+        </div>
+        {timingRows.map(row => (
+          <div class:list={['field-row', `field-row-${row.length}`]}>
+            {row.map(field => <IntakeField field={field} lang={lang} td={td} />)}
+          </div>
+        ))}
         <div class="continue-row">
           <button type="button" class="continue-btn" data-continue="timing">{td.continueLabel}</button>
         </div>
       </fieldset>
 
       <fieldset id="stage-contact" class="stage" tabindex="-1" hidden>
-        <legend class="section-heading">{td.sectionContact}</legend>
+        <legend class="visually-hidden">{td.sectionContact}</legend>
+        <!--
+          The visible heading is a paragraph, not the legend: a legend inside a
+          fieldset with a border is drawn into the border itself, which a card
+          with rounded corners has nowhere sensible to put. The legend stays for
+          the accessibility tree, so this copy is aria-hidden rather than read
+          out twice.
+        -->
+        <div class="stage-header">
+          <p class="section-heading" aria-hidden="true">{td.sectionContact}</p>
+          <div class="stage-dots" aria-hidden="true">
+            {STAGE_IDS.map(sid => <span class:list={['dot', sid === 'stage-contact' && 'dot-here']}></span>)}
+          </div>
+        </div>
         <!--
           Phone, Signal and email are each optional on their own but one of
           the three is required. Without this line the only statement of that
@@ -452,7 +536,7 @@ const stageLabels = {
           three fields all labelled "(optional)".
         -->
         <p class="section-intro">{td.sectionContactIntro}</p>
-        {contactRows.map(row => (
+        {contactRows.map((row, i) => (
           <>
             <div class:list={['field-row', `field-row-${row.length}`]}>
               {row.map(field => <IntakeField field={field} lang={lang} td={td} />)}
@@ -464,7 +548,7 @@ const stageLabels = {
               the last of them; the message names the three itself, so it does
               not depend on position to be understood.
             */}
-            {row.some(field => field.id === 'contactEmail') && (
+            {i === lastContactMethodRow && (
               <p class="pair-error" id="contact-methods-error" hidden></p>
             )}
           </>
@@ -492,21 +576,20 @@ const stageLabels = {
     <p class="form-sent" id="submit-done" role="status" tabindex="-1" hidden></p>
   </main>
 
-  <script define:vars={{ printOnlyFieldIds: PRINT_ONLY_FIELD_IDS, stageIds: STAGE_IDS, stageLabels, contactMethodRequired: td.contactMethodRequired, deliverableRequired: td.deliverableRequired, modelTickedNote: td.modelTickedNote, fileTooLarge: td.fileTooLarge, chooseFilesLabel: td.chooseFilesLabel, addFilesLabel: td.addFilesLabel, removeFileLabel: td.removeFileLabel, submitSummaryHeading: td.submitSummaryHeading, requiredFieldNote: td.requiredFieldNote, invalidEmailMessage: td.invalidEmailMessage, submitLabel: td.submitLabel, sendingLabel: td.sendingLabel, sentMessage: td.sentMessage, sendFailed: td.sendFailed, sendRateLimited: td.sendRateLimited, attachmentsTooLarge: td.attachmentsTooLarge, tooManyFiles: td.tooManyFiles, fileTypeRejected: td.fileTypeRejected, fileContentRejected: td.fileContentRejected, numberLocale: lang === 'no' ? 'nb-NO' : 'en-GB' }}>
+  <script define:vars={{ stageIds: STAGE_IDS, stageLabels, contactMethodRequired: td.contactMethodRequired, fileTooLarge: td.fileTooLarge, chooseFilesLabel: td.chooseFilesLabel, addFilesLabel: td.addFilesLabel, removeFileLabel: td.removeFileLabel, submitMissingNote: td.submitMissingNote, invalidEmailMessage: td.invalidEmailMessage, submitLabel: td.submitLabel, sendingLabel: td.sendingLabel, sentMessage: td.sentMessage, sendFailed: td.sendFailed, sendRateLimited: td.sendRateLimited, attachmentsTooLarge: td.attachmentsTooLarge, tooManyFiles: td.tooManyFiles, fileTypeRejected: td.fileTypeRejected, fileContentRejected: td.fileContentRejected, numberLocale: lang === 'no' ? 'nb-NO' : 'en-GB' }}>
     const form = document.getElementById('intake-form');
 
-    // Declared up here because syncDeliverable() runs during setup and clears
-    // field marks through it - left further down with the rest of the submit
-    // handling, it was still in its temporal dead zone and the whole script
-    // died on load.
+    // Declared up here, ahead of everything that touches it. It sat further
+    // down with the rest of the submit handling once, and setup code running
+    // before that met it in its temporal dead zone and killed the whole script
+    // on load.
     let reportedControls = [];
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     // Reports whether it actually revealed anything, so callers can move
-    // focus on the first reveal only. Re-answering the deliverable or
-    // order-type question from further down the form used to yank focus (and
-    // with it, on a phone, the on-screen keyboard) back up to a section the
-    // visitor had already passed.
+    // focus on the first reveal only. Re-answering a question from further down
+    // the form used to yank focus (and with it, on a phone, the on-screen
+    // keyboard) back up to a section the visitor had already passed.
     function reveal(el) {
       if (!el || !el.hidden) return false;
       el.hidden = false;
@@ -529,23 +612,14 @@ const stageLabels = {
     }
 
     const stageAnnounce = document.getElementById('stage-announce');
-    const dots = Object.fromEntries(stageIds.map(id => [id, document.querySelector('[data-dot="' + id + '"]')]));
 
-    function setActiveStage(stageId, announce) {
-      const activeIndex = stageIds.indexOf(stageId);
-      stageIds.forEach((id, i) => {
-        const dot = dots[id];
-        if (!dot) return;
-        dot.classList.remove('dot-done', 'dot-active');
-        if (i < activeIndex) dot.classList.add('dot-done');
-        else if (i === activeIndex) dot.classList.add('dot-active');
-      });
-      // Only on a real stage change - announcing on page load would talk over
-      // the heading a screen reader is already reading.
-      if (announce) stageAnnounce.textContent = stageLabels[stageId] + ', ' + (activeIndex + 1) + ' / ' + stageIds.length;
+    // The visible marker is rendered on each card and never changes, so this
+    // only has the announcement left to make. Not on page load - it would talk
+    // over the heading a screen reader is already reading.
+    function announceStage(stageId) {
+      const index = stageIds.indexOf(stageId);
+      stageAnnounce.textContent = stageLabels[stageId] + ', ' + (index + 1) + ' / ' + stageIds.length;
     }
-
-    setActiveStage('stage-about', false);
 
     function advance(button, nextStage) {
       const row = button.closest('.continue-row');
@@ -553,7 +627,7 @@ const stageLabels = {
       reveal(nextStage);
       nextStage.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth', block: 'start' });
       focusContainer(nextStage);
-      setActiveStage(nextStage.id, true);
+      announceStage(nextStage.id);
     }
 
     const stageAbout = document.getElementById('stage-about');
@@ -564,84 +638,6 @@ const stageLabels = {
     const continueAbout = form.querySelector('[data-continue="about"]');
     const continueSpec = form.querySelector('[data-continue="spec"]');
     const continueTiming = form.querySelector('[data-continue="timing"]');
-
-    const deliverableBoxes = Array.from(
-      form.querySelectorAll('input[type="checkbox"][name="deliverable[]"]')
-    );
-    const printedBox = deliverableBoxes.find(box => box.value === 'printed');
-    const modelBox = deliverableBoxes.find(box => box.value === 'model');
-    const modelImplied = document.getElementById('deliverable-model-implied');
-    const modelNote = modelBox.closest('label').querySelector('.option-example');
-
-    // Remembers whether the model was wanted on its own, so unticking the part
-    // puts the box back as the visitor left it rather than leaving behind a
-    // tick they never made.
-    let modelWantedAlone = false;
-
-    // A group of checkboxes has no native "at least one" rule the way a radio
-    // group does, so it gets the same treatment as the contact methods: the
-    // message is parked on the first box for the submit handler to find.
-    function validateDeliverable() {
-      const anyTicked = printedBox.checked || modelBox.checked;
-      printedBox.setCustomValidity(anyTicked ? '' : deliverableRequired);
-    }
-
-    // A print includes its model, so ticking the part ticks the model and then
-    // locks it. Leaving it undoable was the confusing part of an earlier
-    // version: not the tick appearing, but not knowing whether it was allowed
-    // to be removed.
-    function syncDeliverable(changed) {
-      if (changed === modelBox) modelWantedAlone = modelBox.checked;
-
-      const printing = printedBox.checked;
-      if (printing) {
-        const wasUnticked = !modelBox.checked;
-        modelBox.checked = true;
-        modelBox.disabled = true;
-        // The note explains the greyed tick, so it belongs with the greyed
-        // tick - there is nothing for it to say while the box is a live choice.
-        if (modelNote) modelNote.classList.add('is-shown');
-        // Greying it out removes it from the tab order, so a screen reader
-        // never meets it. Announce the one thing seeing it would have told you.
-        if (changed && wasUnticked) stageAnnounce.textContent = modelTickedNote;
-      } else {
-        modelBox.disabled = false;
-        modelBox.checked = modelWantedAlone;
-        if (modelNote) modelNote.classList.remove('is-shown');
-      }
-
-      // A disabled control submits nothing, so the implied value rides in the
-      // hidden field while the visible one is locked.
-      modelImplied.disabled = !printing;
-
-      validateDeliverable();
-      updateDeliverableFields();
-      clearFieldErrorIfResolved(printedBox);
-    }
-
-    // Print-only fields don't apply when nothing is being printed. They are
-    // hidden and disabled rather than cleared: a disabled control is barred
-    // from constraint validation and left out of the submitted FormData, so
-    // someone wanting only the model is not gated on quantity (required once
-    // there is a print) and no stale material or quantity value rides along -
-    // while anything already typed survives ticking the box again.
-    function updateDeliverableFields() {
-      const printing = printedBox.checked;
-      printOnlyFieldIds.forEach(id => {
-        const wrapper = form.querySelector('[data-field="' + id + '"]');
-        if (!wrapper) return;
-        wrapper.hidden = !printing;
-        wrapper.querySelectorAll('input, select, textarea').forEach(control => {
-          control.disabled = !printing;
-        });
-      });
-    }
-
-    form.addEventListener('change', (event) => {
-      if (event.target.name === 'deliverable[]') syncDeliverable(event.target);
-    });
-
-    syncDeliverable(null);
 
     continueAbout.addEventListener('click', () => advance(continueAbout, stageSpec));
     continueSpec.addEventListener('click', () => advance(continueSpec, stageTiming));
@@ -800,32 +796,37 @@ const stageLabels = {
     // full - it is the first and only point at which anything is asked for.
     const submitError = document.getElementById('submit-error');
 
-    function labelFor(control) {
-      let source = control.id ? form.querySelector('label[for="' + control.id + '"]') : null;
-      // Radio and checkbox groups are labelled by their fieldset's legend.
-      if (!source) {
-        const group = control.closest('fieldset');
-        source = group ? group.querySelector('legend') : null;
-      }
-      if (!source) return '';
-      return source.textContent.trim();
-    }
-
-    // setCustomValidity messages are ours already and say more than a field
-    // name could - the contact-method rule, the deliverable rule and the file
-    // size cap all land here.
-    function summaryTextFor(control) {
-      if (control.validity.customError) return control.validationMessage;
-      if (control.validity.typeMismatch) return invalidEmailMessage;
-      return labelFor(control);
-    }
-
-    // Beside the field itself the label would just repeat what is written above
-    // it, so a plain note does instead.
+    // Only a message that says something the summary does not. A field that is
+    // simply missing gets no sentence of its own - the box is marked instead.
+    // The list by the button has already named it, and repeating "needs an
+    // answer" under every one of them turned a refused submit into a page of
+    // warnings.
     function inlineTextFor(control) {
       if (control.validity.customError) return control.validationMessage;
       if (control.validity.typeMismatch) return invalidEmailMessage;
-      return requiredFieldNote;
+      return "";
+    }
+
+    // Where the field is, rather than what is wrong with it. A field answering
+    // a rule it shares with others is marked differently: see the CSS for the
+    // two classes, and sharedFields() below for who gets which.
+    function markField(control, missing, shared) {
+      const wrapper = control.closest(".field");
+      if (!wrapper) return;
+      wrapper.classList.toggle("is-missing", Boolean(missing) && !shared);
+      wrapper.classList.toggle("is-missing-shared", Boolean(missing) && Boolean(shared));
+    }
+
+    // Every field reporting through one shared slot. The contact rule parks its
+    // message on the email field alone - phone and Signal are each valid on
+    // their own - so marking only the control that carries the validity would
+    // leave the other two looking fine while the rule they are part of is what
+    // is stopping the send.
+    function sharedFields(slotId) {
+      return Object.keys(SHARED_ERROR_SLOTS)
+        .filter(key => SHARED_ERROR_SLOTS[key] === slotId)
+        .map(id => document.getElementById(id))
+        .filter(Boolean);
     }
 
     // Every control that is standing between the visitor and sending, not just
@@ -883,48 +884,64 @@ const stageLabels = {
     // one that was actually reported - otherwise picking the second option of a
     // group never cleared the mark its first option had put up.
     function reportedControlFor(control) {
+      // Answering any field of a shared rule answers the rule, so an event from
+      // one of them counts as news about whichever control was reported for it.
+      // Without this, filling in the phone number left all three marked until
+      // the rest of the form happened to be finished too - the reported control
+      // there is the email field, which nothing had typed in.
+      const shared = SHARED_ERROR_SLOTS[control.name] || SHARED_ERROR_SLOTS[control.id];
+      if (shared) {
+        const owner = reportedControls.find(reported =>
+          (SHARED_ERROR_SLOTS[reported.name] || SHARED_ERROR_SLOTS[reported.id]) === shared);
+        if (owner) return owner;
+      }
       return reportedControls.find(reported => reported === control
         || ((reported.type === 'radio' || reported.type === 'checkbox')
             && reported.name === control.name)) || null;
     }
 
-    // Marks each offending field where it sits, and lists them all by the
-    // button. The list is the part that answers "what do I have to fill in",
-    // which is the question Send is being pressed to ask.
+    // Clears both marks, on the field itself and on anything sharing its rule.
+    function unmark(control) {
+      const shared = SHARED_ERROR_SLOTS[control.name] || SHARED_ERROR_SLOTS[control.id];
+      if (shared) sharedFields(shared).forEach(field => markField(field, false));
+      else markField(control, false);
+    }
+
+    // Marks each offending field where it sits, and says once, by the button,
+    // that something is missing. It used to list every missing answer here as
+    // well, which was the same information three times over: the fields are
+    // marked where they sit, and pressing Send takes you to the first of them.
     function showSubmitErrors(controls) {
       reportedControls = controls;
-      submitError.textContent = '';
 
       const heading = document.createElement('p');
       heading.className = 'form-error-heading';
-      heading.textContent = submitSummaryHeading;
-
-      const list = document.createElement('ul');
-      list.className = 'form-error-list';
+      heading.textContent = submitMissingNote;
 
       controls.forEach(control => {
-        const entry = document.createElement('li');
-        const jump = document.createElement('button');
-        jump.type = 'button';
-        jump.className = 'form-error-jump';
-        jump.textContent = summaryTextFor(control);
-        jump.addEventListener('click', () => goTo(control));
-        entry.append(jump);
-        list.append(entry);
-
+        // Phone, Signal and email are one rule spread over three fields, and
+        // the line under them says it in words. Reddening whichever box happens
+        // to carry the validity would point at a field that is not itself
+        // wrong - any one of the three answers it.
+        const shared = SHARED_ERROR_SLOTS[control.name] || SHARED_ERROR_SLOTS[control.id];
+        if (shared) sharedFields(shared).forEach(field => markField(field, true, true));
+        else markField(control, true);
         const inline = fieldErrorFor(control);
-        if (inline) {
-          inline.textContent = inlineTextFor(control);
+        const text = inlineTextFor(control);
+        if (inline && text) {
+          inline.textContent = text;
           inline.hidden = false;
         }
       });
 
-      submitError.append(heading, list);
+      submitError.textContent = '';
+      submitError.append(heading);
       submitError.hidden = false;
     }
 
     function clearSubmitError() {
       reportedControls.forEach(control => {
+        unmark(control);
         const inline = fieldErrorFor(control);
         if (inline && inline.id !== 'fileUpload-error') {
           inline.hidden = true;
@@ -941,6 +958,7 @@ const stageLabels = {
     function clearFieldErrorIfResolved(control) {
       const reported = reportedControlFor(control);
       if (!reported || !reported.checkValidity()) return;
+      unmark(reported);
       const inline = fieldErrorFor(reported);
       if (!inline || inline.id === 'fileUpload-error') return;
       // A slot shared by more than one question stays up until every question
@@ -958,7 +976,6 @@ const stageLabels = {
     const ENQUIRY_ENDPOINT = '/api/enquiry';
     const submitButton = form.querySelector('button[type="submit"]');
     const submitDone = document.getElementById('submit-done');
-    const progressDots = document.querySelector('.progress-dots');
     const draftNote = document.querySelector('.draft-note');
 
     // The endpoint answers with a code rather than a sentence, so what a visitor
@@ -990,9 +1007,10 @@ const stageLabels = {
       submitButton.textContent = sending ? sendingLabel : submitLabel;
     }
 
+    // The stage marker needs no hiding of its own any more: it is rendered on
+    // each card, inside the form, so it goes when the form goes.
     function showSent() {
       form.hidden = true;
-      if (progressDots) progressDots.hidden = true;
       if (draftNote) draftNote.hidden = true;
       submitDone.textContent = sentMessage;
       submitDone.hidden = false;
@@ -1002,7 +1020,11 @@ const stageLabels = {
 
     function showSendFailure(message) {
       clearSubmitError();
-      submitError.textContent = message;
+      const heading = document.createElement('p');
+      heading.className = 'form-error-heading';
+      heading.textContent = message;
+      submitError.textContent = '';
+      submitError.append(heading);
       submitError.hidden = false;
       submitError.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth', block: 'center' });
     }

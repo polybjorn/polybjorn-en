@@ -22,7 +22,7 @@ const optionLabel = (opt: any) => (opt.label ? opt.label[lang] : opt[lang]);
   {field.type === 'radio' || field.type === 'checkboxGroup' ? (
     <fieldset>
       <legend class="field-label">{field.label[lang]}</legend>
-      <div class="option-list">
+      <div class:list={['option-list', field.inlineOptions && 'option-list-inline']}>
         {field.options.map((opt: any) => (
           <label>
             <input
@@ -34,9 +34,7 @@ const optionLabel = (opt: any) => (opt.label ? opt.label[lang] : opt[lang]);
             {opt.example ? (
               <span class="option-text">
                 <span class="option-label">{optionLabel(opt)}</span>
-                <span
-                  class:list={['option-example', opt.showWhenLocked && 'option-example-toggle']}
-                >{opt.example[lang]}</span>
+                <span class="option-example">{opt.example[lang]}</span>
               </span>
             ) : (
               <span class="option-label">{optionLabel(opt)}</span>
@@ -133,10 +131,20 @@ const optionLabel = (opt: any) => (opt.label ? opt.label[lang] : opt[lang]);
      so it silently matches nothing and every field renders unstyled. The
      fieldset and legend resets are duplicated in both files for the same
      reason - each component has its own. */
+      /* No bottom margin of its own: the gap after a question belongs to the
+         field, not to the options inside it. With it here, a validation mark -
+         which is rendered after the fieldset, at the end of the field - was
+         pushed 2.5rem clear of the answers it was talking about. The field
+         below carries that gap now, so the mark sits under the options and the
+         spacing between questions is unchanged. */
       fieldset {
         border: none;
         padding: 0;
-        margin: 0 0 2.5rem;
+        margin: 0;
+      }
+
+      .field:has(fieldset) {
+        margin-bottom: 2.5rem;
       }
 
       legend, .section-heading {
@@ -160,10 +168,9 @@ const optionLabel = (opt: any) => (opt.label ? opt.label[lang] : opt[lang]);
         font-weight: 600;
       }
 
-      /* The two radio-group questions (deliverable, order type) need their
-         legend to read as clearly above their options, which share the same
-         weight and colour as this legend - so the hierarchy comes from size
-         here instead, not from dimming the options. */
+      /* A grouped question needs its legend to read as clearly above its
+         options, which share the same weight and colour as the legend - so the
+         hierarchy comes from size here instead, not from dimming the options. */
       .field fieldset legend.field-label {
         font-size: 1.1rem;
         margin-bottom: 0.7rem;
@@ -171,7 +178,7 @@ const optionLabel = (opt: any) => (opt.label ? opt.label[lang] : opt[lang]);
 
       .field-error {
         font-size: 0.88rem;
-        color: #f0907f;
+        color: #e8b775;
         margin: 0.4rem 0 0;
         line-height: 1.4;
       }
@@ -302,12 +309,12 @@ const optionLabel = (opt: any) => (opt.label ? opt.label[lang] : opt[lang]);
       }
 
       .file-list :global(.file-row-over) {
-        border-color: #7a4038;
-        color: #f0907f;
+        border-color: #7a5a30;
+        color: #e8b775;
       }
 
       .file-list :global(.file-row-over .file-size) {
-        color: #f0907f;
+        color: #e8b775;
       }
 
       .file-list :global(.file-remove) {
@@ -324,8 +331,8 @@ const optionLabel = (opt: any) => (opt.label ? opt.label[lang] : opt[lang]);
       }
 
       .file-list :global(.file-remove:hover) {
-        border-color: #f0907f;
-        color: #f0907f;
+        border-color: #e8b775;
+        color: #e8b775;
       }
 
       input:focus-visible,
@@ -335,10 +342,69 @@ const optionLabel = (opt: any) => (opt.label ? opt.label[lang] : opt[lang]);
         outline-offset: 2px;
       }
 
+      /* A field the submit refused. The box itself is marked, where the eye
+         already is: the list by the Send button names every missing answer in
+         words, so a sentence under each field as well made a refused submit
+         into a page of warnings. A question with no box of its own - a radio
+         or checkbox group - marks its legend instead.
+
+         The focus ring takes the same colour. A blue ring around a marked box
+         reads as two states at once, which is what made the refused form look
+         like it had two things wrong with every field. */
+      .field.is-missing input[type="text"],
+      .field.is-missing input[type="email"],
+      .field.is-missing input[type="tel"],
+      .field.is-missing textarea,
+      .field.is-missing select {
+        border-color: #a8764a;
+      }
+
+      .field.is-missing legend.field-label {
+        color: #e8b775;
+      }
+
+      /* One of a set of fields that between them answer a single rule - phone,
+         Signal and e-post - while none of them is answered. Nothing standing
+         here: any one of the three satisfies the rule, and three marked boxes
+         read as three things that each have to be filled in. The ring is only
+         marked once you are in one of them, which is where "is this one of the
+         ones it is waiting for?" gets asked. */
+      .field.is-missing-shared input:focus-visible {
+        outline-color: #a8764a;
+        outline-offset: 0;
+      }
+
+      /* Sat against the border rather than 2px clear of it: offset, a ring
+         outside a border of the same colour reads as two borders on one box. */
+      .field.is-missing input:focus-visible,
+      .field.is-missing textarea:focus-visible,
+      .field.is-missing select:focus-visible {
+        outline-color: #a8764a;
+        outline-offset: 0;
+      }
+
       .option-list {
         display: flex;
         flex-direction: column;
         gap: 0.8rem;
+      }
+
+      /* Short options do not need a line each. The columns are equal and
+         aligned rather than sized to their own text, so a four-answer question
+         reads as a block instead of a ragged edge - and the list is capped
+         short of the form's full width, which is what put two options a third
+         of the page apart when they were stretched across it.
+
+         auto-fit rather than a breakpoint: a row too narrow for two columns of
+         a usable width gets one per line on its own, which is what a phone
+         gets. */
+      .option-list-inline {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+        column-gap: 2rem;
+        row-gap: 0.8rem;
+        align-items: start;
+        max-width: 34rem;
       }
 
       .option-list label {
@@ -353,18 +419,6 @@ const optionLabel = (opt: any) => (opt.label ? opt.label[lang] : opt[lang]);
       .option-list input {
         margin-top: 0.25rem;
         flex-shrink: 0;
-      }
-
-      /* A locked option: greyed, so "am I allowed to change this" is answered
-         before it is asked. The native disabled checkbox still draws its tick,
-         and the neighbouring option's description says why it is there. */
-      .option-list input:disabled ~ .option-label,
-      .option-list input:disabled ~ .option-text {
-        opacity: 0.6;
-      }
-
-      .option-list label:has(input:disabled) {
-        cursor: default;
       }
 
       .option-text {
@@ -384,27 +438,7 @@ const optionLabel = (opt: any) => (opt.label ? opt.label[lang] : opt[lang]);
         font-weight: 400;
       }
 
-      /* Collapsed unless the script says otherwise. Without JS it simply never
-         appears, which is the same as before - it only ever explained a state
-         the script produces. */
-      .option-example-toggle {
-        max-height: 0;
-        opacity: 0;
-        overflow: hidden;
-        transform: translateY(-2px);
-      }
-
-      .option-example-toggle.is-shown {
-        max-height: 4rem;
-        opacity: 1;
-        transform: none;
-      }
-
       @media (prefers-reduced-motion: no-preference) {
-        .option-example-toggle {
-          transition: max-height 0.22s ease, opacity 0.22s ease, transform 0.22s ease;
-        }
-
         .file-trigger,
         .file-list :global(.file-remove) {
           transition: transform 0.12s ease, background 0.15s ease,
@@ -414,6 +448,34 @@ const optionLabel = (opt: any) => (opt.label ? opt.label[lang] : opt[lang]);
         .file-trigger:active,
         .file-list :global(.file-remove:active) {
           transform: scale(0.96);
+        }
+
+        /* A field being marked, and unmarked the moment it is answered.
+           Instant, the mark arrives with no sense of what put it there - and on
+           the way out it is the difference between a field that was fixed and
+           one that simply stopped being marked. */
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        textarea,
+        select {
+          transition: border-color 0.2s ease, outline-color 0.2s ease;
+        }
+
+        legend.field-label {
+          transition: color 0.2s ease;
+        }
+
+        /* Hidden until there is something to say, so it arrives rather than
+           transitions - a keyframe is the only thing that animates an element
+           on its way in from display: none. */
+        .field-error:not([hidden]) {
+          animation: field-mark-in 0.2s ease;
+        }
+
+        @keyframes field-mark-in {
+          from { opacity: 0; transform: translateY(-3px); }
+          to { opacity: 1; transform: none; }
         }
       }
 </style>
