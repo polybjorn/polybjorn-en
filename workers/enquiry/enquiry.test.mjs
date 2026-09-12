@@ -85,7 +85,7 @@ const binaryStl = (triangles = 2) => {
 
 test('a valid submission is stored with its brief and its file', async () => {
   const kv = kvStub();
-  const form = baseForm({ 'deliverable[]': ['printed', 'model'], orderType: 'one-off' });
+  const form = baseForm({ 'materialProperties[]': ['outdoor', 'heat'], orderType: 'file' });
   form.append('fileUpload', new File([pngBytes()], 'skisse.png'));
 
   const response = await worker.fetch(post(form), envWith(kv));
@@ -95,7 +95,7 @@ test('a valid submission is stored with its brief and its file', async () => {
 
   const envelope = await kv.get(`enquiry:${id}`, 'json');
   assert.equal(envelope.lang, 'no');
-  assert.deepEqual(envelope.raw.deliverable, ['printed', 'model']);
+  assert.deepEqual(envelope.raw.materialProperties, ['outdoor', 'heat']);
   assert.equal(envelope.files.length, 1);
   assert.equal(envelope.files[0].name, 'skisse.png');
   assert.ok(kv.store.has(`file:${id}:0`));
@@ -130,13 +130,13 @@ test('a submission with no way to reply is refused', async () => {
 
 test('an option value the form could not have produced is dropped', async () => {
   const kv = kvStub();
-  const form = baseForm({ orderType: 'made-up-value', 'deliverable[]': 'not-an-option' });
+  const form = baseForm({ orderType: 'made-up-value', 'materialProperties[]': 'not-an-option' });
 
   const response = await worker.fetch(post(form), envWith(kv));
   const { id } = await response.json();
   const envelope = await kv.get(`enquiry:${id}`, 'json');
   assert.equal(envelope.raw.orderType, undefined);
-  assert.equal(envelope.raw.deliverable, undefined);
+  assert.equal(envelope.raw.materialProperties, undefined);
 });
 
 test('a field the form does not have is ignored', async () => {
