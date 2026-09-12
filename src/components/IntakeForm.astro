@@ -539,11 +539,61 @@ const stageLabels = {
        with the page it replaced would be the loudest thing on a page whose job
        is now over. */
     .form-sent {
+      margin: 3rem 0 4rem;
+      outline: none;
+    }
+
+    .form-sent-line {
       font-size: 1.1rem;
       line-height: 1.5;
       text-align: center;
-      margin: 3rem 0 4rem;
-      outline: none;
+      margin: 0 0 3rem;
+    }
+
+    /* Stacked, label over value, at every width. A two-column receipt would
+       have to choose a label column wide enough for "Beskriv delen og hva den
+       skal brukes til" and narrow enough not to strand "Navn" across the page,
+       and there is no width where both are true inside 680px. */
+    .receipt-heading {
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: #6aaeee;
+      margin: 2.4rem 0 1.2rem;
+      padding-top: 1.2rem;
+      border-top: 1px solid #333840;
+    }
+
+    .receipt-heading:first-child {
+      margin-top: 0;
+      padding-top: 0;
+      border-top: none;
+    }
+
+    .receipt dl {
+      margin: 0;
+    }
+
+    .receipt dt {
+      font-size: 0.88rem;
+      color: #9aa2ad;
+      margin-bottom: 0.2rem;
+    }
+
+    .receipt dd {
+      margin: 0 0 1.3rem;
+      line-height: 1.5;
+      /* The description is the one answer that can carry its own line breaks,
+         and an attachment list is one file per line. */
+      white-space: pre-wrap;
+    }
+
+    /* A lone checkbox is a statement rather than a question with an answer, so
+       its label is the whole row and there is nothing to put opposite it. */
+    .receipt-statement {
+      margin: 0 0 1.3rem;
+      line-height: 1.5;
     }
 
     /* Where this card sits in the sequence, marked on the card itself. It was
@@ -836,7 +886,17 @@ const stageLabels = {
       than an alert: the visitor asked for this, so it does not need to
       interrupt them the way a refused submit does.
     -->
-    <p class="form-sent" id="submit-done" role="status" tabindex="-1" hidden></p>
+    <!--
+      What replaces the form once it has gone. The receipt is built from the
+      form's own controls rather than from a second copy of the answers, so it
+      cannot drift from what was actually sent. role="status" sits on the line,
+      not on the panel: a screen reader should hear "sent", then read the
+      receipt at its own pace, rather than have the whole thing announced.
+    -->
+    <section class="form-sent" id="submit-done" tabindex="-1" hidden>
+      <p class="form-sent-line" id="sent-message" role="status"></p>
+      <div class="receipt" id="sent-receipt"></div>
+    </section>
   </main>
 
   <a class="to-top" href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});this.classList.remove('visible');return false;" aria-label={tr.backTopAria}><ArrowUp size={28} strokeWidth={1.5} /></a>
@@ -1520,6 +1580,8 @@ const stageLabels = {
     const ENQUIRY_ENDPOINT = '/api/enquiry';
     const submitButton = form.querySelector('button[type="submit"]');
     const submitDone = document.getElementById('submit-done');
+    const sentMessageEl = document.getElementById('sent-message');
+    const sentReceipt = document.getElementById('sent-receipt');
 
     // The endpoint answers with a code rather than a sentence, so what a visitor
     // reads is written on this page, in the language they are reading it in.
@@ -1552,9 +1614,103 @@ const stageLabels = {
 
     // The dots live in the form's own action rows now, so hiding the form takes
     // them with it.
+    // Reads an answer back out of the control that holds it. The option text is
+    // taken from .option-label rather than the whole <label>, so an answer comes
+    // back as "Ferdig fil" and not as itself plus the example underneath it.
+    function readAnswer(wrapper) {
+      const label = wrapper.querySelector('.field-label');
+      const labelText = label ? label.textContent.trim() : '';
+
+      if (wrapper.dataset.field === 'fileUpload') {
+        if (!selectedFiles.length) return null;
+        return {
+          label: labelText,
+          value: selectedFiles.map(file => file.name + ' (' + formatSize(file.size) + ')').join('\n'),
+        };
+      }
+
+      const optionText = input => {
+        const own = input.closest('label');
+        const named = own && own.querySelector('.option-label');
+        return (named || own || input).textContent.trim();
+      };
+
+      const ticked = [...wrapper.querySelectorAll('input[type="radio"]:checked, input[type="checkbox"]:checked')]
+        .filter(input => !input.disabled);
+      if (ticked.length) {
+        if (!labelText) return { statement: optionText(ticked[0]) };
+        return { label: labelText, value: ticked.map(optionText).join(', ') };
+      }
+
+      const control = wrapper.querySelector('textarea, select, input[type="text"], input[type="email"], input[type="tel"]');
+      if (!control || control.disabled) return null;
+      // A select always has something selected, and on an unanswered one that
+      // something is the placeholder. Its value is empty where its text is not,
+      // so the value decides whether there is an answer and the text is only
+      // what gets shown once there is one.
+      const value = control.tagName === 'SELECT'
+        ? (control.value.trim() ? control.options[control.selectedIndex].textContent.trim() : '')
+        : control.value.trim();
+      if (!value) return null;
+      return { label: labelText, value };
+    }
+
+    // Built from the form itself rather than from a second copy of the answers,
+    // so what someone reads back cannot drift from what FormData carried. Runs
+    // before the form is hidden, while the controls still hold their values.
+    function buildReceipt() {
+      sentReceipt.textContent = '';
+
+      stageIds.forEach(stageId => {
+        const stage = document.getElementById(stageId);
+        if (!stage) return;
+
+        const answers = [];
+        stage.querySelectorAll('[data-field]').forEach(wrapper => {
+          if (wrapper.hidden) return;
+          const answer = readAnswer(wrapper);
+          if (answer) answers.push(answer);
+        });
+        if (!answers.length) return;
+
+        const heading = document.createElement('h2');
+        heading.className = 'receipt-heading';
+        heading.textContent = stageLabels[stageId];
+        sentReceipt.append(heading);
+
+        // A statement is not a term and a definition, so it interrupts the list
+        // rather than joining it, and whatever follows starts a new one. That
+        // keeps every answer in the order the form asked it.
+        let list = null;
+        const flush = () => {
+          if (list) sentReceipt.append(list);
+          list = null;
+        };
+
+        answers.forEach(answer => {
+          if (answer.statement) {
+            flush();
+            const line = document.createElement('p');
+            line.className = 'receipt-statement';
+            line.textContent = answer.statement;
+            sentReceipt.append(line);
+            return;
+          }
+          if (!list) list = document.createElement('dl');
+          const term = document.createElement('dt');
+          term.textContent = answer.label;
+          const value = document.createElement('dd');
+          value.textContent = answer.value;
+          list.append(term, value);
+        });
+        flush();
+      });
+    }
+
     function showSent() {
+      buildReceipt();
       form.hidden = true;
-      submitDone.textContent = sentMessage;
+      sentMessageEl.textContent = sentMessage;
       submitDone.hidden = false;
       submitDone.focus({ preventScroll: true });
       submitDone.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth', block: 'center' });
