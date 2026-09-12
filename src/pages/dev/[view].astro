@@ -1,0 +1,110 @@
+---
+/**
+ * Dev-only previews of states the enquiry form only reaches by being filled in
+ * and sent. Reviewing the "sent" state otherwise means answering four sections
+ * of questions, every time, for every change to a margin.
+ *
+ * `npm run dev`, then:
+ *   /dev/enquiry-sent      the English page, already sent
+ *   /dev/enquiry-sent-no   the Norwegian one
+ *
+ * getStaticPaths returns nothing in a production build, so these routes exist
+ * only while the dev server is running - `npm run build` emits no dev/ at all,
+ * rather than emitting a page that hides itself. Verify with `ls dist/dev`
+ * after a build: it should not be there.
+ *
+ * The preview drives the real component. It fills the real controls, stubs
+ * fetch so nothing reaches the worker, and lets the page's own script render
+ * the receipt. Nothing here reimplements what it is previewing, so this cannot
+ * show something the live page would not.
+ */
+import IntakeForm from '../../components/IntakeForm.astro';
+
+export function getStaticPaths() {
+  if (!import.meta.env.DEV) return [];
+  return [
+    { params: { view: 'enquiry-sent' }, props: { lang: 'en' as const } },
+    { params: { view: 'enquiry-sent-no' }, props: { lang: 'no' as const } },
+  ];
+}
+
+const { lang } = Astro.props;
+---
+
+<IntakeForm lang={lang} />
+
+<script is:inline>
+  // On load rather than inline: the component's own script is a module, so it
+  // is deferred, and filling controls it has not wired up yet would leave the
+  // file list and the validation state out of step with what is on screen.
+  window.addEventListener('load', () => {
+    const form = document.getElementById('intake-form');
+    if (!form) return;
+
+    window.fetch = async () => ({ ok: true, status: 201, json: async () => ({ ok: true, id: 'preview' }) });
+    const fire = (el, type) => el.dispatchEvent(new Event(type, { bubbles: true }));
+
+    const SAMPLE = {
+      projectName: 'Sensorbrakett',
+      quantity: '25',
+      targetDate: 'Ingen fast frist',
+      size: '120 x 60 x 20 mm',
+      materialName: 'PETG',
+      color: 'Sort, matt',
+      contactName: 'Kari Nordmann',
+      contactCompany: 'Nordmann Mekaniske AS',
+      contactLocation: 'Haugesund',
+      contactPhone: '+47 900 12 345',
+      contactSignal: 'kari.01',
+      contactEmail: 'kari@example.com',
+    };
+
+    form.querySelectorAll('textarea').forEach(el => {
+      el.value = 'Brakett som holder en sensor på plass i et fuktig miljø, montert på en eksisterende ramme av aluminium.';
+      fire(el, 'input');
+    });
+
+    form.querySelectorAll('input[type="text"], input[type="email"], input[type="tel"]').forEach(el => {
+      el.value = SAMPLE[el.id] || 'Testverdi';
+      fire(el, 'input');
+    });
+
+    form.querySelectorAll('select').forEach(el => {
+      const option = [...el.options].find(candidate => candidate.value);
+      if (!option) return;
+      el.value = option.value;
+      fire(el, 'change');
+    });
+
+    new Set([...form.querySelectorAll('input[type="radio"]')].map(radio => radio.name)).forEach(name => {
+      const radio = form.querySelector('input[type="radio"][name="' + name + '"]');
+      radio.checked = true;
+      fire(radio, 'change');
+    });
+
+    // Two per question, so a checkbox group shows more than one answer and a
+    // lone checkbox still gets ticked.
+    form.querySelectorAll('[data-field]').forEach(wrapper => {
+      [...wrapper.querySelectorAll('input[type="checkbox"]:not([disabled])')]
+        .slice(0, 2)
+        .forEach(box => {
+          box.checked = true;
+          fire(box, 'change');
+        });
+    });
+
+    // A real File through a real DataTransfer, so the attachment goes through
+    // the page's own file handling rather than being drawn to look like it did.
+    try {
+      const transfer = new DataTransfer();
+      transfer.items.add(new File([new Uint8Array(1234567)], 'skisse.png', { type: 'image/png' }));
+      const input = document.getElementById('fileUpload');
+      input.files = transfer.files;
+      fire(input, 'change');
+    } catch (error) {
+      console.warn('No attachment in this preview:', error.message);
+    }
+
+    form.requestSubmit();
+  });
+</script>

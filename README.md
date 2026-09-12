@@ -41,6 +41,23 @@ scripts/
   prepare-deploy.mjs        - splits build output for two-repo deploy
 ```
 
+## Dev-only previews
+
+The enquiry form has a state it only reaches by being filled in and sent, which
+made reviewing it a four-section form fill for every change to a margin.
+
+```sh
+npm run dev
+```
+
+- `/dev/enquiry-sent` - the English form, already sent
+- `/dev/enquiry-sent-no` - the Norwegian one
+
+The preview fills the real controls with sample answers and stubs `fetch`, so
+the page's own code renders the receipt and nothing reaches the worker. These
+routes exist only while the dev server runs: `npm run build` emits no `dev/` at
+all, rather than a page that hides itself.
+
 ## CV generation
 
 CV data in `src/data/cv.yaml` feeds both the website and PDF output via [Typst](https://typst.app).
