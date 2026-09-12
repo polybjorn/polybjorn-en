@@ -13,6 +13,8 @@ const tr = t[lang];
 const td = tr.threeDPrinting;
 const featured = projects.flatMap(p => p.images).filter(img => img.featured3D);
 const backHref = lang === 'no' ? '/no' : '/';
+const enquiryHref = lang === 'no' ? '/no/3d-printing/enquiry' : '/3d-printing/enquiry';
+const stepOrder = ['enquiry', 'scope', 'price'];
 
 const serviceOrder = [
   { key: 'modelling', icon: Boxes },
@@ -167,6 +169,89 @@ const serviceOrder = [
       text-decoration: underline;
     }
 
+    .enquiry-cta {
+      font-family: 'Piazzolla', serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: #1e2228;
+      background: #6aaeee;
+      border-radius: 8px;
+      padding: 0.8rem 2rem;
+      margin-top: 1.6rem;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .enquiry-cta:hover {
+      background: #85bcf2;
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+      .enquiry-cta {
+        transition: background 0.15s, transform 0.12s;
+      }
+
+      .enquiry-cta:active {
+        transform: scale(0.97);
+      }
+    }
+
+    /* Quieter than a service card: it qualifies the grid above rather than
+       adding a seventh thing to it. */
+    .also-private {
+      font-family: 'Piazzolla', serif;
+      font-size: 0.95rem;
+      color: #9aa2ad;
+      margin-top: 1.4rem;
+    }
+
+    .steps {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 1.6rem;
+    }
+
+    .step {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+
+    /* Numbered because these genuinely are a sequence - an enquiry, then a
+       scope, then a price - and the order is the information. */
+    .step-number {
+      flex-shrink: 0;
+      width: 1.9rem;
+      height: 1.9rem;
+      border-radius: 50%;
+      border: 1px solid #3a3f47;
+      color: #6aaeee;
+      font-family: 'Piazzolla', serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .step h3 {
+      font-family: 'Piazzolla', serif;
+      font-size: 1.05rem;
+      color: #fff;
+      margin: 0 0 0.3rem;
+    }
+
+    .step p {
+      font-family: 'Piazzolla', serif;
+      font-size: 1rem;
+      line-height: 1.6;
+      color: #ccc;
+      margin: 0;
+    }
+
     .contact-cta {
       text-align: center;
       padding: 2rem 1.5rem;
@@ -261,6 +346,7 @@ const serviceOrder = [
     <section class="hero">
       <h1>{td.h1}</h1>
       <p class="tagline">{td.tagline}</p>
+      <a class="enquiry-cta" href={enquiryHref}>{td.enquiryCta}</a>
     </section>
 
     <section>
@@ -297,18 +383,28 @@ const serviceOrder = [
           </div>
         ))}
       </div>
+      <p class="also-private">{td.alsoPrivate}</p>
     </section>
 
-    <section class="prose">
+    <!--
+      Three steps, where there were two paragraphs and a section about who the
+      work is for. The form now carries the first conversation, and the job list
+      that used to be here is the services grid directly above it. What is left
+      is the part no form can do: what happens to the client's time and money.
+    -->
+    <section>
       <h2>{td.howItWorksHeading}</h2>
-      <p>{td.howItWorks1}</p>
-      <p>{td.howItWorks2}</p>
-    </section>
-
-    <section class="prose">
-      <h2>{td.whoItsForHeading}</h2>
-      <p>{td.whoItsFor1}</p>
-      <p>{td.whoItsFor2}</p>
+      <ol class="steps">
+        {stepOrder.map((key, index) => (
+          <li class="step">
+            <span class="step-number" aria-hidden="true">{index + 1}</span>
+            <div>
+              <h3>{td.steps[key].label}</h3>
+              <p>{td.steps[key].body}</p>
+            </div>
+          </li>
+        ))}
+      </ol>
     </section>
 
     <section class="contact-cta">
