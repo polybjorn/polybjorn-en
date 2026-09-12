@@ -54,6 +54,16 @@ for (const { path, lang } of PAGES) {
     const { doc } = await sent();
     assert.equal(doc.getElementById('intake-form').hidden, true);
     assert.equal(doc.getElementById('submit-done').hidden, false);
+
+    // The heading asked someone to fill the form in. Once they have, it says
+    // the send landed instead - and the intro explaining a form that is no
+    // longer on the page goes with it.
+    const heading = doc.querySelector('.hero h1').textContent.trim();
+    assert.equal(heading, doc.getElementById('sent-message').textContent.trim());
+    assert.equal(doc.querySelector('.hero .intro').hidden, true);
+
+    // The heading change is silent to a screen reader, so the status element
+    // still carries the text.
     assert.ok(doc.getElementById('sent-message').textContent.trim().length > 0);
   });
 

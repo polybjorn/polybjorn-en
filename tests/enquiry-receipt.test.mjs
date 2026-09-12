@@ -70,6 +70,19 @@ for (const { path, lang } of PAGES) {
     assert.equal(css(value).marginLeft, '0px', "the browser's default dd indent is off");
   });
 
+  test(`${lang}: the confirmation is the heading, not a line under the old one`, async () => {
+    const { doc, css } = await sentPage(path);
+
+    // The status element keeps the text for a screen reader, because a changed
+    // heading is announced to nobody - but it must not be a second visible copy
+    // of what the h1 now says. That depends on a scoped class applying to it,
+    // which is exactly the kind of thing that silently does not.
+    const status = doc.getElementById('sent-message');
+    assert.equal(css(status).position, 'absolute');
+    assert.equal(css(status).width, '1px');
+    assert.equal(doc.querySelector('.hero h1').textContent.trim(), status.textContent.trim());
+  });
+
   test(`${lang}: the file field is named once on screen, twice underneath`, async () => {
     const dom = loadPage(path, { styles: true });
     const doc = dom.window.document;
