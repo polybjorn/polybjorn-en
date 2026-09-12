@@ -111,21 +111,43 @@ export const BASE_FIELDS = [
     options: ORDER_TYPES,
   },
   {
+    // The help said "a short label, if you have one" - one half of that is what
+    // an example shows by being one, and the other half is true of every
+    // question here that is not marked otherwise.
+    //
+    // The example is the first concrete thing anyone reads on this form, so it
+    // sets what the form appears to be for - and no single word does that on
+    // its own. A set of them, one picked per visit (IntakeForm.astro), says the
+    // range of work this is for rather than nominating one part as typical.
+    //
+    // They are all the same kind of answer: a functional part with a reason to
+    // be printed rather than bought. An earlier single example, "Hyllebrakett",
+    // made the whole page sound like it was asking about the cheapest thing a
+    // printer can make.
+    //
+    // The markup renders the first of these, so a visitor without script still
+    // gets one. Keep that in mind when reordering: the first is the default.
     id: 'projectName',
     type: 'text',
     required: false,
     label: { en: 'Project or part name', no: 'Prosjekt- eller delnavn' },
-    help: {
-      en: 'A short label for the enquiry, if you have one.',
-      no: 'En kort tittel på henvendelsen, hvis du har en.',
+    placeholders: {
+      en: ['Sensor housing', 'Assembly jig', 'Impeller', 'Gearbox cover', 'Cable duct', 'Measuring jig'],
+      no: ['Sensorhus', 'Monteringsjigg', 'Pumpehjul', 'Girkassedeksel', 'Kabelkanal', 'Målejigg'],
     },
   },
   {
+    // The prompts are in the box. The one thing lost by moving them there,
+    // which is worth knowing before moving them back: a placeholder goes at the
+    // first keystroke, and on this field it is a list of what to cover rather
+    // than an example of how to answer - so it disappears exactly when someone
+    // starts working through it. Everywhere else on the form the hint is an
+    // example, and an example has done its job by the time you are typing.
     id: 'description',
     type: 'textarea',
     required: true,
     label: { en: 'Describe the part and what it is for', no: 'Beskriv delen og hva den skal brukes til' },
-    help: {
+    placeholder: {
       en: 'The problem it solves, where it fits, and anything about the setup around it.',
       no: 'Problemet den løser, hvor den skal sitte, og eventuelt annet rundt bruken.',
     },
@@ -155,21 +177,25 @@ export const BASE_FIELDS = [
     // Optional since the printed-or-model question went: with nothing left to
     // say "this one only wants the file", a required quantity would stop that
     // enquiry on a question that does not apply to it.
+    // The help existed to say a range is allowed. An example that is a range
+    // says the same thing in four characters.
     id: 'quantity',
     type: 'text',
     required: false,
     label: { en: 'How many do you need?', no: 'Hvor mange trenger du?' },
-    help: {
-      en: 'A number, or a range like "5 to 10" if you are not sure yet.',
-      no: 'Et antall, eller et spenn som "5 til 10" hvis du ikke er sikker ennå.',
-    },
+    placeholder: { en: '5, or 5 to 10', no: '5, eller 5 til 10' },
   },
   {
+    // "A date, or no fixed date is fine" was two facts: what to type, and that
+    // you do not have to have one. The example carries the first and the label
+    // carries the second, which is better placed there anyway - it is read
+    // before the field rather than after it. This one shares a row with the
+    // budget, so a line of help under it wrapped.
     id: 'targetDate',
     type: 'text',
     required: false,
-    label: { en: 'When do you need the part by?', no: 'Når trenger du delen?' },
-    help: { en: 'A date, or "no fixed date" is fine.', no: 'En dato, eller "ingen fast frist" går fint.' },
+    label: { en: 'Deadline, if you have one', no: 'Frist, hvis du har en' },
+    placeholder: { en: '15 October', no: '15. oktober' },
   },
   {
     id: 'budget',
@@ -210,14 +236,22 @@ export const BASE_FIELDS = [
     ],
   },
   {
+    // Same move as materialName below: the examples go in the box. The help
+    // said three things - state a unit, either unit is fine, a guess is fine -
+    // and a filled-in example says the first two on its own. The third is
+    // already in the label, which says "approximate".
+    //
+    // The axes are in the box, standing at the right-hand end of it, which is
+    // why the label no longer carries them. They were in the label because a
+    // placeholder would have taken them away at the first keystroke - which is
+    // exactly when knowing which number is which starts to matter. A note that
+    // stays put has neither problem, and it leaves the label as two words.
     id: 'size',
     type: 'text',
     required: false,
-    label: { en: 'Approximate size (L x W x H)', no: 'Omtrentlig størrelse (L x B x H)' },
-    help: {
-      en: 'In millimetres or centimetres - say which. A rough guess is fine.',
-      no: 'I millimeter eller centimeter - si hvilken. Et grovt anslag går fint.',
-    },
+    label: { en: 'Approximate size', no: 'Omtrentlig størrelse' },
+    placeholder: { en: '120 x 80 x 40 mm', no: '120 x 80 x 40 mm' },
+    boxNote: { en: 'L x W x H', no: 'L x B x H' },
   },
   {
     // Properties instead of a named filament - choosing between similar
@@ -228,58 +262,162 @@ export const BASE_FIELDS = [
     // already has a specific material in mind, not limited to whichever
     // ones are common enough to list here.
     //
-    // Each option carries a concrete example, same pattern as ORDER_TYPES -
-    // "heat" alone gives a noob nothing to anchor to, and the flex option
-    // needs its example to disambiguate "the material itself should bend"
-    // (TPU) from "it occasionally gets bent by accident" (that's toughness,
-    // already covered by "wear").
+    // No examples at all here, unlike ORDER_TYPES. Every option went through a
+    // stage of carrying a line of grey text under it, and at twelve options
+    // that was the shape of the whole question: a list you read twice. Each
+    // label says its own thing instead, which cost a word or two in four of
+    // them - "Brannhemmende" rather than "Brann", the requirement instead of
+    // the hazard, is the pattern.
     //
-    // Every label reads as a completion of the question ("does it need to
-    // handle ... load without sagging?"). Two of them used not to: "Staying
-    // rigid under load" and "Needs to flex" were a gerund and a verb phrase
-    // sitting next to three noun phrases, and "Needs to flex" did not parse
-    // as something the part must *handle* at all.
+    // The rule that fell out of it: if an option needs a note to be understood,
+    // the note belongs in the label. An example earns its place where the
+    // answer is a judgement rather than a word (ORDER_TYPES' "Bare en idé",
+    // where the example says what follows from picking it).
+    //
+    // The question asks what matters rather than what the part must withstand.
+    // It was "does it need to handle any of these?", which worked while every
+    // option was a thing to survive - but a part that touches food or has to
+    // insulate is not withstanding anything, and those requirements rule
+    // materials in and out as hard as heat does. The labels are noun phrases
+    // under either question, so they did not have to change.
+    //
+    // Ordered in pairs, because the list runs in two columns and fills left to
+    // right: wet and weather, then temperature, then chemical and fire, then
+    // the two mechanical pairs, then the two that are neither. A single column
+    // on a narrow screen reads in the same order.
     id: 'materialProperties',
     type: 'checkboxGroup',
     required: false,
-    label: { en: 'Does it need to handle any of these?', no: 'Må den tåle noe av dette?' },
+    // Six plain options on the left, the six named ones on the right. See
+    // .option-groups in IntakeField.astro - a question with no advanced options
+    // gets one full-width list and needs no flag for it.
+    // The six below the fold. Half of these questions only come up in specific
+    // work, and a requirement nobody has is still a line everybody reads.
+    advancedLabel: { en: 'Special requirements', no: 'Spesielle krav' },
+    label: { en: 'Does any of this matter for the part?', no: 'Er noe av dette viktig for delen?' },
     options: [
       {
+        // "Hele året" carries the frost, which is the point of the label: a
+        // year outdoors in this country is sun and frost both, so nobody goes
+        // hunting for a separate tick for the cold. It also fixes the grammar -
+        // "Utendørs, sol og frost" joined an adverb to two nouns with a comma
+        // and read as a translation, which it was.
         value: 'outdoor',
-        label: { en: 'Outdoors or in the sun', no: 'Utendørs eller i sol' },
-        example: { en: 'Garden furniture, a car, a boat.', no: 'Hagemøbler, en bil, en båt.' },
+        label: { en: 'Outdoors all year', no: 'Utendørs hele året' },
       },
       {
+        value: 'water',
+        label: { en: 'Water or damp', no: 'Vann eller fukt' },
+      },
+      {
+        // "Varme" on its own got ticked for anything that ever felt warm. The
+        // adjective narrows it and the number settles it: 60 degrees is where
+        // PLA starts to let go, so it is the line that decides whether this is
+        // a material question at all. A qualifier rather than an example - it
+        // measures the label instead of illustrating it, and it is short enough
+        // to sit on the same line.
         value: 'heat',
-        label: { en: 'Heat', no: 'Varme' },
-        example: {
-          en: 'A stove, an engine bay, hot water - not just warm hands.',
-          no: 'En komfyr, motorrom, varmt vann - ikke bare varme hender.',
-        },
+        label: { en: 'High heat', no: 'Høy varme' },
+        qualifier: { en: '> 60 °C', no: '> 60 °C' },
       },
       {
+        // The property, in Norwegian word order. "Belastning uten å henge" was
+        // English phrasing carried across word by word, and it described an
+        // outcome where the labels around it name a property: Brannhemmende,
+        // Antistatisk, and now this.
         value: 'rigid',
-        label: { en: 'Load without sagging', no: 'Belastning uten å henge' },
-        example: {
-          en: "A shelf bracket, a mounting arm - shouldn't sag.",
-          no: 'En hyllebrakett, en monteringsarm - skal ikke henge.',
-        },
+        label: { en: 'Stiff under load', no: 'Stiv under belastning' },
       },
       {
+        // The material, not the motion. "Being bent on purpose" was meant to
+        // ask for TPU and instead caught anything that moves: a hinge can be
+        // rigid parts on a pin, which is a question about clearances and has
+        // nothing to do with a flexible filament. Naming what the material has
+        // to be cannot be read the other way.
         value: 'flex',
-        label: { en: 'Being bent on purpose', no: 'Å bli bøyd med hensikt' },
-        example: {
-          en: 'Bends by design - a hinge, a strap, a phone case.',
-          no: 'Bøyer seg med hensikt - et hengsel, en stropp, et mobildeksel.',
-        },
+        label: { en: 'Soft or rubbery', no: 'Mykt eller gummiaktig' },
       },
       {
+        // "Slitasje" is the word for wear; "daglig bruk" was saying how often
+        // rather than what happens to the part.
         value: 'wear',
-        label: { en: 'Everyday bumps and wear', no: 'Daglig bruk og støt' },
-        example: {
-          en: 'Gets picked up, knocked, or dropped a lot.',
-          no: 'Blir løftet, dyttet eller mistet i bakken ofte.',
-        },
+        label: { en: 'Wear and impact', no: 'Slitasje og støt' },
+      },
+      {
+        // Named for the case that is left once "utendørs hele året" has taken
+        // the obvious one - cold indoors. "Kulde" beside that option was the
+        // same tick twice over.
+        //
+        // "Kjølerom", not "kjølelager": a lager is a building, not a condition
+        // a part sits in.
+        advanced: true,
+        value: 'cold',
+        label: { en: 'Freezer or cold room', no: 'Fryser eller kjølerom' },
+      },
+      {
+        // "eller olje" in the label, not "olje, drivstoff" in small grey next
+        // to it. The qualifier slot is for a measurement or a standard - a
+        // number you either have or do not - and the two options that use it
+        // read that way. A suggestion in the same grey read as a different kind
+        // of thing wearing the same clothes.
+        //
+        // Oil is the word worth the two syllables: someone whose part sits in
+        // engine oil or grease does not necessarily file that under chemicals,
+        // where anyone thinking of fuel or solvent already does.
+        advanced: true,
+        value: 'chemicals',
+        label: { en: 'Chemicals or oil', no: 'Kjemikalier eller olje' },
+      },
+      {
+        // The requirement, not the hazard. "Brann" read as surviving a fire,
+        // which is not what anyone means by it, and needed a note to say so.
+        //
+        // The qualifier is the standard a flame-retardant filament is sold
+        // against: UL 94 rates HB / V-2 / V-1 / V-0, and V-0 is what anyone
+        // with a real requirement here is asking for. It tells them the right
+        // thing is being asked, and tells everyone else there is a standard to
+        // have an answer about.
+        advanced: true,
+        value: 'fire',
+        label: { en: 'Fire retardant', no: 'Brannhemmende' },
+        qualifier: { en: 'UL94 V-0', no: 'UL94 V-0' },
+      },
+      {
+        advanced: true,
+        value: 'friction',
+        label: { en: 'Rubbing against other parts', no: 'Friksjon mot andre deler' },
+      },
+      {
+        advanced: true,
+        value: 'contact',
+        label: { en: 'Food or skin contact', no: 'Mat- eller hudkontakt' },
+      },
+      {
+        // One end of the scale, not both. The label named insulating and
+        // conducting together while the qualifier named the band between them:
+        // surface resistivity runs from conductive under 10⁴ Ω, through
+        // static-dissipative at 10⁶-10⁹, to insulating above 10¹². A range
+        // cannot stand for two opposite ends.
+        //
+        // Insulating is the half that went, because it is what plastic does
+        // anyway: asking whether a part must insulate is asking whether it must
+        // go on being what it already is, and nearly every filament answers
+        // yes. Draining static is the half that needs a material chosen for it,
+        // and 10⁶-10⁹ Ω is exactly that material's band.
+        //
+        // A part that has to insulate to a stated dielectric strength is a real
+        // requirement, and a rarer one: that arrives as kV/mm in the
+        // description, from someone who knows to say so.
+        advanced: true,
+        value: 'electrical',
+        // "Antistatisk", the way it is actually written. "Lede vekk statisk"
+        // was English phrasing in Norwegian words: "statisk" is not a noun on
+        // its own there, it wants "statisk elektrisitet" after it, and that
+        // makes the label half again as long as any other. The adjective is
+        // also the same shape as "Brannhemmende" two rows up - the requirement
+        // named in one word - and the ohms say which end of the scale it means.
+        label: { en: 'Antistatic', no: 'Antistatisk' },
+        qualifier: { en: '10⁶-10⁹ Ω', no: '10⁶-10⁹ Ω' },
       },
     ],
   },
@@ -288,14 +426,17 @@ export const BASE_FIELDS = [
     // question with a text box under it, which got answered "yes" - and it
     // needed two sentences of help to undo that, which is a lot of text for a
     // field sharing a row with another.
+    //
+    // The examples are in the box rather than under it. Half a row is not wide
+    // enough for a line of help, so it wrapped, and a wrapped hint under a
+    // one-word label was most of the height of the field. A placeholder can
+    // carry them because they are only examples: the label says what the field
+    // is, and nothing here is needed to answer it.
     id: 'materialName',
     type: 'text',
     required: false,
     label: { en: 'Material', no: 'Materiale' },
-    help: {
-      en: 'If you have one in mind - PETG, ASA, TPU.',
-      no: 'Hvis du har et i tankene - PETG, ASA, TPU.',
-    },
+    placeholder: { en: 'PETG, ASA, TPU', no: 'PETG, ASA, TPU' },
   },
   {
     // Back to "colour and finish" (not colour alone) now that the
@@ -315,6 +456,10 @@ export const BASE_FIELDS = [
     type: 'text',
     required: true,
     autocomplete: 'name',
+    // required counts a space as an answer, so " " got through. Nothing beyond
+    // that is checkable: a rule strict enough to reject "Bj" also rejects Bo
+    // and Li, and this is a name someone is telling me on purpose.
+    pattern: '.*\\S.*',
     label: { en: 'Name', no: 'Navn' },
   },
   {
@@ -332,22 +477,27 @@ export const BASE_FIELDS = [
     // options). Its own field also drops the need to pattern-match "does
     // this look like a phone number" to decide whether to reveal a
     // separate "prefer Signal" checkbox.
+    // An example of the shape, now that the page refuses one that is not a
+    // number - better to show it than to refuse it afterwards.
     id: 'contactPhone',
     type: 'text',
     inputType: 'tel',
     autocomplete: 'tel',
     required: false,
+    placeholder: { en: '+47 123 45 678', no: '+47 123 45 678' },
     label: { en: 'Phone', no: 'Telefon' },
   },
   {
+    // "eller lenke" rather than "eller signal.me-lenke": this field is half a
+    // row wide, and a placeholder that does not fit is cut off with nothing to
+    // say it was. A username is the case that needs showing anyway - the shape
+    // with the digits on the end is not something anyone guesses - and if what
+    // gets typed is neither, the refusal names all three forms.
     id: 'contactSignal',
     type: 'text',
     required: false,
+    placeholder: { en: 'name.42 or a link', no: 'navn.42 eller lenke' },
     label: { en: 'Signal', no: 'Signal' },
-    help: {
-      en: 'Username or signal.me link.',
-      no: 'Brukernavn eller signal.me-lenke.',
-    },
   },
   {
     id: 'contactEmail',
@@ -367,6 +517,14 @@ export const BASE_FIELDS = [
     // is the right failure direction here: absent means not confidential,
     // exactly what unticked means. Anything downstream should treat a missing
     // field as "no", never as "unknown".
+    //
+    // No help text. It said "otherwise I may show the work, for example as a
+    // project on this site", which stated a default nobody had agreed to: it
+    // reads as a licence taken by an unticked box, and it is the tick that is
+    // the request, not the blank. Saying less leaves the question where it
+    // belongs - a customer asking for confidentiality gets it, and anything I
+    // want to publish is asked for separately, when there is something to show
+    // and someone to ask.
     id: 'confidential',
     type: 'checkbox',
     required: false,
@@ -374,23 +532,22 @@ export const BASE_FIELDS = [
       en: 'Treat this enquiry as confidential',
       no: 'Behandle henvendelsen konfidensielt',
     },
-    help: {
-      en: 'Otherwise I may show the work, for example as a project on this site.',
-      no: 'Ellers kan jeg vise fram arbeidet, for eksempel som et prosjekt på denne nettsiden.',
-    },
   },
   {
+    // The old label was just "Location", which got read as "street address".
+    // "Town or area" carries that, and a town in the box carries it again - so
+    // the help, which said what the answer was for, is gone. What it is for is
+    // the one thing lost: the reason anyone is being asked where they live.
+    // Say so directly if that turns out to matter.
     id: 'contactLocation',
     type: 'text',
     required: false,
     autocomplete: 'address-level2',
+    // Haugesund, not a town picked at random: an example here is the one place
+    // name on the page, so it may as well be the one that says where the work
+    // is done from - which is also what makes "for frakt eller henting" obvious
+    // without the sentence that used to say it.
+    placeholder: { en: 'Haugesund', no: 'Haugesund' },
     label: { en: 'Town or area', no: 'Sted eller område' },
-    // The old label was just "Location", which got read as "street address".
-    // "Town or area" carries that now, so the help only has to say what it is
-    // for.
-    help: {
-      en: 'Roughly where you are, for postage or handover.',
-      no: 'Omtrent hvor du er, for frakt eller henting.',
-    },
   },
 ];

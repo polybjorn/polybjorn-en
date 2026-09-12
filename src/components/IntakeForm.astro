@@ -2,7 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import { t } from '../data/translations.js';
 import { BASE_FIELDS } from '../data/intakeForm.js';
-import { ArrowLeft } from 'lucide-astro';
+import { ArrowLeft, ArrowUp } from 'lucide-astro';
 import IntakeField from './IntakeField.astro';
 
 interface Props {
@@ -16,21 +16,37 @@ const backHref = lang === 'no' ? '/no/3d-printing' : '/3d-printing';
 
 const byId = (id: string) => BASE_FIELDS.find(f => f.id === id);
 
+// Field id -> the examples it offers, in this language. Handed to the script so
+// the pick happens per visit rather than per build: a static site built once a
+// week would otherwise show the same "random" example all week.
+const PLACEHOLDER_SETS = Object.fromEntries(
+  BASE_FIELDS.filter((field: any) => field.placeholders).map((field: any) => [field.id, field.placeholders[lang]]),
+);
+
 const aboutFields = ['projectName', 'description', 'fileUpload'].map(byId);
+// Ownership follows what you have, because the two are one subject: where the
+// design came from. It sat last, after the size, the material and the colour -
+// the questions about the printed object rather than about the design - which
+// put the one question on this form with legal weight at the bottom of the card,
+// read last and answered last.
 const specRows = [
   ['orderType'],
-  ['size'],
+  ['copyright'],
+  ['size', 'quantity'],
   ['materialProperties'],
   ['materialName', 'color'],
-  ['copyright'],
 ].map(row => row.map(byId));
-// Fields grouped onto rows. A date, a budget bracket, a name, a company, a
-// phone number and a town are all short values, and a box the width of the page
-// invites a sentence - so they pair off, and only the ones that can genuinely
-// run long stay wide. A quantity is short too, but it has nothing to pair with
-// here: the other two questions in its section belong together.
+// Fields grouped onto rows. A size, a quantity, a date, a budget bracket, a
+// name, a company, a phone number and a town are all short values, and a box
+// the width of the page invites a sentence - so they pair off, and only the ones
+// that can genuinely run long stay wide.
+//
+// How many is a question about the part, not about when it is wanted: what it
+// costs and how long it takes do not scale with it in a straight line, which is
+// something to work out alongside size and material. So it sits with those,
+// beside the size, and Timing is left with the two questions that really are
+// about time and money.
 const timingRows = [
-  ['quantity'],
   ['targetDate', 'budget'],
 ].map(row => row.map(byId));
 // Paired across, read down: who you are on the left - name, company, town -
@@ -40,18 +56,14 @@ const contactRows = [
   ['contactName', 'contactPhone'],
   ['contactCompany', 'contactEmail'],
   ['contactLocation', 'contactSignal'],
-  ['confidential'],
 ].map(row => row.map(byId));
 
-// The three that answer the "at least one" rule between them. Their shared mark
-// goes under the last row holding one of them, wherever that ends up - naming a
-// field instead left the mark stranded mid-column the first time the order
-// changed.
-const CONTACT_METHOD_IDS = ['contactPhone', 'contactSignal', 'contactEmail'];
-const lastContactMethodRow = contactRows.reduce(
-  (last, row, i) => (row.some(field => CONTACT_METHOD_IDS.includes(field.id)) ? i : last),
-  0,
-);
+// The one question that is not about reaching you, and the last thing before
+// Send - so it shares Send's row rather than holding one of its own above it.
+// A lone checkbox on a row of its own, with the button on the next row, spent
+// two rows and a gap on one line of text and one button.
+const confidentialField = byId('confidential');
+
 
 // Single source for the dots, the "2 / 4" counter and the screen-reader
 // announcement, so they cannot drift out of step with the actual stages.
@@ -72,6 +84,11 @@ const stageLabels = {
 >
   <style>
     body {
+      /* So the platform draws its own furniture dark: the list a select pops
+         open, the caret, the scrollbars. Without it a dark page hangs a white
+         dropdown off a dark control, which is the part of a select nothing in
+         our CSS can reach. */
+      color-scheme: dark;
       background: #1e2228;
       color: #dde1e7;
       font-family: 'Piazzolla', serif;
@@ -81,8 +98,6 @@ const stageLabels = {
     main {
       max-width: 680px;
       margin: 0 auto;
-      /* The bottom was clearing a progress bar fixed to the viewport. That
-         marker lives on the cards now, so this is just breathing room. */
       padding: 4rem 2rem 4rem;
     }
 
@@ -148,6 +163,68 @@ const stageLabels = {
       line-height: 1.5;
     }
 
+    /* One heading over each column of a paired section, centred on the column
+       it names. It is a row of the same grid the fields below use, so the two
+       stay lined up at every width and stack together when the row collapses. */
+    .column-headings {
+      margin-bottom: 0.2rem;
+    }
+
+    /* Left, over the column it names - a heading centred over a column of
+       left-aligned fields lines up with nothing in it. A row rather than a block
+       so the dot beside the heading sits on its line the way the ones beside the
+       field labels do. */
+    .column-heading {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      margin: 0 0 0.9rem;
+    }
+
+    /* The same dot as the one beside a required field label, drawn again here
+       because scoped styles do not cross components: that rule lives in
+       IntakeField.astro and would never match a span this file renders. */
+    .column-heading .required-mark {
+      display: inline-block;
+      position: relative;
+      width: 0.9rem;
+      height: 0.9rem;
+      margin-left: 0.1rem;
+      vertical-align: middle;
+    }
+
+    .column-heading .required-mark::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 0.3rem;
+      height: 0.3rem;
+      border-radius: 50%;
+      background: #e8b775;
+    }
+
+    /* And gone once the three fields under it are marked, for the same reason
+       the field dots go: a promise and the thing it promised, side by side, is
+       one warning too many. The state lives on the fields, so the heading has to
+       ask after them - which is what :has is for. */
+    #stage-contact:has(.field.is-missing-shared) .column-heading .required-mark {
+      display: none;
+    }
+
+    /* A heading with something to say when you ask it. The whole heading is the
+       target rather than the dot beside it, which is too small to hover for.
+
+       No underline under it: the dotted line is the conventional way of saying
+       "there is an explanation here", and it also looked like a heading someone
+       had underlined by accident. What is left to find it by is the cursor and
+       the dot - and the rule is in the alert text anyway for anyone who presses
+       Send without ever hovering anything. */
+    .column-heading[title] {
+      cursor: help;
+    }
+
     .visually-hidden {
       position: absolute;
       width: 1px;
@@ -178,18 +255,6 @@ const stageLabels = {
       align-items: start;
     }
 
-    /* Pulled up hard against the row it belongs to. A field carries 1.4rem of
-       margin below it, which on its own left the shared mark adrift - and it
-       reads as adrift from the shorter of two columns in particular, since the
-       mark can only sit below the taller one. */
-    .pair-error {
-      font-size: 0.88rem;
-      color: #e8b775;
-      line-height: 1.4;
-      margin: -1.1rem 0 1.4rem;
-      text-align: center;
-    }
-
     /* auto-fit rather than a viewport breakpoint: the row pairs whenever there
        is room for two columns of a usable width and stacks when there is not,
        measured against the space it actually has. A media query asks the wrong
@@ -204,21 +269,84 @@ const stageLabels = {
       grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
     }
 
-    /* Centred, like Send at the end of the form - the button that moves you on
-       sits in the same place in the page whichever section you are in. */
-    /* The one question in "Om deg" that is not about reaching you, and a lone
-       checkbox under two columns of boxes reads as a field somebody left
-       half-finished. A rule above it makes the space around it deliberate: a
-       different kind of question, not a column that ran out. */
-    .field-row:has([data-field="confidential"]) {
-      border-top: 1px solid #333840;
-      padding-top: 1.4rem;
-      margin-top: 0.4rem;
+    /* Progress on the left, the button on the right. flex-end rather than
+       space-between, with the dots pushing themselves left: on every card but
+       the one you are on the dots are hidden, and space-between would then walk
+       the button over to the left where nothing else on the page sits. */
+    .continue-row,
+    .submit-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 1rem;
+    }
+
+    /* Centre, which is what was asked for: the tick's line on the middle of the
+       button's height. Baseline was tried in between and is the wrong answer
+       here - it hangs a 22px line off the same line as the label of a 44px
+       button, so the tick rides high. */
+    .submit-actions {
+      align-items: center;
+    }
+
+    /* Wrapping, because a tick with a sentence on it and a button are a lot for
+       one narrow row: the button drops under the tick rather than squeezing it.
+       The field pushes itself left so it stays there either way. */
+    .submit-actions {
+      flex-wrap: wrap;
+      row-gap: 1.2rem;
+    }
+
+    /* :global on .field, because the field is IntakeField's markup and carries
+       that component's scope - written plainly, this selector had IntakeForm's
+       cid appended to .field and matched nothing at all. That is why the tick
+       and the button sat packed together against the right of the row with a
+       hole to their left: with no basis and no grow, the field was as wide as
+       its own text and justify-content: flex-end put the pair at the end.
+       The same mistake, unnoticed, is why the tick's bottom margin never went
+       away either.
+
+       A basis rather than auto: it states what the tick's side of the row wants
+       instead of asking the field how wide its contents are. It grows into
+       whatever is left, so the button is pushed right without a margin doing it,
+       and 18rem is the width below which the two stop sharing a row. */
+    .submit-actions :global(.field) {
+      flex: 1 1 18rem;
+      margin-bottom: 0;
+    }
+
+    /* The tick's box on the centre of its own line, not 0.25rem below the top of
+       it. That offset is for options whose text runs to two lines, where a box
+       centred on the block would float beside the middle of a paragraph - there
+       is no second line here, and next to a button twice the height it was the
+       one thing in the row not sitting on the same line as everything else.
+
+       :global on the descendants: the option markup belongs to IntakeField, so
+       it carries that component's scope and a selector written here would never
+       reach it. The anchor is scoped, the rest is not. */
+    .submit-actions :global(.option-list label) {
+      align-items: center;
+    }
+
+    /* No margin at all, not just no top margin: a checkbox carries about 4px of
+       it on the left from the browser's own stylesheet, which inset the tick
+       from the card's edge while every input above it started flush against
+       it. */
+    .submit-actions :global(.option-list input) {
+      margin: 0;
     }
 
     .continue-row {
-      text-align: center;
       margin-top: 0.4rem;
+    }
+
+    /* Same trap as .progress-dots[hidden] above: display on the class beats the
+       [hidden] attribute's own display: none, which lives in the browser's
+       stylesheet and loses to anything of ours. advance() hides the row it came
+       from, and the row stayed put - so every card you had passed kept offering
+       to take you on to the next one. */
+    .continue-row[hidden] {
+      display: none;
     }
 
     .continue-btn {
@@ -260,14 +388,41 @@ const stageLabels = {
           border-color 0.15s ease, color 0.15s ease;
       }
 
+      /* A press that did not go through. Short, and once - it says the button
+         heard you and refused, not that something is wrong with the button. */
+      button[type="submit"].is-refused {
+        animation: submit-refused 0.3s ease;
+      }
+
+      @keyframes submit-refused {
+        0%, 100% { transform: translateX(0); }
+        20% { transform: translateX(-4px); }
+        40% { transform: translateX(4px); }
+        60% { transform: translateX(-3px); }
+        80% { transform: translateX(2px); }
+      }
+
       .continue-btn:active,
       button[type="submit"]:active {
         transform: scale(0.97);
       }
 
-      .form-error,
-      .pair-error:not([hidden]) {
+      .form-error {
         animation: form-error-in 0.22s ease;
+      }
+
+      /* The rule appearing beside the heading, the same way a field's own mark
+         appears under it - they are one event and should look like one. */
+      .section-head .section-intro:not([hidden]) {
+        animation: form-error-in 0.22s ease;
+      }
+
+      /* A section's dot changing what it means: done, current, or holding the
+         send up. Slower than the marks, because the dots are the thing you are
+         not looking at - a change you catch out of the corner of your eye has
+         to last long enough to be caught. */
+      .progress-dots .dot {
+        transition: background 0.25s ease, border-color 0.25s ease;
       }
 
       @keyframes form-error-in {
@@ -276,32 +431,76 @@ const stageLabels = {
       }
     }
 
+    /* The rule that used to sit above the confidentiality tick sits above the
+       whole row now, because the tick is in it: what it separates is the last
+       question and the send from the questions about reaching you. */
     .submit-row {
-      text-align: center;
-      margin-top: 2.5rem;
+      border-top: 1px solid #333840;
+      margin-top: 1.3rem;
+      padding-top: 1.3rem;
     }
 
     /* The warning belongs to the form above it, not to the button below it, so
        when it appears it moves up towards the last field and leaves the button
        its own space. Without a warning the button keeps the full gap. */
-    .submit-row:has(.form-error:not([hidden])) {
-      margin-top: 1.5rem;
+    .submit-row:has(.form-error:not([hidden]):not(.form-error-quiet)) {
+      margin-top: 0.6rem;
     }
 
     /* One line, so the box is the width of that line rather than the width of
        the form - a sentence pinned to the left of a full-width panel is mostly
-       empty panel. It sits over the button it belongs to, centred with it. */
+       empty panel. It sits over the button it belongs to, centred with it.
+       Only an endpoint refusal is shown this way; see .form-error-quiet. */
     .form-error {
       font-size: 0.92rem;
       color: #e8b775;
       line-height: 1.45;
       width: fit-content;
       max-width: 100%;
-      margin: 0 auto 2rem;
+      margin: 0 0 2rem auto;
       background: #2c2419;
       border: 1px solid #7a5a30;
       border-radius: 8px;
       padding: 0.7rem 1rem;
+    }
+
+    /* A refusal that the page has already shown: every missing field is marked
+       and the page has moved to the first one, so the sentence is left in the
+       alert region for a screen reader and taken off the screen. Not [hidden],
+       which would take it out of the accessibility tree as well. */
+    .form-error.form-error-quiet {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      border: 0;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+    }
+
+    /* Send while the form is not ready to send. Not blue plus amber: an amber
+       ring around a blue fill with dark text on it put three colours on the one
+       element that has to look like the thing you press. It gives up the fill
+       instead and wears the state colour on its own, so there are two - and it
+       goes back to blue the moment the last marked field is answered.
+
+       It has to be a standing state rather than a flourish. Pressing Send takes
+       you to the first missing field, so anything that only happens once happens
+       while the button is scrolling off the screen. This is what is waiting when
+       you come back down to press it again.
+
+       An inset ring rather than a border: a border would change the button's
+       size, and it would do it while the page is moving. */
+    button[type="submit"].is-refused {
+      background: transparent;
+      color: #e8b775;
+      box-shadow: inset 0 0 0 1px #a8764a;
+    }
+
+    button[type="submit"].is-refused:hover {
+      background: rgba(168, 118, 74, 0.12);
     }
 
     /* The heading, list and jump buttons are built by the script, so they carry
@@ -362,36 +561,85 @@ const stageLabels = {
        Read off the card it belongs to, the marker needs no script either: the
        card you are on is the last one there is, so its own position is the
        progress. */
-    .stage-header {
+    /* Where the form is asking you to press something: the same row as the
+       button that moves you on. It has been three things now - a bar fixed to
+       the window, a marker on every card, and this. Fixed meant floating chrome
+       over the page and a collision with whatever else sat at the bottom
+       centre; one per card said the same thing four times over. Here there is
+       exactly one on the page, in the place you are already looking, and it
+       scrolls with the form like everything else.
+
+       No background, border or blur: it is not sitting on top of the page any
+       more, so it does not need to hold itself apart from it. */
+    .progress-dots {
       display: flex;
       align-items: center;
-      gap: 1rem;
-      margin-bottom: 1.4rem;
+      gap: 0.55rem;
+      margin: 0 auto 0 0;
     }
 
-    .stage-header .section-heading {
-      margin: 0;
+    /* display on the class beats the [hidden] attribute's own display: none,
+       which is in the browser's stylesheet and loses to anything of ours. So
+       every card's set stayed on screen and the form counted itself four
+       times. */
+    .progress-dots[hidden] {
+      display: none;
     }
 
-    .stage-dots {
-      display: flex;
-      gap: 0.45rem;
-      margin-left: auto;
-      flex-shrink: 0;
-    }
-
-    .stage-dots .dot {
-      width: 6px;
-      height: 6px;
+    .progress-dots .dot {
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
       background: transparent;
       border: 1.5px solid #4a5058;
     }
 
-    .stage-dots .dot.dot-here {
+    .progress-dots .dot.dot-active {
       background: #6aaeee;
       border-color: #6aaeee;
     }
+
+    .progress-dots .dot.dot-done {
+      background: #4a5058;
+      border-color: #4a5058;
+    }
+
+    /* A section with an answer still missing, in the same amber as the fields
+       themselves. Last of the dot rules, so it wins over done and active: which
+       section you are on matters less than which one is holding you up. */
+    .progress-dots .dot.dot-missing {
+      background: #a8764a;
+      border-color: #a8764a;
+    }
+
+    /* Copied from ThreeDPrintingPage.astro, where this page's visitors have
+       just come from, and identical on the gallery, the projects list and every
+       project page: same position, same fade, same 28px arrow. A back-to-top
+       that looked or behaved differently here would be a different control as
+       far as anyone using it is concerned.
+
+       The bottom centre was the progress bar's until the dots moved into the
+       rows, which is what left room for it. */
+    .to-top {
+      position: fixed;
+      bottom: 1rem;
+      left: 50%;
+      display: inline-flex;
+      transform: translateX(-50%) translateY(0.5rem);
+      color: #ccc;
+      text-decoration: none;
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s, transform 0.3s;
+      line-height: 1;
+    }
+    .to-top.visible {
+      opacity: 0.75;
+      pointer-events: auto;
+      transform: translateX(-50%) translateY(0);
+    }
+    .to-top:hover { opacity: 1; color: #fff; }
 
     .back-home {
       position: fixed;
@@ -451,15 +699,13 @@ const stageLabels = {
         -->
         <legend class="visually-hidden">{td.sectionAbout}</legend>
 
-        <div class="stage-header">
-          <div class="stage-dots" aria-hidden="true">
-            {STAGE_IDS.map(sid => <span class:list={['dot', sid === 'stage-about' && 'dot-here']}></span>)}
-          </div>
-        </div>
 
         {aboutFields.map(field => <IntakeField field={field} lang={lang} td={td} />)}
 
         <div class="continue-row">
+          <div class="progress-dots" aria-hidden="true">
+            {STAGE_IDS.map(id => <span class="dot" data-dot={id}></span>)}
+          </div>
           <button type="button" class="continue-btn" data-continue="about">{td.continueLabel}</button>
         </div>
       </fieldset>
@@ -473,18 +719,16 @@ const stageLabels = {
           the accessibility tree, so this copy is aria-hidden rather than read
           out twice.
         -->
-        <div class="stage-header">
-          <p class="section-heading" aria-hidden="true">{td.sectionSpec}</p>
-          <div class="stage-dots" aria-hidden="true">
-            {STAGE_IDS.map(sid => <span class:list={['dot', sid === 'stage-spec' && 'dot-here']}></span>)}
-          </div>
-        </div>
+        <p class="section-heading" aria-hidden="true">{td.sectionSpec}</p>
         {specRows.map(row => (
           <div class:list={['field-row', `field-row-${row.length}`]}>
             {row.map(field => <IntakeField field={field} lang={lang} td={td} />)}
           </div>
         ))}
         <div class="continue-row">
+          <div class="progress-dots" aria-hidden="true">
+            {STAGE_IDS.map(id => <span class="dot" data-dot={id}></span>)}
+          </div>
           <button type="button" class="continue-btn" data-continue="spec">{td.continueLabel}</button>
         </div>
       </fieldset>
@@ -498,18 +742,16 @@ const stageLabels = {
           the accessibility tree, so this copy is aria-hidden rather than read
           out twice.
         -->
-        <div class="stage-header">
-          <p class="section-heading" aria-hidden="true">{td.sectionTiming}</p>
-          <div class="stage-dots" aria-hidden="true">
-            {STAGE_IDS.map(sid => <span class:list={['dot', sid === 'stage-timing' && 'dot-here']}></span>)}
-          </div>
-        </div>
+        <p class="section-heading" aria-hidden="true">{td.sectionTiming}</p>
         {timingRows.map(row => (
           <div class:list={['field-row', `field-row-${row.length}`]}>
             {row.map(field => <IntakeField field={field} lang={lang} td={td} />)}
           </div>
         ))}
         <div class="continue-row">
+          <div class="progress-dots" aria-hidden="true">
+            {STAGE_IDS.map(id => <span class="dot" data-dot={id}></span>)}
+          </div>
           <button type="button" class="continue-btn" data-continue="timing">{td.continueLabel}</button>
         </div>
       </fieldset>
@@ -523,35 +765,57 @@ const stageLabels = {
           the accessibility tree, so this copy is aria-hidden rather than read
           out twice.
         -->
-        <div class="stage-header">
-          <p class="section-heading" aria-hidden="true">{td.sectionContact}</p>
-          <div class="stage-dots" aria-hidden="true">
-            {STAGE_IDS.map(sid => <span class:list={['dot', sid === 'stage-contact' && 'dot-here']}></span>)}
-          </div>
-        </div>
         <!--
-          Phone, Signal and email are each optional on their own but one of
-          the three is required. Without this line the only statement of that
-          rule was a validation message at the very end of the form, under
-          three fields all labelled "(optional)".
+          Phone, Signal and email are each optional on their own but one of the
+          three is required, and this is the only place that says so. It used to
+          be said twice: here, and again in an amber line under the three fields
+          once a send was refused - the same sentence, one of them phrased
+          differently because it had to stand on its own.
+
+          Now the rule is stated once and this line turns amber when it is the
+          thing standing in the way (see .section-intro.is-missing). The fields
+          themselves are marked at the same time, so what is being asked for and
+          where to answer it are both on screen without either being repeated.
+
+          It sits beside the heading rather than under it: the heading is two
+          words and the line is one, and a row each spent two rows on what fits
+          in one. It wraps back under when the row cannot hold both.
+
+          A heading per column rather than one for the card, because the two
+          columns are two different questions: who you are on the left, how to
+          reach you on the right. They sit in a row of the same grid the fields
+          use, so each one is centred over the column it names and stacks with it
+          when the row collapses.
+
+          The rule is the right column's heading's own tooltip. "Minst én av
+          disse" needs something visible to point at, and a heading over the
+          three of them is that; standing in the card as a line of its own it
+          read as any one of the six fields being enough.
+
+          The dot is back on the heading, and the tooltip is on the heading
+          rather than on the dot: a 14px dot is a poor thing to have to hover.
+          The dot belongs here and not on any of the three fields, which is the
+          distinction - a mark means whatever it sits beside, so on a field label
+          it says this field and on a column heading it says this column. One of
+          these three is required, so the column is.
+
+          A dotted underline is what says there is something to hover.
+
+          A tooltip is for eyes and a mouse only, so the same rule goes into the
+          alert text when a send is refused for it - in the wording that works
+          without anything to point at. See contactMethodRequired.
         -->
-        <p class="section-intro">{td.sectionContactIntro}</p>
-        {contactRows.map((row, i) => (
-          <>
-            <div class:list={['field-row', `field-row-${row.length}`]}>
-              {row.map(field => <IntakeField field={field} lang={lang} td={td} />)}
-            </div>
-            {/*
-              The "at least one of three" rule belongs to phone, Signal and
-              email together, so its mark goes under all three rather than
-              under whichever one happens to carry the validity. It sits after
-              the last of them; the message names the three itself, so it does
-              not depend on position to be understood.
-            */}
-            {i === lastContactMethodRow && (
-              <p class="pair-error" id="contact-methods-error" hidden></p>
-            )}
-          </>
+        <div class="field-row field-row-2 column-headings">
+          <p class="section-heading column-heading" aria-hidden="true">{td.sectionContact}</p>
+          <p class="section-heading column-heading" aria-hidden="true" title={td.sectionContactIntro}>
+            {td.columnContact}
+            <span class="required-mark"></span>
+          </p>
+        </div>
+        {contactRows.map(row => (
+          <div class:list={['field-row', `field-row-${row.length}`]}>
+            {row.map(field => <IntakeField field={field} lang={lang} td={td} />)}
+          </div>
         ))}
 
         <div class="submit-row">
@@ -562,7 +826,16 @@ const stageLabels = {
             than the page's, and gone on the next scroll.
           -->
           <div class="form-error" id="submit-error" role="alert" hidden></div>
-          <button type="submit">{td.submitLabel}</button>
+          <!--
+            No progress marker on this card. Four of four is where the form ends:
+            the dots are there to say how much is left, and by here the answer is
+            the button next to them. Their absence also leaves the row to the
+            tick and to Send.
+          -->
+          <div class="submit-actions">
+            <IntakeField field={confidentialField} lang={lang} td={td} />
+            <button type="submit">{td.submitLabel}</button>
+          </div>
         </div>
       </fieldset>
     </form>
@@ -576,8 +849,31 @@ const stageLabels = {
     <p class="form-sent" id="submit-done" role="status" tabindex="-1" hidden></p>
   </main>
 
-  <script define:vars={{ stageIds: STAGE_IDS, stageLabels, contactMethodRequired: td.contactMethodRequired, fileTooLarge: td.fileTooLarge, chooseFilesLabel: td.chooseFilesLabel, addFilesLabel: td.addFilesLabel, removeFileLabel: td.removeFileLabel, submitMissingNote: td.submitMissingNote, invalidEmailMessage: td.invalidEmailMessage, submitLabel: td.submitLabel, sendingLabel: td.sendingLabel, sentMessage: td.sentMessage, sendFailed: td.sendFailed, sendRateLimited: td.sendRateLimited, attachmentsTooLarge: td.attachmentsTooLarge, tooManyFiles: td.tooManyFiles, fileTypeRejected: td.fileTypeRejected, fileContentRejected: td.fileContentRejected, numberLocale: lang === 'no' ? 'nb-NO' : 'en-GB' }}>
+  <a class="to-top" href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});this.classList.remove('visible');return false;" aria-label={tr.backTopAria}><ArrowUp size={28} strokeWidth={1.5} /></a>
+
+  <script define:vars={{ stageIds: STAGE_IDS, stageLabels, contactMethodRequired: td.contactMethodRequired, fileTooLarge: td.fileTooLarge, chooseFilesLabel: td.chooseFilesLabel, addFilesLabel: td.addFilesLabel, removeFileLabel: td.removeFileLabel, submitMissingNote: td.submitMissingNote, placeholderSets: PLACEHOLDER_SETS, invalidEmailMessage: td.invalidEmailMessage, descriptionTooShort: td.descriptionTooShort, invalidPhoneMessage: td.invalidPhoneMessage, invalidSignalMessage: td.invalidSignalMessage, submitLabel: td.submitLabel, sendingLabel: td.sendingLabel, sentMessage: td.sentMessage, sendFailed: td.sendFailed, sendRateLimited: td.sendRateLimited, attachmentsTooLarge: td.attachmentsTooLarge, tooManyFiles: td.tooManyFiles, fileTypeRejected: td.fileTypeRejected, fileContentRejected: td.fileContentRejected, numberLocale: lang === 'no' ? 'nb-NO' : 'en-GB' }}>
     const form = document.getElementById('intake-form');
+
+    // Shown only at the foot of the page, which is the rest of the site's rule
+    // for it too. On this page the foot moves: every Continue adds a card, so
+    // the arrow comes and goes as the form grows rather than sitting there from
+    // the start.
+    const toTop = document.querySelector('.to-top');
+    window.addEventListener('scroll', () => {
+      toTop.classList.toggle(
+        'visible',
+        window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 20,
+      );
+    });
+
+    // One example out of the set, chosen on arrival. The markup already carries
+    // the first of them, so this only ever swaps one example for another - a
+    // visitor without script sees no difference, and nobody sees an empty box.
+    Object.entries(placeholderSets).forEach(([id, examples]) => {
+      const field = document.getElementById(id);
+      if (!field || !examples.length) return;
+      field.placeholder = examples[Math.floor(Math.random() * examples.length)];
+    });
 
     // Declared up here, ahead of everything that touches it. It sat further
     // down with the rest of the submit handling once, and setup code running
@@ -612,14 +908,45 @@ const stageLabels = {
     }
 
     const stageAnnounce = document.getElementById('stage-announce');
+    // One set per card, and only the card you are on shows its own. They all
+    // say the same thing, so painting all of them costs nothing and means the
+    // set that appears next is already right.
+    const dotSets = Array.from(form.querySelectorAll('.progress-dots'));
 
-    // The visible marker is rendered on each card and never changes, so this
-    // only has the announcement left to make. Not on page load - it would talk
-    // over the heading a screen reader is already reading.
-    function announceStage(stageId) {
-      const index = stageIds.indexOf(stageId);
-      stageAnnounce.textContent = stageLabels[stageId] + ', ' + (index + 1) + ' / ' + stageIds.length;
+    // Which sections are holding the send up, marked on the dots: with one set
+    // on the page and four sections behind you, the dots are the only thing
+    // that can say a section you have scrolled past is the problem.
+    function paintMissingDots(controls) {
+      const missing = new Set(
+        controls.map(control => control.closest('fieldset.stage')).filter(Boolean).map(stage => stage.id),
+      );
+      dotSets.forEach(set => {
+        stageIds.forEach(id => {
+          const dot = set.querySelector('[data-dot="' + id + '"]');
+          if (dot) dot.classList.toggle('dot-missing', missing.has(id));
+        });
+      });
     }
+
+    function setActiveStage(stageId, announce) {
+      const activeIndex = stageIds.indexOf(stageId);
+      dotSets.forEach(set => {
+        const stage = set.closest('fieldset.stage');
+        set.hidden = !stage || stage.id !== stageId;
+        stageIds.forEach((id, i) => {
+          const dot = set.querySelector('[data-dot="' + id + '"]');
+          if (!dot) return;
+          dot.classList.remove('dot-done', 'dot-active');
+          if (i < activeIndex) dot.classList.add('dot-done');
+          else if (i === activeIndex) dot.classList.add('dot-active');
+        });
+      });
+      // Only on a real stage change - announcing on page load would talk over
+      // the heading a screen reader is already reading.
+      if (announce) stageAnnounce.textContent = stageLabels[stageId] + ', ' + (activeIndex + 1) + ' / ' + stageIds.length;
+    }
+
+    setActiveStage('stage-about', false);
 
     function advance(button, nextStage) {
       const row = button.closest('.continue-row');
@@ -627,7 +954,7 @@ const stageLabels = {
       reveal(nextStage);
       nextStage.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth', block: 'start' });
       focusContainer(nextStage);
-      announceStage(nextStage.id);
+      setActiveStage(nextStage.id, true);
     }
 
     const stageAbout = document.getElementById('stage-about');
@@ -650,15 +977,73 @@ const stageLabels = {
     const phoneField = document.getElementById('contactPhone');
     const contactSignalField = document.getElementById('contactSignal');
 
+    // The same shape the endpoint insists on (workers/enquiry/index.js): an
+    // address needs a dot-separated domain. type="email" on its own does not -
+    // "konto@polybjorn" is a valid email input value, and the endpoint would
+    // then refuse an enquiry over something the page could have caught while
+    // the visitor was still standing in front of it. If one of these two
+    // changes, the other has to change with it.
+    const EMAIL_SHAPE = /^[^@\s]+@[^@\s.]+\.[^@\s]+$/;
+
+    // Phone numbers vary too much between countries to check more than the
+    // shape: take out the punctuation people actually type, then count digits.
+    // E.164 caps a number at 15, and the shortest national numbers in use are
+    // around 6, so anything outside that is a typo rather than a number.
+    const PHONE_PUNCTUATION = /[\s().-]/g;
+    const PHONE_SHAPE = /^\+?\d{6,15}$/;
+
+    function phoneLooksRight(value) {
+      return PHONE_SHAPE.test(value.replace(PHONE_PUNCTUATION, ''));
+    }
+
+    // The three ways Signal actually addresses someone: a signal.me link, a
+    // username, or a phone number. A username carries its discriminator -
+    // Signal requires the digits, so a bare word is not one, and someone typing
+    // their display name here is giving me something I cannot reach them on.
+    const SIGNAL_LINK = /^(https?:\/\/)?signal\.me\/\S+$/i;
+    const SIGNAL_USERNAME = /^[a-z_][a-z0-9_]{2,31}\.\d{2,}$/i;
+
+    function signalLooksRight(value) {
+      return SIGNAL_LINK.test(value) || SIGNAL_USERNAME.test(value) || phoneLooksRight(value);
+    }
+
     function validateContactMethod() {
-      const hasContact = emailField.value.trim() || phoneField.value.trim() || contactSignalField.value.trim();
-      emailField.setCustomValidity(hasContact ? '' : contactMethodRequired);
+      const email = emailField.value.trim();
+      const phone = phoneField.value.trim();
+      const signal = contactSignalField.value.trim();
+      const hasContact = email || phone || signal;
+
+      // Each of the three is optional, so a blank one says nothing and is left
+      // alone. A filled-in one has to be something I can reach.
+      phoneField.setCustomValidity(phone && !phoneLooksRight(phone) ? invalidPhoneMessage : '');
+      contactSignalField.setCustomValidity(signal && !signalLooksRight(signal) ? invalidSignalMessage : '');
+
+      if (!hasContact) emailField.setCustomValidity(contactMethodRequired);
+      else if (email && !EMAIL_SHAPE.test(email)) emailField.setCustomValidity(invalidEmailMessage);
+      else emailField.setCustomValidity('');
     }
 
     emailField.addEventListener('input', validateContactMethod);
     phoneField.addEventListener('input', validateContactMethod);
     contactSignalField.addEventListener('input', validateContactMethod);
     validateContactMethod();
+
+    // Two characters is not a description, and a space is a value as far as
+    // required is concerned - so an answer of " " satisfied it. Empty is left
+    // to required itself: that is the plain "not answered yet" case, and it
+    // gets the mark without a sentence like every other blank field.
+    const DESCRIPTION_MIN = 12;
+    const descriptionField = document.getElementById('description');
+
+    function validateDescription() {
+      const typed = descriptionField.value;
+      const trimmed = typed.trim();
+      const tooShort = typed.length > 0 && trimmed.length < DESCRIPTION_MIN;
+      descriptionField.setCustomValidity(tooShort ? descriptionTooShort : '');
+    }
+
+    descriptionField.addEventListener('input', validateDescription);
+    validateDescription();
 
     // Client-side only: a courtesy check against the advertised cap, not a
     // real limit - the endpoint still has to enforce this on what it
@@ -791,9 +1176,134 @@ const stageLabels = {
       renderFileList();
     });
 
+    // A dropdown drawn on the page rather than by the platform. A native
+    // select's open list is not ours: its row height, font and width come from
+    // the OS, so a control that matched the inputs beside it while closed
+    // stopped matching the moment it opened, and no amount of CSS reaches
+    // inside it.
+    //
+    // The <select> stays in the form and keeps the value, so what is submitted
+    // is unchanged and the endpoint sees exactly what it saw before. Without
+    // script none of this runs and the native control is what you get.
+    form.querySelectorAll('.select-wrap').forEach(wrap => {
+      const select = wrap.querySelector('select');
+      const button = wrap.querySelector('.combo-button');
+      const list = wrap.querySelector('.combo-list');
+      const shown = wrap.querySelector('.combo-value');
+      if (!select || !button || !list || !shown) return;
+      const options = Array.from(list.querySelectorAll('.combo-option'));
+
+      select.classList.add('combo-native-hidden');
+      select.tabIndex = -1;
+      select.setAttribute('aria-hidden', 'true');
+      button.hidden = false;
+
+      // The option the keyboard is on, which is not the option that is chosen:
+      // moving through a list is not answering with everything you pass.
+      let active = -1;
+
+      function setActive(index, scroll) {
+        active = index;
+        options.forEach((option, i) => option.classList.toggle('is-active', i === index));
+        if (index < 0) {
+          button.removeAttribute('aria-activedescendant');
+          return;
+        }
+        button.setAttribute('aria-activedescendant', options[index].id);
+        if (scroll) options[index].scrollIntoView({ block: 'nearest' });
+      }
+
+      function open() {
+        if (!list.hidden) return;
+        list.hidden = false;
+        button.setAttribute('aria-expanded', 'true');
+        // Opening lands on what is already chosen, or on the first option when
+        // nothing is - not on nothing, which leaves the arrow keys with no
+        // starting point.
+        const chosen = options.findIndex(option => option.dataset.value === select.value);
+        setActive(chosen >= 0 ? chosen : 0, true);
+      }
+
+      function close() {
+        if (list.hidden) return;
+        list.hidden = true;
+        button.setAttribute('aria-expanded', 'false');
+        setActive(-1);
+      }
+
+      function choose(index) {
+        const option = options[index];
+        if (!option) return;
+        select.value = option.dataset.value;
+        shown.textContent = option.textContent;
+        shown.classList.add('has-value');
+        options.forEach(other => other.setAttribute('aria-selected', String(other === option)));
+        // Everything else on this page listens to the select, not to the button:
+        // the validation, the marks and the warning all read the form's own
+        // controls, so the value has to arrive there with an event on it.
+        select.dispatchEvent(new Event('change', { bubbles: true }));
+        close();
+        button.focus();
+      }
+
+      button.addEventListener('click', () => (list.hidden ? open() : close()));
+
+      button.addEventListener('keydown', (event) => {
+        switch (event.key) {
+          case 'ArrowDown':
+            event.preventDefault();
+            if (list.hidden) open();
+            else setActive(Math.min(active + 1, options.length - 1), true);
+            break;
+          case 'ArrowUp':
+            event.preventDefault();
+            if (list.hidden) open();
+            else setActive(Math.max(active - 1, 0), true);
+            break;
+          case 'Home':
+            if (list.hidden) break;
+            event.preventDefault();
+            setActive(0, true);
+            break;
+          case 'End':
+            if (list.hidden) break;
+            event.preventDefault();
+            setActive(options.length - 1, true);
+            break;
+          case 'Enter':
+          case ' ':
+            event.preventDefault();
+            if (list.hidden) open();
+            else choose(active);
+            break;
+          case 'Escape':
+            if (list.hidden) break;
+            event.preventDefault();
+            close();
+            break;
+          case 'Tab':
+            // Leaving is leaving: no silent choice on the way out.
+            close();
+            break;
+        }
+      });
+
+      options.forEach((option, i) => {
+        option.addEventListener('click', () => choose(i));
+        // Pointer and keyboard share one highlight, so the list never shows a
+        // hover in one place and an arrow key in another.
+        option.addEventListener('mousemove', () => setActive(i, false));
+      });
+
+      document.addEventListener('click', (event) => {
+        if (!wrap.contains(event.target)) close();
+      });
+    });
+
     // Nothing in the form is gated: Continue always moves on, and Send is the
-    // only thing that refuses. So Send has to say what it is waiting for, in
-    // full - it is the first and only point at which anything is asked for.
+    // only thing that refuses. What it says depends on what refused - see
+    // showSubmitErrors for a form with answers missing, showSendFailure for an
+    // endpoint that would not take it.
     const submitError = document.getElementById('submit-error');
 
     // Only a message that says something the summary does not. A field that is
@@ -808,25 +1318,15 @@ const stageLabels = {
     }
 
     // Where the field is, rather than what is wrong with it. A field answering
-    // a rule it shares with others is marked differently: see the CSS for the
-    // two classes, and sharedFields() below for who gets which.
+    // a rule it shares with others is marked differently - see the two classes
+    // in IntakeField.astro: a field of its own gets a standing mark, a field of
+    // a shared rule only reddens its focus ring, because any one of the three
+    // answers the rule and three marked boxes read as three things to fill in.
     function markField(control, missing, shared) {
       const wrapper = control.closest(".field");
       if (!wrapper) return;
       wrapper.classList.toggle("is-missing", Boolean(missing) && !shared);
       wrapper.classList.toggle("is-missing-shared", Boolean(missing) && Boolean(shared));
-    }
-
-    // Every field reporting through one shared slot. The contact rule parks its
-    // message on the email field alone - phone and Signal are each valid on
-    // their own - so marking only the control that carries the validity would
-    // leave the other two looking fine while the rule they are part of is what
-    // is stopping the send.
-    function sharedFields(slotId) {
-      return Object.keys(SHARED_ERROR_SLOTS)
-        .filter(key => SHARED_ERROR_SLOTS[key] === slotId)
-        .map(id => document.getElementById(id))
-        .filter(Boolean);
     }
 
     // Every control that is standing between the visitor and sending, not just
@@ -866,17 +1366,35 @@ const stageLabels = {
     // whichever field happens to carry the validity. Keyed by control name,
     // falling back to id, since a checkbox group is addressed by name and a
     // text field by either.
-    const SHARED_ERROR_SLOTS = {
-      contactPhone: 'contact-methods-error',
-      contactSignal: 'contact-methods-error',
-      contactEmail: 'contact-methods-error',
-    };
+    // The three fields that answer one rule between them. It is a rule rather
+    // than a field error, so it is not reported under any field: the section's
+    // own line states it, and turns amber when it is the thing being waited for.
+    const CONTACT_RULE_IDS = ['contactPhone', 'contactSignal', 'contactEmail'];
 
-    function fieldErrorFor(control) {
-      const shared = SHARED_ERROR_SLOTS[control.name] || SHARED_ERROR_SLOTS[control.id];
-      if (shared) return document.getElementById(shared);
+    function contactRuleFields() {
+      return CONTACT_RULE_IDS.map(id => document.getElementById(id)).filter(Boolean);
+    }
+
+    // The rule, as opposed to something wrong with this field in particular. A
+    // malformed number or address is the field's own business and says so under
+    // it; "give me one of the three" belongs to all three at once and to none
+    // of them individually.
+    function isContactRule(control) {
+      return CONTACT_RULE_IDS.includes(control.id)
+        && control.validity.customError
+        && control.validationMessage === contactMethodRequired;
+    }
+
+    function ownErrorFor(control) {
       const row = control.closest('.field');
       return row ? row.querySelector('.field-error') : null;
+    }
+
+    function wipeFieldError(control) {
+      const slot = ownErrorFor(control);
+      if (!slot || slot.id === 'fileUpload-error') return;
+      slot.hidden = true;
+      slot.textContent = '';
     }
 
     // invalidControls() reports one control per radio or checkbox group, so an
@@ -884,72 +1402,113 @@ const stageLabels = {
     // one that was actually reported - otherwise picking the second option of a
     // group never cleared the mark its first option had put up.
     function reportedControlFor(control) {
-      // Answering any field of a shared rule answers the rule, so an event from
-      // one of them counts as news about whichever control was reported for it.
-      // Without this, filling in the phone number left all three marked until
-      // the rest of the form happened to be finished too - the reported control
-      // there is the email field, which nothing had typed in.
-      const shared = SHARED_ERROR_SLOTS[control.name] || SHARED_ERROR_SLOTS[control.id];
-      if (shared) {
-        const owner = reportedControls.find(reported =>
-          (SHARED_ERROR_SLOTS[reported.name] || SHARED_ERROR_SLOTS[reported.id]) === shared);
-        if (owner) return owner;
-      }
-      return reportedControls.find(reported => reported === control
+      // The field itself first: it may have been reported for something of its
+      // own, and a shared rule must not answer for it.
+      const direct = reportedControls.find(reported => reported === control
         || ((reported.type === 'radio' || reported.type === 'checkbox')
-            && reported.name === control.name)) || null;
+            && reported.name === control.name));
+      if (direct) return direct;
+
+      // Otherwise, answering any field of the contact rule answers the rule, so
+      // an event from one of them is news about whichever control was reported
+      // for it. Without this, filling in the phone number left all three marked
+      // until the rest of the form happened to be finished too - the control
+      // reported there is the email field, which nothing had typed in.
+      if (CONTACT_RULE_IDS.includes(control.id)) {
+        return reportedControls.find(reported => CONTACT_RULE_IDS.includes(reported.id)) || null;
+      }
+      return null;
     }
 
-    // Clears both marks, on the field itself and on anything sharing its rule.
+    // The rule's mark sits on three fields at once, so answering it takes the
+    // mark off all three - but only where the field has nothing else wrong with
+    // it. Clearing the lot unconditionally meant a corrected phone number also
+    // unmarked an address that was still malformed.
     function unmark(control) {
-      const shared = SHARED_ERROR_SLOTS[control.name] || SHARED_ERROR_SLOTS[control.id];
-      if (shared) sharedFields(shared).forEach(field => markField(field, false));
-      else markField(control, false);
+      markField(control, false);
+      if (!CONTACT_RULE_IDS.includes(control.id)) return;
+      contactRuleFields().forEach(field => {
+        if (field.checkValidity()) markField(field, false);
+      });
     }
 
-    // Marks each offending field where it sits, and says once, by the button,
-    // that something is missing. It used to list every missing answer here as
-    // well, which was the same information three times over: the fields are
-    // marked where they sit, and pressing Send takes you to the first of them.
+    // Marks each offending field where it sits and takes you to the first of
+    // them; Send picks up a ring to say it was the press that refused. No
+    // message: with the fields marked and the page moved to the first one, a
+    // sentence by the button was saying what the page had already shown. It is
+    // still written into the alert region, which is the only way a screen
+    // reader hears any of this - hence the box being quietened rather than
+    // skipped.
+    //
+    // An endpoint refusal is the other case, and it keeps the visible box:
+    // rate-limited, a rejected file, no connection - none of that is a field
+    // anyone can be sent to, so the sentence is all there is.
     function showSubmitErrors(controls) {
       reportedControls = controls;
+      markSubmitRefused();
+      paintMissingDots(controls);
 
       const heading = document.createElement('p');
       heading.className = 'form-error-heading';
-      heading.textContent = submitMissingNote;
+      // The contact rule has no field of its own to be marked and its tooltip is
+      // for a mouse, so where it is the thing being waited for it is said here
+      // instead - in this box, which is the text a screen reader gets.
+      heading.textContent = controls.some(isContactRule)
+        ? submitMissingNote + ' ' + contactMethodRequired
+        : submitMissingNote;
 
       controls.forEach(control => {
         // Phone, Signal and email are one rule spread over three fields, and
-        // the line under them says it in words. Reddening whichever box happens
+        // the line under them says it in words. Marking whichever box happens
         // to carry the validity would point at a field that is not itself
-        // wrong - any one of the three answers it.
-        const shared = SHARED_ERROR_SLOTS[control.name] || SHARED_ERROR_SLOTS[control.id];
-        if (shared) sharedFields(shared).forEach(field => markField(field, true, true));
-        else markField(control, true);
-        const inline = fieldErrorFor(control);
-        const text = inlineTextFor(control);
-        if (inline && text) {
-          inline.textContent = text;
-          inline.hidden = false;
+        // wrong - any one of the three answers it. A malformed address is not
+        // that rule though: that one is the email field's own problem, so it
+        // gets marked like anything else.
+        if (isContactRule(control)) {
+          // The rule is stated at the top of the section either way, so all
+          // that changes is its colour. The three fields are marked with it,
+          // which is what says where to answer it.
+          contactRuleFields().forEach(field => markField(field, true, true));
+        } else {
+          markField(control, true);
+          const inline = ownErrorFor(control);
+          const text = inlineTextFor(control);
+          if (inline && text) {
+            inline.textContent = text;
+            inline.hidden = false;
+          }
         }
       });
 
       submitError.textContent = '';
       submitError.append(heading);
+      submitError.classList.add('form-error-quiet');
       submitError.hidden = false;
+    }
+
+    // Send wears the same state whatever refused the press - a missing answer
+    // here, or the endpoint turning the enquiry down. It said nothing about the
+    // second, so a form that was filled in correctly and still would not send
+    // left the button looking exactly as it does before anyone presses it.
+    //
+    // The class is taken off and put back so a second press moves the button
+    // again: an animation already on the element does not restart by itself.
+    function markSubmitRefused() {
+      submitButton.classList.remove('is-refused');
+      void submitButton.offsetWidth;
+      submitButton.classList.add('is-refused');
     }
 
     function clearSubmitError() {
       reportedControls.forEach(control => {
         unmark(control);
-        const inline = fieldErrorFor(control);
-        if (inline && inline.id !== 'fileUpload-error') {
-          inline.hidden = true;
-          inline.textContent = '';
-        }
+        wipeFieldError(control);
       });
       reportedControls = [];
+      paintMissingDots([]);
+      submitButton.classList.remove('is-refused');
       submitError.hidden = true;
+      submitError.classList.remove('form-error-quiet');
       submitError.textContent = '';
     }
 
@@ -959,15 +1518,10 @@ const stageLabels = {
       const reported = reportedControlFor(control);
       if (!reported || !reported.checkValidity()) return;
       unmark(reported);
-      const inline = fieldErrorFor(reported);
-      if (!inline || inline.id === 'fileUpload-error') return;
-      // A slot shared by more than one question stays up until every question
-      // reporting through it has been answered.
-      const stillMissing = reportedControls.some(other =>
-        fieldErrorFor(other) === inline && !other.checkValidity());
-      if (stillMissing) return;
-      inline.hidden = true;
-      inline.textContent = '';
+      // A section stops being marked when nothing in it is outstanding any
+      // more, not when the whole form is finally valid.
+      paintMissingDots(reportedControls.filter(control => !control.checkValidity()));
+      wipeFieldError(reported);
     }
 
     // The endpoint runs on this same hostname (a Cloudflare Worker route, see
@@ -1007,8 +1561,8 @@ const stageLabels = {
       submitButton.textContent = sending ? sendingLabel : submitLabel;
     }
 
-    // The stage marker needs no hiding of its own any more: it is rendered on
-    // each card, inside the form, so it goes when the form goes.
+    // The dots live in the form's own action rows now, so hiding the form takes
+    // them with it.
     function showSent() {
       form.hidden = true;
       if (draftNote) draftNote.hidden = true;
@@ -1020,11 +1574,13 @@ const stageLabels = {
 
     function showSendFailure(message) {
       clearSubmitError();
+      markSubmitRefused();
       const heading = document.createElement('p');
       heading.className = 'form-error-heading';
       heading.textContent = message;
       submitError.textContent = '';
       submitError.append(heading);
+      submitError.classList.remove('form-error-quiet');
       submitError.hidden = false;
       submitError.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth', block: 'center' });
     }
@@ -1036,11 +1592,11 @@ const stageLabels = {
       if (invalid.length) {
         clearSubmitError();
         showSubmitErrors(invalid);
-        // The list is right by the button, where the visitor is already
-        // looking, so stay put unless the first thing missing is somewhere
-        // they have scrolled past.
-        if (!stageContact.contains(invalid[0])) goTo(invalid[0]);
-        else invalid[0].focus({ preventScroll: true });
+        // Nothing by the button explains itself any more, so the page always
+        // goes to the field it is waiting for - including one in this last
+        // section, which used to be left alone on the assumption that a message
+        // beside the button covered it.
+        goTo(invalid[0]);
         return;
       }
       clearSubmitError();

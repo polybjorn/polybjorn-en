@@ -16,31 +16,103 @@ const { field, lang, td } = Astro.props;
 // example ({ value, label, example }) - ORDER_TYPES and materialProperties
 // use the second shape.
 const optionLabel = (opt: any) => (opt.label ? opt.label[lang] : opt[lang]);
+
+// A field offers either one example or a set of them. The set renders its first
+// entry and the script swaps in one of the others per visit, so the markup is
+// never without an example and never depends on script for one.
+// A question can name a subset of its options - the specialised ones, which are
+// the same markup in a group of their own beside the rest. See .option-groups.
+const options = field.options ?? [];
+const coreOptions = options.filter((opt: any) => !opt.advanced);
+const advancedOptions = options.filter((opt: any) => opt.advanced);
+
+const placeholder = field.placeholder
+  ? field.placeholder[lang]
+  : field.placeholders
+    ? field.placeholders[lang][0]
+    : undefined;
 ---
 
 <div class="field" data-field={field.id}>
   {field.type === 'radio' || field.type === 'checkboxGroup' ? (
     <fieldset>
-      <legend class="field-label">{field.label[lang]}</legend>
-      <div class:list={['option-list', field.inlineOptions && 'option-list-inline']}>
-        {field.options.map((opt: any) => (
-          <label>
-            <input
-              type={field.type === 'radio' ? 'radio' : 'checkbox'}
-              name={field.type === 'radio' ? field.id : `${field.id}[]`}
-              value={opt.value}
-              required={field.type === 'radio' ? field.required : undefined}
-            />
-            {opt.example ? (
-              <span class="option-text">
-                <span class="option-label">{optionLabel(opt)}</span>
-                <span class="option-example">{opt.example[lang]}</span>
-              </span>
-            ) : (
-              <span class="option-label">{optionLabel(opt)}</span>
-            )}
-          </label>
-        ))}
+      <legend class="field-label">{field.label[lang]}{field.required && (
+        <span class="required-mark" aria-hidden="true"></span>
+      )}</legend>
+      <div class:list={['option-groups', !advancedOptions.length && 'option-groups-single']}>
+        <div
+          class:list={[
+            'option-list',
+            field.inlineOptions && 'option-list-inline',
+          ]}
+        >
+          {coreOptions.map((opt: any) => (
+            <label>
+              <input
+                type={field.type === 'radio' ? 'radio' : 'checkbox'}
+                name={field.type === 'radio' ? field.id : `${field.id}[]`}
+                value={opt.value}
+                required={field.type === 'radio' ? field.required : undefined}
+              />
+              {opt.example ? (
+                <span class="option-text">
+                  <span class="option-label">{optionLabel(opt)}{opt.qualifier && (
+                    <span class="option-qualifier">{opt.qualifier[lang]}</span>
+                  )}</span>
+                  <span class="option-example">{opt.example[lang]}</span>
+                </span>
+              ) : (
+                <span class="option-label">{optionLabel(opt)}{opt.qualifier && (
+                    <span class="option-qualifier">{opt.qualifier[lang]}</span>
+                  )}</span>
+              )}
+            </label>
+          ))}
+        </div>
+
+        {/*
+          A nested fieldset, because these are a named subset of the same
+          question: the name has to reach a screen reader as the label of a
+          group, not as a paragraph that happens to sit above some checkboxes.
+          It is named with aria-label rather than a <legend> because the visible
+          copy has to disappear once the group stands in its own column, and
+          hiding a legend means positioning it - which engines do not reliably
+          honour, and a legend that ignores it lands as 1.2rem bold white from
+          the generic rule: the loudest thing in the question it was supposed to
+          disappear from.
+
+          So the visible copy is a paragraph, aria-hidden so the name is not
+          read twice, and display: none on it is a promise the browser keeps.
+        */}
+        {advancedOptions.length > 0 && (
+          <fieldset class="option-group" aria-label={field.advancedLabel[lang]}>
+            <p class="option-group-label" aria-hidden="true">{field.advancedLabel[lang]}</p>
+            <div class="option-list">
+              {advancedOptions.map((opt: any) => (
+                <label>
+                  <input
+                    type={field.type === 'radio' ? 'radio' : 'checkbox'}
+                    name={field.type === 'radio' ? field.id : `${field.id}[]`}
+                    value={opt.value}
+                    required={field.type === 'radio' ? field.required : undefined}
+                  />
+                  {opt.example ? (
+                    <span class="option-text">
+                      <span class="option-label">{optionLabel(opt)}{opt.qualifier && (
+                    <span class="option-qualifier">{opt.qualifier[lang]}</span>
+                  )}</span>
+                      <span class="option-example">{opt.example[lang]}</span>
+                    </span>
+                  ) : (
+                    <span class="option-label">{optionLabel(opt)}{opt.qualifier && (
+                    <span class="option-qualifier">{opt.qualifier[lang]}</span>
+                  )}</span>
+                  )}
+                </label>
+              ))}
+            </div>
+          </fieldset>
+        )}
       </div>
     </fieldset>
   ) : field.type === 'checkbox' ? (
@@ -57,19 +129,74 @@ const optionLabel = (opt: any) => (opt.label ? opt.label[lang] : opt[lang]);
     </div>
   ) : (
     <>
-      <label class="field-label" for={field.id}>{field.label[lang]}</label>
+      <label class="field-label" id={`${field.id}-label`} for={field.id}>{field.label[lang]}{field.required && (
+        <span class="required-mark" aria-hidden="true"></span>
+      )}</label>
 
       {field.type === 'textarea' && (
-        <textarea id={field.id} name={field.id} required={field.required}></textarea>
+        <textarea
+          id={field.id}
+          name={field.id}
+          required={field.required}
+          placeholder={placeholder}
+        ></textarea>
       )}
 
       {field.type === 'select' && (
-        <select id={field.id} name={field.id} required={field.required}>
-          <option value="" disabled selected>{td.choosePlaceholder}</option>
-          {field.options.map((opt: any) => (
-            <option value={opt.value}>{optionLabel(opt)}</option>
-          ))}
-        </select>
+        /*
+          Three things, and only two of them are ever on screen at once.
+
+          The <select> is the form: it carries the value, it is what FormData
+          reads, and without script it is the whole control - which is why it is
+          rendered plainly and hidden by the script rather than the other way
+          round. A visitor with no JavaScript gets the native dropdown exactly as
+          before.
+
+          The button and the list are what the script swaps in. They exist in the
+          markup rather than being built at runtime so they carry this
+          component's scope: a node created by a script has no data-astro-cid and
+          every scoped rule below would miss it.
+        */
+        <div class="select-wrap">
+          <select id={field.id} name={field.id} required={field.required}>
+            <option value="" disabled selected>{td.choosePlaceholder}</option>
+            {field.options.map((opt: any) => (
+              <option value={opt.value}>{optionLabel(opt)}</option>
+            ))}
+          </select>
+
+          <button
+            type="button"
+            class="combo-button"
+            id={`${field.id}-button`}
+            role="combobox"
+            aria-haspopup="listbox"
+            aria-expanded="false"
+            aria-controls={`${field.id}-listbox`}
+            aria-labelledby={`${field.id}-label ${field.id}-button`}
+            hidden
+          >
+            <span class="combo-value">{td.choosePlaceholder}</span>
+          </button>
+
+          <ul
+            class="combo-list"
+            id={`${field.id}-listbox`}
+            role="listbox"
+            aria-labelledby={`${field.id}-label`}
+            hidden
+          >
+            {field.options.map((opt: any, i: number) => (
+              <li
+                class="combo-option"
+                id={`${field.id}-option-${i}`}
+                role="option"
+                aria-selected="false"
+                data-value={opt.value}
+              >{optionLabel(opt)}</li>
+            ))}
+          </ul>
+        </div>
       )}
 
       {field.type === 'file' && (
@@ -104,13 +231,27 @@ const optionLabel = (opt: any) => (opt.label ? opt.label[lang] : opt[lang]);
       )}
 
       {field.type === 'text' && (
-        <input
-          type={field.inputType || 'text'}
-          id={field.id}
-          name={field.id}
-          required={field.required}
-          autocomplete={field.autocomplete}
-        />
+        <div class="input-with-note">
+          <input
+            type={field.inputType || 'text'}
+            id={field.id}
+            name={field.id}
+            required={field.required}
+            autocomplete={field.autocomplete}
+            placeholder={placeholder}
+            pattern={field.pattern}
+            aria-describedby={field.boxNote ? `${field.id}-note` : undefined}
+          />
+          {/*
+            A standing note inside the box, on the right. Not aria-hidden and
+            not a placeholder: it is part of the answer the field is asking for,
+            and a placeholder would take it away at the first keystroke - which
+            is the moment it starts mattering.
+          */}
+          {field.boxNote && (
+            <span class="input-note" id={`${field.id}-note`}>{field.boxNote[lang]}</span>
+          )}
+        </div>
       )}
     </>
   )}
@@ -159,9 +300,32 @@ const optionLabel = (opt: any) => (opt.label ? opt.label[lang] : opt[lang]);
         margin-bottom: 1.4rem;
       }
 
+      /* The width a group heading asks about (see the @container rule at the
+         bottom). On the field rather than on the fieldset inside it, because the
+         nested group is a fieldset too and a container there would have the
+         heading asking about the width of its own column, which is never wide.
+
+         Only on the field that has such a group, though. inline-size containment
+         means an element sizes itself without looking at its contents, which is
+         exactly wrong for a field that has to tell a flex row how wide its label
+         is: as a flex item it collapsed to min-content and wrapped one word per
+         line. Two things were on every field that only one field needed. */
+      .field:has(.option-group) {
+        container-type: inline-size;
+      }
+
+      /* flex so the required dot beside the text is centred against the text's
+         own line, rather than against vertical-align's guess at where the middle
+         of a line is - that put it a shade low, which on a 5px dot is the
+         difference between beside the label and under it.
+
+         Wrapping allowed, so a long label and its dot behave like a line of
+         text: the dot follows the last word onto whichever line it ends on. */
       .field label.field-label,
       .field legend.field-label {
-        display: block;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
         font-size: 0.98rem;
         color: #dde1e7;
         margin-bottom: 0.4rem;
@@ -174,6 +338,55 @@ const optionLabel = (opt: any) => (opt.label ? opt.label[lang] : opt[lang]);
       .field fieldset legend.field-label {
         font-size: 1.1rem;
         margin-bottom: 0.7rem;
+      }
+
+      /* Required, said in one mark. aria-hidden because the control already
+         carries required and a screen reader says so itself - this is for eyes
+         only, and it is the same amber the field turns if it is skipped: a
+         promise of what happens, in the colour it happens in.
+
+         A drawn dot rather than an asterisk. In a serif face the asterisk is cut
+         high on the line, the way a footnote marker is meant to be, so beside a
+         label it hung above the text and read as a stray character. A dot has no
+         metrics of its own to fight: the box is 0.9rem so there is something to
+         hover for the tooltip, and the dot inside it is centred by the flex
+         rather than by a font's idea of where the glyph belongs. */
+      /* The dot is centred inside its own box and the box is centred on the
+         text, which is two separate jobs done two separate ways on purpose.
+
+         The box relies on vertical-align rather than on its parent being a flex
+         row. It was relying on the flex, and that works for the fields whose
+         label is a <label> and not for the one whose label is a <legend>:
+         browsers do not reliably honour display on a legend, so on "Hva har du
+         så langt?" the box fell back to sitting on the baseline and the dot rode
+         low. vertical-align: middle is honoured everywhere. */
+      .required-mark {
+        display: inline-block;
+        position: relative;
+        width: 0.9rem;
+        height: 0.9rem;
+        margin-left: 0.1rem;
+        vertical-align: middle;
+      }
+
+      .required-mark::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 0.3rem;
+        height: 0.3rem;
+        border-radius: 50%;
+        background: #e8b775;
+      }
+
+      /* Gone once the field is marked. The dot is a promise that this one will
+         go amber if it is skipped; the amber box is that having happened. Both
+         at once is the same warning twice, in the same colour, a centimetre
+         apart - and the one that is still only a promise is the one to drop. */
+      .field.is-missing .required-mark {
+        display: none;
       }
 
       .field-error {
@@ -194,7 +407,8 @@ const optionLabel = (opt: any) => (opt.label ? opt.label[lang] : opt[lang]);
       input[type="email"],
       input[type="tel"],
       textarea,
-      select {
+      select,
+      .combo-button {
         width: 100%;
         background: #2a2e35;
         border: 1px solid #3a3f47;
@@ -205,11 +419,200 @@ const optionLabel = (opt: any) => (opt.label ? opt.label[lang] : opt[lang]);
            font under 16px takes focus, and each stage change focuses one. */
         font-size: 1rem;
         padding: 0.65rem 0.8rem;
+        /* Stated, not inherited: a select works out its own line box from the
+           font otherwise, and came out a couple of pixels taller than the text
+           inputs it sits next to. */
+        line-height: 1.35;
+      }
+
+      /* The box is ours, the arrow and the list were the platform's: a select
+         left at its default draws its own control furniture, which is why it
+         did not match the inputs above it. appearance: none hands the whole box
+         over to the rules above, and the arrow below is drawn from a rotated
+         corner rather than an image, so it takes its colour from the page like
+         everything else.
+
+         The popup list itself is the platform's and always will be - what makes
+         it dark is color-scheme on the page (IntakeForm.astro), and these
+         option colours are for the engines that take them instead. */
+      select {
+        appearance: none;
+        -webkit-appearance: none;
+        /* Room for the arrow, so a long answer does not run under it. */
+        padding-right: 2.4rem;
+        cursor: pointer;
+      }
+
+      option {
+        background: #2a2e35;
+        color: #dde1e7;
+      }
+
+      .select-wrap {
+        position: relative;
+      }
+
+      /* The native control while the script is driving: out of the tab order
+         and out of the accessibility tree, still in the form and still holding
+         the value. Not [hidden] and not display: none - a control that is not
+         rendered is one some browsers decline to submit. */
+      .combo-native-hidden {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+
+      /* Everything the box rule above sets, plus what a button does not inherit
+         from it: buttons centre their text and come with their own font.
+
+         Then a shade lighter than a text input, which is the point: the box rule
+         gives it the same border, radius and metrics as the field above it, and
+         with the same background too it read as another box to type in rather
+         than a thing that opens. Room on the right for the arrow, so a long
+         answer stops before it rather than running under it. */
+      .combo-button {
+        display: flex;
+        align-items: center;
+        min-height: 2.7rem;
+        padding-right: 2.4rem;
+        background: #30353e;
+        text-align: left;
+        cursor: pointer;
+      }
+
+      .combo-button:hover {
+        background: #363c46;
+      }
+
+      .combo-button[aria-expanded="true"] {
+        border-color: #4a5058;
+      }
+
+      /* Placeholder until something is chosen: the same grey as a real
+         placeholder, because that is what it is. */
+      .combo-value {
+        color: #7c848f;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+
+      .combo-value.has-value {
+        color: #dde1e7;
+      }
+
+      /* The part a native select would not let us have. Over the page rather
+         than in it, so opening one does not move the fields below. */
+      .combo-list {
+        position: absolute;
+        top: calc(100% + 0.35rem);
+        left: 0;
+        right: 0;
+        z-index: 50;
+        /* Tall enough that neither of these lists scrolls - six budget brackets
+           come to about 15rem, and five ownership answers to more than that
+           because two of them wrap. The cap is there for a short window, not to
+           ration the list: 65vh leaves the page visible behind it either way,
+           and scrolling inside a dropdown to reach the last of six answers is a
+           scroll nobody should have to find. */
+        max-height: min(24rem, 65vh);
+        overflow-y: auto;
+        margin: 0;
+        padding: 0.3rem;
+        list-style: none;
+        background: #2a2e35;
+        border: 1px solid #4a5058;
+        border-radius: 8px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+      }
+
+      .combo-option {
+        padding: 0.5rem 0.6rem;
+        border-radius: 6px;
+        font-size: 1rem;
+        color: #dde1e7;
+        cursor: pointer;
+      }
+
+      /* One highlight, driven by the keyboard and by the pointer alike, so
+         there is never a hover in one place and an arrow key in another. */
+      .combo-option.is-active {
+        background: #343a44;
+      }
+
+      .combo-option[aria-selected="true"] {
+        color: #6aaeee;
+      }
+
+      .combo-button:focus-visible {
+        outline: 2px solid #6aaeee;
+        outline-offset: 2px;
+      }
+
+      .field.is-missing .combo-button {
+        border-color: #a8764a;
+      }
+
+      .select-wrap::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        right: 1rem;
+        width: 0.5rem;
+        height: 0.5rem;
+        border-right: 2px solid #aab1ba;
+        border-bottom: 2px solid #aab1ba;
+        transform: translateY(-70%) rotate(45deg);
+        pointer-events: none;
+      }
+
+      .select-wrap:hover::after {
+        border-color: #fff;
+      }
+
+      /* Pointing up while the list is open, because the list is above nothing:
+         it says "this closes" rather than "this opens" once it already has. */
+      .select-wrap:has(.combo-button[aria-expanded="true"])::after {
+        transform: translateY(-30%) rotate(225deg);
       }
 
       textarea {
         min-height: 6rem;
         resize: vertical;
+      }
+
+      /* Reads as an example, not as an answer someone has already given. */
+      ::placeholder {
+        color: #7c848f;
+        opacity: 1;
+      }
+
+      .input-with-note {
+        position: relative;
+      }
+
+      /* Same grey as a placeholder, because it is the same kind of thing: not
+         typed, not clickable, and it must not look like a value. */
+      .input-note {
+        position: absolute;
+        top: 50%;
+        right: 0.8rem;
+        transform: translateY(-50%);
+        font-size: 0.82rem;
+        color: #7c848f;
+        pointer-events: none;
+      }
+
+      /* Room for it, so a long answer runs under the note rather than into it.
+         Only where there is a note to make room for. */
+      .input-with-note:has(.input-note) input {
+        padding-right: 5rem;
       }
 
       /* Real input, not `hidden` - stays keyboard-focusable so Enter/Space
@@ -364,11 +767,21 @@ const optionLabel = (opt: any) => (opt.label ? opt.label[lang] : opt[lang]);
       }
 
       /* One of a set of fields that between them answer a single rule - phone,
-         Signal and e-post - while none of them is answered. Nothing standing
-         here: any one of the three satisfies the rule, and three marked boxes
-         read as three things that each have to be filled in. The ring is only
-         marked once you are in one of them, which is where "is this one of the
-         ones it is waiting for?" gets asked. */
+         Signal and e-post - while none of them is answered. Marked, but dimmer
+         than a field that is wrong on its own: the rule reads "oppgi minst én av
+         disse", and with nothing marked, "disse" pointed at nothing while the
+         one amber box on screen was a field the sentence was not about.
+
+         The two intensities are the distinction. A bright border is this field
+         is missing; these dim ones are any one of us will do, which is what the
+         amber sentence above them says in words. Unmarked entirely was the
+         first attempt and it left the rule with nothing to point at; three
+         bright borders was the attempt before that, and it read as three things
+         to fill in. */
+      .field.is-missing-shared input {
+        border-color: #7a5a30;
+      }
+
       .field.is-missing-shared input:focus-visible {
         outline-color: #a8764a;
         outline-offset: 0;
@@ -407,6 +820,80 @@ const optionLabel = (opt: any) => (opt.label ? opt.label[lang] : opt[lang]);
         max-width: 34rem;
       }
 
+      /* The plain options down the left, the named subset down the right. Two
+         columns of six rather than one column of twelve - and the subset pays
+         nothing for its own heading, because the other column is that tall
+         anyway.
+
+         It was a <details> under the list for a while. As a column it saves no
+         height by collapsing, and a requirement nobody expands is a requirement
+         nobody mentions.
+
+         The example stays under its label rather than beside it: a label track
+         wide enough to read plus an example wide enough to read does not fit in
+         half a row, so beside only works in one full-width column, and that
+         leaves this half of the block empty.
+
+         auto-fit, so a row too narrow for two readable columns stacks them -
+         a phone reads the plain options, then the named group. */
+      .option-groups {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+        column-gap: 2rem;
+        row-gap: 1.6rem;
+        align-items: start;
+      }
+
+      /* Nothing to pair with: one list, full width. */
+      .option-groups-single {
+        display: block;
+      }
+
+
+
+      .option-group {
+        border: none;
+        padding: 0;
+        margin: 0;
+        min-inline-size: 0;
+      }
+
+      /* Quieter than a question, louder than an option: it names a group rather
+         than belonging to one. */
+      .option-group .option-group-label {
+        font-size: 0.88rem;
+        font-weight: 600;
+        color: #aab1ba;
+        margin: 0 0 0.8rem;
+        padding: 0;
+      }
+
+      /* Standing in a column of its own the group needs no heading: the column
+         is the separation, and the heading repeated in words what the layout had
+         already said. Last in the file, after the rule it has to beat.
+
+         32rem is where .option-groups pairs - two 15rem tracks and the 2rem
+         between them - so the heading goes exactly when the second column
+         appears, and comes back when the lists stack into one run and it is the
+         only thing marking where one ends and the other starts. */
+      @container (min-width: 32rem) {
+        .option-group .option-group-label {
+          display: none;
+        }
+      }
+
+      /* The same thing said in viewport terms, for an engine without container
+         queries (before Chrome 105 / Safari 16.4). 37rem of window is where
+         this page's content reaches the 32rem the rule above asks about: the
+         page caps at 680px and spends 77px of it on the padding either side of
+         the card. Both rules agree in practice; whichever the browser
+         understands is the one that fires. */
+      @media (min-width: 37rem) {
+        .option-group .option-group-label {
+          display: none;
+        }
+      }
+
       .option-list label {
         display: flex;
         align-items: flex-start;
@@ -427,10 +914,20 @@ const optionLabel = (opt: any) => (opt.label ? opt.label[lang] : opt[lang]);
         gap: 0.15rem;
       }
 
+      /* inline-flex so the qualifier beside it is centred against this text's
+         own line box. vertical-align: middle was a near miss: it lines the
+         small text up with the parent's baseline plus half an x-height, which
+         is close to centred and never quite it. Wrapping allowed, so a label
+         and a qualifier that cannot share a line put the qualifier on the next
+         one rather than out of the column. */
       .option-label {
+        display: inline-flex;
+        flex-wrap: wrap;
+        align-items: center;
         color: #dde1e7;
         font-weight: 600;
       }
+
 
       .option-example {
         font-size: 0.86rem;
@@ -438,7 +935,51 @@ const optionLabel = (opt: any) => (opt.label ? opt.label[lang] : opt[lang]);
         font-weight: 400;
       }
 
+      /* A measurement that belongs to the label rather than under it: raised,
+         small and grey, so it reads as a note on the label and not as part of
+         the answer. Weight 400 explicitly - the label around it is 600, and a
+         qualifier in the same weight reads as more label.
+
+         Middle, not super: raised off the line it read as a footnote marker
+         pointing at a footnote that is not there. Centred against the label
+         text it reads as a unit belonging to it. */
+      .option-qualifier {
+        margin-left: 0.35rem;
+        font-size: 0.72rem;
+        font-weight: 400;
+        color: #7c848f;
+        white-space: nowrap;
+      }
+
       @media (prefers-reduced-motion: no-preference) {
+        /* The list arrives rather than appears. Short - 0.16s - because a
+           dropdown has to feel like it opened when you pressed it, not like it
+           is deciding: anything longer and the second press of a double-click
+           lands mid-animation. It comes from [hidden], so a keyframe is the
+           only thing that can animate it in. */
+        .combo-list:not([hidden]) {
+          animation: combo-open 0.16s ease;
+        }
+
+        @keyframes combo-open {
+          from { opacity: 0; transform: translateY(-4px); }
+          to { opacity: 1; transform: none; }
+        }
+
+        /* The arrow turns over rather than flipping, which is what says the
+           thing it points at is the same thing in a different state. */
+        .select-wrap::after {
+          transition: transform 0.18s ease, border-color 0.15s ease;
+        }
+
+        .combo-button {
+          transition: background 0.15s ease, border-color 0.15s ease;
+        }
+
+        .combo-option {
+          transition: background 0.12s ease, color 0.12s ease;
+        }
+
         .file-trigger,
         .file-list :global(.file-remove) {
           transition: transform 0.12s ease, background 0.15s ease,
