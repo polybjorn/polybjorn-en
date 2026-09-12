@@ -65,6 +65,19 @@ ours instead of starting a dev server by hand. A plain `npm run build` - what
 deploys - emits no `dev/` directory at all, rather than a page that hides
 itself.
 
+## Tests
+
+```sh
+npm test              # build, then both suites
+npm run test:worker   # the enquiry endpoint, against a KV stub
+npm run test:pages    # the built pages, driven in jsdom
+```
+
+The page tests run against `dist`, not the source: Astro's scoping, bundling and
+minifier sit between a component and the browser, and at least one bug has lived
+entirely in that gap. Some of them ask for a computed style rather than reading
+the DOM, because markup looks identical whether a rule applied or never matched.
+
 ## CV generation
 
 CV data in `src/data/cv.yaml` feeds both the website and PDF output via [Typst](https://typst.app).
