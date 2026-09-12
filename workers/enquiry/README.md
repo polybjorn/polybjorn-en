@@ -77,7 +77,7 @@ The envelope:
   "lang": "no",
   "country": "NO",
   "answers": [{ "id": "description", "label": "Beskriv delen ...", "value": "..." }],
-  "raw": { "description": "...", "deliverable": ["printed", "model"] },
+  "raw": { "description": "...", "orderType": "file", "materialProperties": ["outdoor"] },
   "files": [{ "index": 0, "name": "brakett.stl", "type": "model/stl", "size": 8484, "sha256": "..." }],
   "brief": "Henvendelse fra skjemaet ...\n\nBeskriv delen ...: ..."
 }
