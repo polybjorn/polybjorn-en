@@ -1,0 +1,87 @@
+/**
+ * Whether the receipt's styling actually applies.
+ *
+ * This file exists because of a specific bug. Everything inside the receipt is
+ * created by script at submit time, and a script-created node does not carry
+ * Astro's scope attribute - so `.receipt-heading { }` in the component compiled
+ * to `.receipt-heading[data-astro-cid-...]` and matched nothing on the page. It
+ * shipped, and the receipt rendered as unstyled text.
+ *
+ * Nothing that reads the DOM can catch that: the markup is identical whether a
+ * rule applied or never matched. These ask the cascade instead.
+ */
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+
+import { fillSample } from '../src/dev/fill-sample.js';
+import { PAGES, loadPage, settle, stubFetch, jsonResponse } from './helpers/page.mjs';
+
+const PAGE_BACKGROUND = 'rgb(35, 39, 46)';
+const ACCENT = 'rgb(106, 174, 238)';
+const DIMMED = 'rgb(154, 162, 173)';
+
+async function sentPage(path) {
+  const dom = loadPage(path, { styles: true });
+  stubFetch(dom.window, jsonResponse(201, { ok: true, id: 'test' }));
+  fillSample(dom.window.document);
+  dom.window.document.getElementById('intake-form').requestSubmit();
+  await settle(dom.window);
+  const { window } = dom;
+  return { window, doc: window.document, css: el => window.getComputedStyle(el) };
+}
+
+for (const { path, lang } of PAGES) {
+  test(`${lang}: the receipt is one card in the page's own style`, async () => {
+    const { doc, css } = await sentPage(path);
+    const receipt = doc.getElementById('sent-receipt');
+
+    assert.equal(css(receipt).backgroundColor, PAGE_BACKGROUND, 'the same card the form sections use');
+    assert.ok(doc.querySelectorAll('#sent-receipt .receipt-section').length > 1, 'several sections inside it');
+
+    const second = doc.querySelectorAll('#sent-receipt .receipt-section')[1];
+    assert.equal(css(second).borderTopWidth, '1px', 'sections are divided by a rule, not by being separate cards');
+  });
+
+  test(`${lang}: answers lay out in columns, and a long one spans them`, async () => {
+    const { doc, css } = await sentPage(path);
+
+    const list = doc.querySelector('#sent-receipt .receipt-list');
+    assert.equal(css(list).display, 'grid');
+
+    // The description is always long enough to take the full width. If this
+    // fails, the measurement in isWide() has drifted from the sample answer.
+    const wide = doc.querySelector('#sent-receipt .receipt-item-wide');
+    assert.ok(wide, 'the description should not be squeezed into a column');
+    assert.equal(css(wide).gridColumn.replace(/\s+/g, ''), '1/-1');
+  });
+
+  test(`${lang}: headings, labels and values are styled`, async () => {
+    const { doc, css } = await sentPage(path);
+
+    const heading = doc.querySelector('#sent-receipt .receipt-heading');
+    assert.equal(css(heading).textTransform, 'uppercase');
+    assert.equal(css(heading).color, ACCENT);
+
+    const term = doc.querySelector('#sent-receipt dt');
+    assert.equal(css(term).color, DIMMED, 'a label reads quieter than its answer');
+
+    const value = doc.querySelector('#sent-receipt dd');
+    assert.equal(css(value).whiteSpace, 'pre-wrap', 'a description keeps its own line breaks');
+    assert.equal(css(value).marginLeft, '0px', "the browser's default dd indent is off");
+  });
+
+  test(`${lang}: the submit warning is centred, not pinned to Send`, async () => {
+    const dom = loadPage(path, { styles: true });
+    dom.window.fetch = async () => { throw new Error('offline'); };
+    fillSample(dom.window.document);
+    dom.window.document.getElementById('intake-form').requestSubmit();
+    await settle(dom.window);
+
+    const box = dom.window.document.getElementById('submit-error');
+    const style = dom.window.getComputedStyle(box);
+    assert.equal(box.hidden, false);
+    assert.equal(style.marginLeft, 'auto');
+    assert.equal(style.marginRight, 'auto');
+    assert.equal(style.width, 'fit-content', 'centring only reads as centring while the box is its content width');
+  });
+}
