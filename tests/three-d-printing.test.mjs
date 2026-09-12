@@ -37,20 +37,17 @@ for (const { path, lang, href } of PAGES) {
     assert.ok(existsSync(join(DIST, href.replace(/^\//, ''), 'index.html')), `${href} is not in dist`);
   });
 
-  test(`${lang}: the process is three steps, not two paragraphs`, () => {
+  test(`${lang}: what the form cannot carry is said next to the button`, () => {
     const doc = loadPage(path).window.document;
-    const steps = doc.querySelectorAll('.steps .step');
+    const note = doc.querySelector('.scope-note');
 
-    assert.equal(steps.length, 3);
-    steps.forEach(step => {
-      assert.ok(step.querySelector('h3').textContent.trim().length > 0);
-      assert.ok(step.querySelector('p').textContent.trim().length > 0);
-    });
-
-    // The five-hour block is the distinctive promise on this page, and the
-    // reason the middle section survives at all. Losing it in a future trim
-    // should fail something.
-    assert.match(doc.querySelector('.steps').textContent, /fem timer|five-hour/);
+    // The five-hour block is the one commercial term the form does not ask
+    // about, and the only sentence that survived the section it used to live
+    // in. It sits under the CTA because that is where someone is deciding what
+    // they are committing to.
+    assert.ok(note, 'losing this leaves the page with nothing the form does not already say');
+    assert.match(note.textContent, /fem timer|five-hour/);
+    assert.ok(note.compareDocumentPosition(doc.querySelector('.enquiry-cta')) & 2, 'it follows the button');
   });
 
   test(`${lang}: the direct contact methods are still offered`, () => {

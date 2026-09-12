@@ -47,19 +47,14 @@ export const t = {
       h1: "3D printing",
       tagline: "3D modelling, prototyping, and small-batch production for businesses in Haugesund and Haugalandet, Norway.",
       servicesHeading: "Services",
-      howItWorksHeading: "How it works",
-      // Three steps rather than two paragraphs. The form now carries the
-      // first conversation, so the page's job here is the part no form can
-      // do: say what happens to the client's time and money.
-      steps: {
-        enquiry: { label: "Enquiry", body: "The form asks for what I need to size up the job." },
-        scope: { label: "Scope", body: "If it is unclear, we work in five-hour blocks. If a block runs out before the job is done, I stop and get in touch so we can decide together. If the scope is clear from the start, we agree time and delivery directly." },
-        price: { label: "Price and terms", body: "Quoted on request." },
-      },
       alsoPrivate: "I also take on work for individuals and hobbyists when capacity allows.",
       examplesMoreHtml: 'See more projects in the <a href="/gallery/made" style="color:#6aaeee;text-decoration:underline;">gallery</a> or on <a href="https://grabcad.com/bjorn.a.andersen-1" target="_blank" rel="noopener" style="color:#6aaeee;text-decoration:underline;">GrabCAD</a>.',
       contactCta: "Get in touch for a no-obligation conversation about your project.",
       enquiryCta: "Start an enquiry",
+      // Under the button, because this is what someone about to press it wants to
+      // know. It is the one commercial term the form does not carry, and the only
+      // sentence that survived the section it used to live in.
+      scopeNote: "If the scope is unclear, we work in five-hour blocks - if a block runs out, I stop and get in touch.",
       services: {
         modelling: { title: "3D modelling", body: "Modelling parts, products, and concepts, from sketch to production-ready file." },
         consultation: { title: "Design consultation", body: "Help with assessing options, materials, and production methods for 3D-printed parts." },
@@ -156,16 +151,11 @@ export const t = {
       h1: "3D-printing",
       tagline: "3D-modellering, prototyping og småserieproduksjon for lokale bedrifter i Haugesund og på Haugalandet.",
       servicesHeading: "Tjenester",
-      howItWorksHeading: "Hvordan det fungerer",
-      steps: {
-        enquiry: { label: "Henvendelse", body: "Skjemaet spør om det jeg trenger for å vurdere oppdraget." },
-        scope: { label: "Omfang", body: "Er det uklart, jobber vi i bolker på fem timer. Blir bolken brukt opp før jobben er ferdig, stopper jeg og tar kontakt så vi kan vurdere veien videre sammen. Er omfanget klart fra start, avtaler vi tidsbruk og leveranse direkte." },
-        price: { label: "Pris og betingelser", body: "Oppgis på forespørsel." },
-      },
       alsoPrivate: "Jeg tar også oppdrag for enkeltpersoner og hobbyister når kapasiteten tillater det.",
       examplesMoreHtml: 'Se flere prosjekter i <a href="/no/galleri/laget" style="color:#6aaeee;text-decoration:underline;">galleriet</a> eller på <a href="https://grabcad.com/bjorn.a.andersen-1" target="_blank" rel="noopener" style="color:#6aaeee;text-decoration:underline;">GrabCAD</a>.',
       contactCta: "Ta kontakt for en uforpliktende samtale om prosjektet ditt.",
       enquiryCta: "Start en henvendelse",
+      scopeNote: "Er omfanget uklart, jobber vi i bolker på fem timer - blir bolken brukt opp, stopper jeg og tar kontakt.",
       services: {
         modelling: { title: "3D-modellering", body: "Modellering av deler, produkter og konsepter, fra skisse til ferdig fil klar for produksjon." },
         consultation: { title: "Design-rådgivning", body: "Hjelp til å vurdere muligheter, materialvalg og produksjonsmetoder for 3D-printede deler." },
