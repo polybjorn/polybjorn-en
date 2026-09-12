@@ -4,6 +4,8 @@ dist-no/
 cv/output/
 # generated types
 .astro/
+# wrangler build and local state, written next to workers/enquiry
+.wrangler/
 
 # dependencies
 node_modules/
@@ -50,3 +52,6 @@ id_rsa
 id_ed25519
 credentials.json
 AGENTS.md
+
+# wrangler build and local state, written next to workers/enquiry
+.wrangler/
