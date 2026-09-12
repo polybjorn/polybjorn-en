@@ -70,11 +70,6 @@ function json(status, body) {
 
 const fail = (status, code) => json(status, { ok: false, code });
 
-async function sha256Hex(bytes) {
-  const digest = await crypto.subtle.digest('SHA-256', bytes);
-  return [...new Uint8Array(digest)].map(b => b.toString(16).padStart(2, '0')).join('');
-}
-
 // Compare digests rather than the tokens themselves: same constant-time loop,
 // but a fixed length either way, so nothing leaks through how long it runs.
 async function tokenMatches(given, expected) {
@@ -271,16 +266,18 @@ async function handleSubmit(request, env) {
   const { keys } = await env.ENQUIRIES.list({ prefix: `enquiry:${today}` });
   if (keys.length >= MAX_PER_DAY) return fail(429, 'rate-limited');
 
-  const manifest = [];
-  for (const [index, file] of files.entries()) {
-    manifest.push({
-      index,
-      name: file.name,
-      type: file.type,
-      size: file.size,
-      sha256: await sha256Hex(file.bytes),
-    });
-  }
+  // No checksum. An earlier version hashed every upload into the manifest so the
+  // puller could verify what it fetched, which reads as diligence and is not
+  // worth what it costs: hashing is CPU proportional to the largest thing this
+  // worker touches, and the free plan allows 10 ms per request in total. Both
+  // hops are already TLS to Cloudflare, and the puller can hash locally if it
+  // ever wants a fingerprint for its own records.
+  const manifest = files.map((file, index) => ({
+    index,
+    name: file.name,
+    type: file.type,
+    size: file.size,
+  }));
 
   const envelope = {
     id,
