@@ -54,9 +54,16 @@ npm run dev
 - `/dev/enquiry-sent-no` - the Norwegian one
 
 The preview fills the real controls with sample answers and stubs `fetch`, so
-the page's own code renders the receipt and nothing reaches the worker. These
-routes exist only while the dev server runs: `npm run build` emits no `dev/` at
-all, rather than a page that hides itself.
+the page's own code renders the receipt and nothing reaches the worker.
+
+```sh
+npm run build:preview
+```
+
+puts the same routes in a static build, for serving a preview from a machine of
+ours instead of starting a dev server by hand. A plain `npm run build` - what
+deploys - emits no `dev/` directory at all, rather than a page that hides
+itself.
 
 ## CV generation
 

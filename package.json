@@ -8,7 +8,8 @@
     "build:deploy": "astro build && node scripts/prepare-deploy.mjs",
     "preview": "astro preview",
     "astro": "astro",
-    "test:worker": "node --test workers/enquiry/*.test.mjs"
+    "test:worker": "node --test workers/enquiry/*.test.mjs",
+    "build:preview": "PREVIEW=1 astro build"
   },
   "engines": {
     "node": ">=20"
