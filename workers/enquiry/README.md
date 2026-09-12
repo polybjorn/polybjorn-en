@@ -78,7 +78,7 @@ The envelope:
   "country": "NO",
   "answers": [{ "id": "description", "label": "Beskriv delen ...", "value": "..." }],
   "raw": { "description": "...", "orderType": "file", "materialProperties": ["outdoor"] },
-  "files": [{ "index": 0, "name": "brakett.stl", "type": "model/stl", "size": 8484, "sha256": "..." }],
+  "files": [{ "index": 0, "name": "brakett.stl", "type": "model/stl", "size": 8484 }],
   "brief": "Henvendelse fra skjemaet ...\n\nBeskriv delen ...: ..."
 }
 ```
@@ -94,6 +94,24 @@ The id sorts chronologically and is safe as a folder name.
 No IP address is kept. `country` is what Cloudflare already knows from the
 connection, and it is there because a country is useful for spotting a wave of
 junk and is not personal data on its own.
+
+## The free plan and CPU
+
+A worker on the Workers Free plan gets **10 ms of CPU per request**, everything
+included. Waiting on KV does not count against it, but parsing the body does,
+and so does anything that walks an upload end to end.
+
+That is why there is no checksum in the manifest and why the text check reads
+only the first 64 KiB: both were CPU proportional to the largest thing here.
+What remains is `request.formData()` itself, which cannot be avoided without
+hand-writing a multipart parser, and which no test on a machine without workerd
+can measure.
+
+So the question is open until it is answered in production, and it is answered
+by attaching a large photo to a real enquiry. If that submission fails where a
+text-only one succeeds, the worker is running out of CPU rather than doing
+anything wrong, and the fix is the $5/month Workers Paid plan, which raises the
+limit to 30 seconds. Nothing in the code changes.
 
 ## Retention
 
