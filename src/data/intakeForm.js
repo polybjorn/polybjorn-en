@@ -12,40 +12,82 @@
 // more fields. The free-text description plus a follow-up conversation
 // covers it now.
 
-// This question opened the form next to the deliverable one for a while, and
-// it did not work there. "Hva trenger du?" and "Hva skal du bestille?" are near
-// synonyms in Norwegian, so two questions that mean quite different things read
-// as one asked twice - and the second needed example lines under both options
-// purely to explain what it was asking. They are also not peers: DELIVERABLE
-// branches the form, deciding whether material, colour and quantity exist,
-// while this one is recorded and changes nothing. Presenting them as a matched
-// pair implied a symmetry that was not there.
+// "What do you need?" - a printed part, a 3D model, or both - used to open the
+// form ahead of this one, and it is gone. Deciding whether material, colour and
+// quantity applied was the only thing it did that the description could not:
+// everything else it recorded, the description says better, and a print is the
+// ordinary case. Those three fields are shown to everyone now, quantity among
+// them optional, so a model-only enquiry skips them instead of the rest of the
+// form being gated on a question that does not fit it.
 //
-// So it lives in the Specification section now, with size, material and
+// The two never sat well together anyway: "Hva trenger du?" and "Hva skal du
+// bestille?" are near synonyms in Norwegian, so two questions that mean quite
+// different things read as one asked twice.
+//
+// This one lives in the Specification section, with size, material and
 // ownership - the other questions about the design itself - and it is named for
 // what it asks.
+//
+// The question asks what exists, not how far along it is. "How finished is the
+// design?" put a degree in the question and got a bare "Finished" back, which
+// read as the question echoed rather than answered - and left one option a
+// state while the other was a thing. Both answers are nouns now, and both
+// complete the question without repeating a word of it.
 //
 // Order type used to have a third option ("production run" / "business
 // order") meant to gate the now-removed requirement grid. That was wrong: a
 // business ordering one already-finished part and a private customer with a
 // strict spec both exist, so "is the design settled" and "are there formal
-// specs to hit" were never the same fact. This is just the design-certainty
-// question - DELIVERABLE_TYPES below is the separate printed-vs-model-only
-// question. A third point on this one ("a problem to solve") was tried and
+// specs to hit" were never the same fact. A third point on this one ("a
+// problem to solve") was tried and
 // dropped too - it never held up as genuinely distinct from "an idea to
 // test," just a fuzzier version of it.
+// Order matters once these sit in two columns (see .option-list-inline): the
+// grid fills left to right, so the left column ends up holding the two answers
+// that already have a shape - a file, a part to copy - and the right column the
+// two that do not, a drawing and an idea. Stacked on a narrow screen the same
+// order reads from most finished to least.
 export const ORDER_TYPES = [
   {
-    // No example. Under "how finished is the design?" the answer "finished"
-    // needs no gloss - the old one ("you know exactly what it should look
-    // like") only existed because the question used to be "what are you
-    // ordering?", which did not say what was being asked.
-    value: 'one-off',
-    label: { en: 'Finished', no: 'Ferdig' },
+    // Every answer here names a thing you can point at - a file, a drawing, an
+    // idea, a part - because the one option that was always obviously distinct
+    // ("a physical part to copy") is the one that does. "A finished design"
+    // and the rest named positions on a scale of design maturity instead, and
+    // three points on a scale read as three shades of the same answer.
+    //
+    // No example: "a finished 3D file" is what it is. The old gloss ("you know
+    // exactly what it should look like") only existed back when the question
+    // was "what are you ordering?", which did not say what was being asked.
+    value: 'file',
+    label: { en: 'A finished 3D file', no: 'En ferdig 3D-fil' },
   },
   {
-    value: 'prototype',
-    label: { en: 'An idea I want to test', no: 'En idé jeg vil teste' },
+    // No example: the label is the whole answer. Someone with a drawing knows
+    // what they want and needs it drawn up, which is different work from
+    // testing an idea - that is why this is its own option and not a softer
+    // wording of the one below.
+    value: 'sketch',
+    label: { en: 'A sketch or measurements', no: 'En skisse eller mål' },
+  },
+  {
+    // Selectable even though the scanner is not here yet. A greyed-out option
+    // says "no" and records nothing; this one says the same thing in a line of
+    // text and still puts the enquiry in front of me, so it answers how many
+    // people actually want it. Every enquiry is a conversation anyway - an
+    // answer that has to wait costs a sentence in the reply.
+    // 'physical', not 'scan' - the ownership question below already submits a
+    // 'scan' value, and two different answers reading the same in the enquiry
+    // would be a puzzle to nobody's benefit.
+    value: 'physical',
+    label: { en: 'A physical part to copy', no: 'En fysisk del jeg vil kopiere' },
+    example: {
+      en: '3D scanning is coming soon.',
+      no: '3D-skanning kommer snart.',
+    },
+  },
+  {
+    value: 'idea',
+    label: { en: 'Just an idea', no: 'Bare en idé' },
     // This one keeps its example: that it takes iterations is not something
     // the label or the question says.
     example: {
@@ -55,86 +97,17 @@ export const ORDER_TYPES = [
   },
 ];
 
-// Printed vs. model-only is a separate axis from design certainty above -
-// someone with a finished design and someone still testing an idea can each
-// want either. It comes first in the form (see IntakeForm.astro) because it
-// decides whether print-specific fields below (material, colour/finish,
-// quantity) are relevant at all.
-//
-// Question and labels were cut back together, over three passes, until no word
-// appeared twice in the block. The labels began as "Printed - a physical part"
-// and "Just the 3D model - I'll print it myself, or don't need it printed",
-// which stated the distinction three times: the question named both options,
-// each label repeated its own word, then glossed it - and the second one said
-// "print" twice by itself. The glosses went, then the "just"/"bare", which the
-// question was already supplying and the radio group enforces anyway.
-//
-// That left the duplication sitting in the question, which still spelled out
-// both labels. So the question went neutral and the labels carry the
-// distinction on their own. They are nouns because they answer "what", not
-// "is it".
-//
-// One choice, not two ticks. This was briefly a checkbox group where ticking
-// the part also ticked the model, to show that a print includes the file -
-// but that made everyone decide about the file, including the many who have no
-// opinion on it, and a box that ticks itself reads as a glitch rather than as
-// generosity. The form only needs one fact here: is anything being printed.
-//
-// So both are checkboxes, and ticking the part ticks the model and then locks
-// it: the bundle is shown, and it is visibly not up for negotiation. An earlier
-// version left the model tick undoable, which turned out to be the confusing
-// part - not the tick appearing, but not knowing whether you were allowed to
-// remove it. Greying it out answers that before it is asked.
-//
-// The printed option keeps its description. A greyed tick on its own says
-// "unavailable" as readily as "included"; the sentence is what makes it the
-// second one.
-export const DELIVERABLE_TYPES = [
-  {
-    value: 'printed',
-    label: { en: 'A printed part', no: 'Printet del' },
-  },
-  {
-    value: 'model',
-    label: { en: 'A 3D model', no: '3D-modell' },
-    // Shown only while this option is locked by the one above (see
-    // IntakeForm.astro). It is there to explain a greyed tick, and there is no
-    // greyed tick to explain while this is a live choice - stating it
-    // permanently made it a standing claim about an option it does not
-    // describe.
-    showWhenLocked: true,
-    example: {
-      en: 'Included with a printed part.',
-      no: 'Følger med en printet del.',
-    },
-  },
-];
-
-// Fields that only make sense when something is actually being printed.
-// IntakeForm.astro hides these and disables their inputs for a model-only
-// request. Disabling (rather than clearing) is what keeps a model-only
-// customer from being gated on `quantity`, which is required on the printed
-// path: a disabled control is barred from constraint validation and left out
-// of the submitted FormData, while its value survives for anyone who switches
-// back to "printed".
-export const PRINT_ONLY_FIELD_IDS = ['materialProperties', 'materialName', 'color', 'quantity'];
-
 export const BASE_FIELDS = [
-  {
-    // A checkbox group with its own "at least one" rule, enforced in
-    // IntakeForm.astro - there is no native required for a group of
-    // checkboxes the way there is for a radio group.
-    id: 'deliverable',
-    type: 'checkboxGroup',
-    required: true,
-    label: { en: 'What do you need?', no: 'Hva trenger du?' },
-    options: DELIVERABLE_TYPES,
-  },
   {
     id: 'orderType',
     type: 'radio',
     required: true,
-    label: { en: 'How finished is the design?', no: 'Hvor ferdig er designet?' },
+    // Four short answers, so they pair into two columns instead of running
+    // down the page - see .option-list-inline in IntakeField.astro. Only this
+    // question: materialProperties below is five options with an example each,
+    // which is a list to read down.
+    inlineOptions: true,
+    label: { en: 'What do you have so far?', no: 'Hva har du så langt?' },
     options: ORDER_TYPES,
   },
   {
@@ -179,9 +152,12 @@ export const BASE_FIELDS = [
     },
   },
   {
+    // Optional since the printed-or-model question went: with nothing left to
+    // say "this one only wants the file", a required quantity would stop that
+    // enquiry on a question that does not apply to it.
     id: 'quantity',
     type: 'text',
-    required: true,
+    required: false,
     label: { en: 'How many do you need?', no: 'Hvor mange trenger du?' },
     help: {
       en: 'A number, or a range like "5 to 10" if you are not sure yet.',
@@ -308,15 +284,17 @@ export const BASE_FIELDS = [
     ],
   },
   {
+    // A noun, not a question. "Already know the material?" was a yes/no
+    // question with a text box under it, which got answered "yes" - and it
+    // needed two sentences of help to undo that, which is a lot of text for a
+    // field sharing a row with another.
     id: 'materialName',
     type: 'text',
     required: false,
-    label: { en: 'Already know the material?', no: 'Vet du allerede hvilket materiale?' },
-    // Without an example this reads as a yes/no question with a text box
-    // under it, and gets answered "yes".
+    label: { en: 'Material', no: 'Materiale' },
     help: {
-      en: 'Name it if so - PETG, ASA, TPU, and so on. Leave it blank if not.',
-      no: 'Skriv det i så fall - PETG, ASA, TPU og så videre. La stå tomt hvis ikke.',
+      en: 'If you have one in mind - PETG, ASA, TPU.',
+      no: 'Hvis du har et i tankene - PETG, ASA, TPU.',
     },
   },
   {
@@ -327,7 +305,10 @@ export const BASE_FIELDS = [
     id: 'color',
     type: 'text',
     required: false,
-    label: { en: 'Colour and finish preference', no: 'Farge- og overflatepreferanse' },
+    // Paired on a row with the material field, so both labels have half the
+    // width they had. "preference"/"-preferanse" was the half that could go:
+    // nothing on this form is an instruction.
+    label: { en: 'Colour and finish', no: 'Farge og overflate' },
   },
   {
     id: 'contactName',
