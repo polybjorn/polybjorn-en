@@ -12,11 +12,12 @@ routes = [
   { pattern = "polybjorn.com/api/enquiry*", zone_name = "polybjorn.com" },
 ]
 
-# Created with: wrangler kv namespace create ENQUIRIES
-# Paste the id it prints here. Submissions live in it only until pi-rovar pulls
-# them, with a 14 day TTL as a backstop.
+# Created with: wrangler kv namespace create ENQUIRIES, 2026-09-12. Submissions
+# live in it only until pi-rovar pulls them, with a 14 day TTL as a backstop.
+# The id is an identifier, not a credential: reaching the namespace still takes
+# an authenticated account.
 kv_namespaces = [
-  { binding = "ENQUIRIES", id = "REPLACE_WITH_KV_NAMESPACE_ID" }
+  { binding = "ENQUIRIES", id = "ea8a9ce7a5a0474a874c2b5c0e5710cc" }
 ]
 
 # A burst limit per IP. The period can only be 10 or 60 seconds, so this stops a
