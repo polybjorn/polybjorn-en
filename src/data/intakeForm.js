@@ -97,19 +97,21 @@ export const ORDER_TYPES = [
   },
 ];
 
+// The order here is the order the enquiry is read in. The worker walks this
+// array to build the brief it stores for pi-rovar (workers/enquiry/index.js),
+// so this list and the form's own layout are two halves of one contract: the
+// rows in IntakeForm.astro decide what a visitor sees, and this decides what
+// arrives in the mail. When they disagree, the brief lists answers in an order
+// nobody filled them in, which is the state this was in until #22 - size after
+// ownership, quantity in with the file upload, and the design questions split
+// across the middle.
+//
+// So: move a question in the form, move it here. Read the rows in
+// IntakeForm.astro left to right and top to bottom and this list should match
+// them exactly. Nothing enforces it - there is no test that can tell a
+// deliberate order from a drifted one - so it is a thing to check by eye when
+// the form changes.
 export const BASE_FIELDS = [
-  {
-    id: 'orderType',
-    type: 'radio',
-    required: true,
-    // Four short answers, so they pair into two columns instead of running
-    // down the page - see .option-list-inline in IntakeField.astro. Only this
-    // question: materialProperties below is five options with an example each,
-    // which is a list to read down.
-    inlineOptions: true,
-    label: { en: 'What do you have so far?', no: 'Hva har du så langt?' },
-    options: ORDER_TYPES,
-  },
   {
     // The help said "a short label, if you have one" - one half of that is what
     // an example shows by being one, and the other half is true of every
@@ -174,42 +176,16 @@ export const BASE_FIELDS = [
     },
   },
   {
-    // Optional since the printed-or-model question went: with nothing left to
-    // say "this one only wants the file", a required quantity would stop that
-    // enquiry on a question that does not apply to it.
-    // The help existed to say a range is allowed. An example that is a range
-    // says the same thing in four characters.
-    id: 'quantity',
-    type: 'text',
-    required: false,
-    label: { en: 'How many do you need?', no: 'Hvor mange trenger du?' },
-    placeholder: { en: '5, or 5 to 10', no: '5, eller 5 til 10' },
-  },
-  {
-    // "A date, or no fixed date is fine" was two facts: what to type, and that
-    // you do not have to have one. The example carries the first and the label
-    // carries the second, which is better placed there anyway - it is read
-    // before the field rather than after it. This one shares a row with the
-    // budget, so a line of help under it wrapped.
-    id: 'targetDate',
-    type: 'text',
-    required: false,
-    label: { en: 'Deadline, if you have one', no: 'Frist, hvis du har en' },
-    placeholder: { en: '15 October', no: '15. oktober' },
-  },
-  {
-    id: 'budget',
-    type: 'select',
-    required: false,
-    label: { en: 'Budget frame', no: 'Budsjettramme' },
-    options: [
-      { value: 'not-sure', en: 'Not sure yet', no: 'Ikke sikker ennå' },
-      { value: 'under-1000', en: 'Under 1 000 NOK', no: 'Under 1 000 kr' },
-      { value: '1000-5000', en: '1 000-5 000 NOK', no: '1 000-5 000 kr' },
-      { value: '5000-20000', en: '5 000-20 000 NOK', no: '5 000-20 000 kr' },
-      { value: 'over-20000', en: 'Over 20 000 NOK', no: 'Over 20 000 kr' },
-      { value: 'discuss', en: "I'd rather discuss it directly", no: 'Vil heller diskutere det direkte' },
-    ],
+    id: 'orderType',
+    type: 'radio',
+    required: true,
+    // Four short answers, so they pair into two columns instead of running
+    // down the page - see .option-list-inline in IntakeField.astro. Only this
+    // question: materialProperties below is five options with an example each,
+    // which is a list to read down.
+    inlineOptions: true,
+    label: { en: 'What do you have so far?', no: 'Hva har du så langt?' },
+    options: ORDER_TYPES,
   },
   {
     // Not required, and deliberately so. This is the one question on the form
@@ -252,6 +228,18 @@ export const BASE_FIELDS = [
     label: { en: 'Approximate size', no: 'Omtrentlig størrelse' },
     placeholder: { en: '120 x 80 x 40 mm', no: '120 x 80 x 40 mm' },
     boxNote: { en: 'L x W x H', no: 'L x B x H' },
+  },
+  {
+    // Optional since the printed-or-model question went: with nothing left to
+    // say "this one only wants the file", a required quantity would stop that
+    // enquiry on a question that does not apply to it.
+    // The help existed to say a range is allowed. An example that is a range
+    // says the same thing in four characters.
+    id: 'quantity',
+    type: 'text',
+    required: false,
+    label: { en: 'How many do you need?', no: 'Hvor mange trenger du?' },
+    placeholder: { en: '5, or 5 to 10', no: '5, eller 5 til 10' },
   },
   {
     // Properties instead of a named filament - choosing between similar
@@ -452,6 +440,32 @@ export const BASE_FIELDS = [
     label: { en: 'Colour and finish', no: 'Farge og overflate' },
   },
   {
+    // "A date, or no fixed date is fine" was two facts: what to type, and that
+    // you do not have to have one. The example carries the first and the label
+    // carries the second, which is better placed there anyway - it is read
+    // before the field rather than after it. This one shares a row with the
+    // budget, so a line of help under it wrapped.
+    id: 'targetDate',
+    type: 'text',
+    required: false,
+    label: { en: 'Deadline, if you have one', no: 'Frist, hvis du har en' },
+    placeholder: { en: '15 October', no: '15. oktober' },
+  },
+  {
+    id: 'budget',
+    type: 'select',
+    required: false,
+    label: { en: 'Budget frame', no: 'Budsjettramme' },
+    options: [
+      { value: 'not-sure', en: 'Not sure yet', no: 'Ikke sikker ennå' },
+      { value: 'under-1000', en: 'Under 1 000 NOK', no: 'Under 1 000 kr' },
+      { value: '1000-5000', en: '1 000-5 000 NOK', no: '1 000-5 000 kr' },
+      { value: '5000-20000', en: '5 000-20 000 NOK', no: '5 000-20 000 kr' },
+      { value: 'over-20000', en: 'Over 20 000 NOK', no: 'Over 20 000 kr' },
+      { value: 'discuss', en: "I'd rather discuss it directly", no: 'Vil heller diskutere det direkte' },
+    ],
+  },
+  {
     id: 'contactName',
     type: 'text',
     required: true,
@@ -461,13 +475,6 @@ export const BASE_FIELDS = [
     // and Li, and this is a name someone is telling me on purpose.
     pattern: '.*\\S.*',
     label: { en: 'Name', no: 'Navn' },
-  },
-  {
-    id: 'contactCompany',
-    type: 'text',
-    required: false,
-    autocomplete: 'organization',
-    label: { en: 'Company', no: 'Firma' },
   },
   {
     // Signal used to be folded into the phone field ("Phone or Signal"),
@@ -488,6 +495,38 @@ export const BASE_FIELDS = [
     label: { en: 'Phone', no: 'Telefon' },
   },
   {
+    id: 'contactCompany',
+    type: 'text',
+    required: false,
+    autocomplete: 'organization',
+    label: { en: 'Company', no: 'Firma' },
+  },
+  {
+    id: 'contactEmail',
+    type: 'text',
+    inputType: 'email',
+    autocomplete: 'email',
+    required: false,
+    label: { en: 'Email', no: 'E-post' },
+  },
+  {
+    // The old label was just "Location", which got read as "street address".
+    // "Town or area" carries that, and a town in the box carries it again - so
+    // the help, which said what the answer was for, is gone. What it is for is
+    // the one thing lost: the reason anyone is being asked where they live.
+    // Say so directly if that turns out to matter.
+    id: 'contactLocation',
+    type: 'text',
+    required: false,
+    autocomplete: 'address-level2',
+    // Haugesund, not a town picked at random: an example here is the one place
+    // name on the page, so it may as well be the one that says where the work
+    // is done from - which is also what makes "for frakt eller henting" obvious
+    // without the sentence that used to say it.
+    placeholder: { en: 'Haugesund', no: 'Haugesund' },
+    label: { en: 'Town or area', no: 'Sted eller område' },
+  },
+  {
     // "eller lenke" rather than "eller signal.me-lenke": this field is half a
     // row wide, and a placeholder that does not fit is cut off with nothing to
     // say it was. A username is the case that needs showing anyway - the shape
@@ -498,14 +537,6 @@ export const BASE_FIELDS = [
     required: false,
     placeholder: { en: 'name.42 or a link', no: 'navn.42 eller lenke' },
     label: { en: 'Signal', no: 'Signal' },
-  },
-  {
-    id: 'contactEmail',
-    type: 'text',
-    inputType: 'email',
-    autocomplete: 'email',
-    required: false,
-    label: { en: 'Email', no: 'E-post' },
   },
   {
     // Was a standing sub-header on every enquiry ("Enquiries are treated
@@ -532,22 +563,5 @@ export const BASE_FIELDS = [
       en: 'Treat this enquiry as confidential',
       no: 'Behandle henvendelsen konfidensielt',
     },
-  },
-  {
-    // The old label was just "Location", which got read as "street address".
-    // "Town or area" carries that, and a town in the box carries it again - so
-    // the help, which said what the answer was for, is gone. What it is for is
-    // the one thing lost: the reason anyone is being asked where they live.
-    // Say so directly if that turns out to matter.
-    id: 'contactLocation',
-    type: 'text',
-    required: false,
-    autocomplete: 'address-level2',
-    // Haugesund, not a town picked at random: an example here is the one place
-    // name on the page, so it may as well be the one that says where the work
-    // is done from - which is also what makes "for frakt eller henting" obvious
-    // without the sentence that used to say it.
-    placeholder: { en: 'Haugesund', no: 'Haugesund' },
-    label: { en: 'Town or area', no: 'Sted eller område' },
   },
 ];
