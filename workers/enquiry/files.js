@@ -52,13 +52,29 @@ function startsWithText(bytes, prefix) {
   return ascii(bytes, start, start + prefix.length) === prefix;
 }
 
+// How much of a text file is actually read. Decoding ten megabytes to prove it
+// is text costs CPU proportional to the upload, and a worker on the free plan
+// has 10 ms of it per request for everything, parsing the body included.
+//
+// A prefix is where the answer is anyway. Every format this would catch - an
+// ELF, a PE, a zip wearing a .obj extension - announces itself in its first
+// bytes, which is the same reason file(1) reads a header rather than a whole
+// disk. What a prefix cannot catch is binary spliced into the middle of an
+// otherwise real text file, and that is given up knowingly: it is inert to the
+// import either way, and whatever nixfleet#87 settles on still has to hold.
+const TEXT_CHECK_BYTES = 64 * 1024;
+
 // Valid UTF-8, and nothing in it that a terminal or an importer would treat as
 // a control sequence. TextDecoder with fatal:true does the first half; the
 // second half is what stops a binary payload wearing a .obj extension.
 export function isPlainText(bytes) {
+  const head = bytes.length > TEXT_CHECK_BYTES ? bytes.subarray(0, TEXT_CHECK_BYTES) : bytes;
   let text;
   try {
-    text = new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+    // stream:true so a character straddling the cut is held back rather than
+    // thrown as a decoding error. Without it, every text file whose 65536th byte
+    // lands mid-character would be refused for being binary.
+    text = new TextDecoder('utf-8', { fatal: true }).decode(head, { stream: true });
   } catch {
     return false;
   }
