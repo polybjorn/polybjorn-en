@@ -194,6 +194,21 @@ test('a binary STL is accepted and a text file calling itself one is not', async
   assert.equal(inspect('model.obj', new Uint8Array([0x7f, 0x45, 0x4c, 0x46])).ok, false);
 });
 
+test('the text check reads a prefix without tripping over it', () => {
+  // A file longer than the 64 KiB the check reads, with a multi-byte character
+  // sitting exactly on the cut. Decoding without stream:true throws here, and
+  // the file would be refused for being binary.
+  const filler = 'v 1.0 2.0 3.0\n'.repeat(5000);
+  const head = filler.slice(0, 65535);
+  assert.equal(inspect('model.obj', new TextEncoder().encode(head + 'æøå' + filler)).ok, true);
+
+  // Still caught: what a prefix is for is the header, and that is where every
+  // format worth refusing announces itself.
+  const elf = new Uint8Array(200000);
+  elf.set([0x7f, 0x45, 0x4c, 0x46]);
+  assert.equal(inspect('model.obj', elf).ok, false);
+});
+
 test('an oversized file is refused', async () => {
   const kv = kvStub();
   const form = baseForm();
