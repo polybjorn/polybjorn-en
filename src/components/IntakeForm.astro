@@ -550,31 +550,29 @@ const stageLabels = {
       margin: 0 0 3rem;
     }
 
-    /* Everything inside .receipt is created by script when the form is sent, and
-       a script-created node does not carry this component's scope attribute - so
+    /* One card, not one per section. Four cards each holding a column of short
+       answers left half the width empty four times over; the sections are
+       divisions within one record, not four records. Rules between them carry
+       the same grouping at a fraction of the furniture.
+
+       Everything inside is created by script when the form is sent, and a
+       script-created node does not carry this component's scope attribute - so
        a plain `.receipt-heading { }` here compiles to
-       `.receipt-heading[data-astro-cid-...]` and matches nothing that is
-       actually on the page. That is why these are :global() descendants of
-       .receipt, which is in the markup and does carry the scope.
-
-       This is the same trap the field-error paragraphs avoid by being rendered
-       up front rather than created at the point of failure. Shipped broken here:
-       the receipt rendered its text with none of its formatting, and a test that
-       reads textContent cannot see the difference. Check a computed style. */
+       `.receipt-heading[data-astro-cid-...]` and matches nothing on the page.
+       Hence :global() descendants of .receipt, which is in the markup and does
+       carry the scope. A test that reads textContent cannot see the difference;
+       check a computed style. */
     .receipt {
-      display: flex;
-      flex-direction: column;
-      gap: 1.5rem;
-    }
-
-    /* One card per section, the same card the form's sections use. The receipt
-       replaces four cards with four cards, rather than turning the page into
-       loose text at the moment it is meant to read as a record. */
-    .receipt :global(.receipt-section) {
       background: #23272e;
       border: 1px solid #333840;
       border-radius: 12px;
       padding: 1.6rem 1.6rem 1.8rem;
+    }
+
+    .receipt :global(.receipt-section + .receipt-section) {
+      border-top: 1px solid #333840;
+      margin-top: 1.8rem;
+      padding-top: 1.6rem;
     }
 
     .receipt :global(.receipt-heading) {
@@ -583,15 +581,28 @@ const stageLabels = {
       letter-spacing: 0.09em;
       text-transform: uppercase;
       color: #6aaeee;
-      margin: 0 0 1.4rem;
+      margin: 0 0 1.2rem;
     }
 
-    /* Stacked, label over value, at every width. A two-column receipt would
-       have to choose a label column wide enough for "Beskriv delen og hva den
-       skal brukes til" and narrow enough not to strand "Navn" across the page,
-       and there is no width where both are true inside 680px. */
-    .receipt :global(dl) {
+    /* Answers flow into as many columns as fit rather than one per line. Most of
+       them are a word or a number, and a column of those down the left of a
+       680px page is mostly empty page.
+
+       auto-fit against a 13rem minimum, the same way the form's own rows pair
+       up: two columns when there is room and one when there is not, measured
+       against the space this actually has rather than the viewport. */
+    .receipt :global(.receipt-list) {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+      gap: 1.2rem 2rem;
+      align-items: start;
       margin: 0;
+    }
+
+    /* An answer that runs long takes the full width instead of being squeezed
+       into a column: the description, and any list of attachments. */
+    .receipt :global(.receipt-item-wide) {
+      grid-column: 1 / -1;
     }
 
     .receipt :global(dt) {
@@ -601,21 +612,18 @@ const stageLabels = {
     }
 
     .receipt :global(dd) {
-      margin: 0 0 1.3rem;
+      margin: 0;
       line-height: 1.5;
       /* The description is the one answer that can carry its own line breaks,
          and an attachment list is one file per line. */
       white-space: pre-wrap;
-    }
-
-    .receipt :global(dd:last-child) {
-      margin-bottom: 0;
+      overflow-wrap: anywhere;
     }
 
     /* A lone checkbox is a statement rather than a question with an answer, so
        its label is the whole row and there is nothing to put opposite it. */
     .receipt :global(.receipt-statement) {
-      margin: 0;
+      margin: 1.2rem 0 0;
       line-height: 1.5;
     }
 
@@ -1681,6 +1689,13 @@ const stageLabels = {
     // Built from the form itself rather than from a second copy of the answers,
     // so what someone reads back cannot drift from what FormData carried. Runs
     // before the form is hidden, while the controls still hold their values.
+    // An answer long enough that a column would wrap it into a paragraph gets
+    // the full width instead. Measured rather than listed by field id: a
+    // description is always long and a colour is always short, but a material or
+    // a deadline can be either, and the layout should follow what was typed.
+    const WIDE_ANSWER_CHARS = 58;
+    const isWide = answer => answer.value.includes('\n') || answer.value.length > WIDE_ANSWER_CHARS;
+
     function buildReceipt() {
       sentReceipt.textContent = '';
 
@@ -1696,41 +1711,48 @@ const stageLabels = {
         });
         if (!answers.length) return;
 
-        const card = document.createElement('section');
-        card.className = 'receipt-section';
-        sentReceipt.append(card);
+        const section = document.createElement('section');
+        section.className = 'receipt-section';
+        sentReceipt.append(section);
 
         const heading = document.createElement('h2');
         heading.className = 'receipt-heading';
         heading.textContent = stageLabels[stageId];
-        card.append(heading);
+        section.append(heading);
 
-        // A statement is not a term and a definition, so it interrupts the list
-        // rather than joining it, and whatever follows starts a new one. That
-        // keeps every answer in the order the form asked it.
-        let list = null;
-        const flush = () => {
-          if (list) card.append(list);
-          list = null;
-        };
+        const list = document.createElement('dl');
+        list.className = 'receipt-list';
+
+        // A statement is not a term and a definition, so it does not go in the
+        // list at all. There is one of them, it is the last question of its
+        // section, and it reads as a closing line - which is where it lands.
+        const statements = [];
 
         answers.forEach(answer => {
           if (answer.statement) {
-            flush();
-            const line = document.createElement('p');
-            line.className = 'receipt-statement';
-            line.textContent = answer.statement;
-            card.append(line);
+            statements.push(answer.statement);
             return;
           }
-          if (!list) list = document.createElement('dl');
+          // Each pair wrapped so that the label and its value stay one grid
+          // item. A bare dt and dd would be two, and the columns would pair
+          // every label with the wrong answer.
+          const item = document.createElement('div');
+          item.className = isWide(answer) ? 'receipt-item receipt-item-wide' : 'receipt-item';
           const term = document.createElement('dt');
           term.textContent = answer.label;
           const value = document.createElement('dd');
           value.textContent = answer.value;
-          list.append(term, value);
+          item.append(term, value);
+          list.append(item);
         });
-        flush();
+
+        if (list.children.length) section.append(list);
+        statements.forEach(text => {
+          const line = document.createElement('p');
+          line.className = 'receipt-statement';
+          line.textContent = text;
+          section.append(line);
+        });
       });
     }
 
