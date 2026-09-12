@@ -100,6 +100,13 @@ test('a valid submission is stored with its brief and its file', async () => {
   assert.equal(envelope.files[0].name, 'skisse.png');
   assert.ok(kv.store.has(`file:${id}:0`));
 
+  // The brief is filed and read by a person: no ISO timestamp, no raw byte
+  // count, and Oslo time rather than the UTC a worker thinks it is in.
+  assert.doesNotMatch(envelope.brief, /\d{4}-\d{2}-\d{2}T/);
+  assert.doesNotMatch(envelope.brief, /\d+ bytes/);
+  assert.match(envelope.brief, /skisse\.png \(\d/);
+  assert.equal(envelope.receivedAt.endsWith('Z'), true, 'the envelope keeps the machine-readable one');
+
   // The brief carries the Norwegian labels the visitor actually read, not ids.
   assert.match(envelope.brief, /Beskriv delen/);
   assert.match(envelope.brief, /sensor/);

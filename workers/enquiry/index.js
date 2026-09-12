@@ -161,10 +161,33 @@ function collectAnswers(form, lang) {
  * on the Pi means the labels come from the same file that built the page, so a
  * reworded question cannot leave an old label attached to a new answer.
  */
+const LOCALES = { no: 'nb-NO', en: 'en-GB' };
+
+// Europe/Oslo rather than UTC, which is where a worker thinks it is. The brief
+// is read by one person in one place, and "16:33" is what he will compare
+// against his own day.
+function formatReceived(receivedAt, lang) {
+  return new Date(receivedAt).toLocaleString(LOCALES[lang], {
+    timeZone: 'Europe/Oslo',
+    dateStyle: 'long',
+    timeStyle: 'short',
+  });
+}
+
+// The same thresholds and the same locale as formatSize() in IntakeForm.astro,
+// so an attachment is not "8,6 MB" in the browser someone just used and
+// "9000000 bytes" in the brief that arrives from it.
+function formatSize(bytes, lang) {
+  const number = new Intl.NumberFormat(LOCALES[lang], { maximumFractionDigits: 1 });
+  if (bytes < 1024) return `${number.format(bytes)} B`;
+  if (bytes < 1024 * 1024) return `${number.format(bytes / 1024)} kB`;
+  return `${number.format(bytes / (1024 * 1024))} MB`;
+}
+
 function renderBrief({ id, receivedAt, lang, answers, files }) {
   const lines = [
-    lang === 'no' ? 'Henvendelse fra skjemaet pa polybjorn.no' : 'Enquiry from the form on polybjorn.com',
-    `${lang === 'no' ? 'Mottatt' : 'Received'}: ${receivedAt}`,
+    lang === 'no' ? 'Henvendelse fra skjemaet på polybjorn.no' : 'Enquiry from the form on polybjorn.com',
+    `${lang === 'no' ? 'Mottatt' : 'Received'}: ${formatReceived(receivedAt, lang)}`,
     `ID: ${id}`,
     '',
   ];
@@ -177,7 +200,7 @@ function renderBrief({ id, receivedAt, lang, answers, files }) {
 
   if (files.length) {
     lines.push(lang === 'no' ? 'Vedlegg:' : 'Attachments:');
-    for (const file of files) lines.push(`- ${file.name} (${file.size} bytes)`);
+    for (const file of files) lines.push(`- ${file.name} (${formatSize(file.size, lang)})`);
     lines.push('');
   }
 
