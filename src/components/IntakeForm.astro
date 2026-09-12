@@ -550,38 +550,57 @@ const stageLabels = {
       margin: 0 0 3rem;
     }
 
-    /* Stacked, label over value, at every width. A two-column receipt would
-       have to choose a label column wide enough for "Beskriv delen og hva den
-       skal brukes til" and narrow enough not to strand "Navn" across the page,
-       and there is no width where both are true inside 680px. */
-    .receipt-heading {
+    /* Everything inside .receipt is created by script when the form is sent, and
+       a script-created node does not carry this component's scope attribute - so
+       a plain `.receipt-heading { }` here compiles to
+       `.receipt-heading[data-astro-cid-...]` and matches nothing that is
+       actually on the page. That is why these are :global() descendants of
+       .receipt, which is in the markup and does carry the scope.
+
+       This is the same trap the field-error paragraphs avoid by being rendered
+       up front rather than created at the point of failure. Shipped broken here:
+       the receipt rendered its text with none of its formatting, and a test that
+       reads textContent cannot see the difference. Check a computed style. */
+    .receipt {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    /* One card per section, the same card the form's sections use. The receipt
+       replaces four cards with four cards, rather than turning the page into
+       loose text at the moment it is meant to read as a record. */
+    .receipt :global(.receipt-section) {
+      background: #23272e;
+      border: 1px solid #333840;
+      border-radius: 12px;
+      padding: 1.6rem 1.6rem 1.8rem;
+    }
+
+    .receipt :global(.receipt-heading) {
       font-size: 0.8rem;
       font-weight: 700;
       letter-spacing: 0.09em;
       text-transform: uppercase;
       color: #6aaeee;
-      margin: 2.4rem 0 1.2rem;
-      padding-top: 1.2rem;
-      border-top: 1px solid #333840;
+      margin: 0 0 1.4rem;
     }
 
-    .receipt-heading:first-child {
-      margin-top: 0;
-      padding-top: 0;
-      border-top: none;
-    }
-
-    .receipt dl {
+    /* Stacked, label over value, at every width. A two-column receipt would
+       have to choose a label column wide enough for "Beskriv delen og hva den
+       skal brukes til" and narrow enough not to strand "Navn" across the page,
+       and there is no width where both are true inside 680px. */
+    .receipt :global(dl) {
       margin: 0;
     }
 
-    .receipt dt {
+    .receipt :global(dt) {
       font-size: 0.88rem;
       color: #9aa2ad;
-      margin-bottom: 0.2rem;
+      margin-bottom: 0.25rem;
     }
 
-    .receipt dd {
+    .receipt :global(dd) {
       margin: 0 0 1.3rem;
       line-height: 1.5;
       /* The description is the one answer that can carry its own line breaks,
@@ -589,10 +608,14 @@ const stageLabels = {
       white-space: pre-wrap;
     }
 
+    .receipt :global(dd:last-child) {
+      margin-bottom: 0;
+    }
+
     /* A lone checkbox is a statement rather than a question with an answer, so
        its label is the whole row and there is nothing to put opposite it. */
-    .receipt-statement {
-      margin: 0 0 1.3rem;
+    .receipt :global(.receipt-statement) {
+      margin: 0;
       line-height: 1.5;
     }
 
@@ -1673,17 +1696,21 @@ const stageLabels = {
         });
         if (!answers.length) return;
 
+        const card = document.createElement('section');
+        card.className = 'receipt-section';
+        sentReceipt.append(card);
+
         const heading = document.createElement('h2');
         heading.className = 'receipt-heading';
         heading.textContent = stageLabels[stageId];
-        sentReceipt.append(heading);
+        card.append(heading);
 
         // A statement is not a term and a definition, so it interrupts the list
         // rather than joining it, and whatever follows starts a new one. That
         // keeps every answer in the order the form asked it.
         let list = null;
         const flush = () => {
-          if (list) sentReceipt.append(list);
+          if (list) card.append(list);
           list = null;
         };
 
@@ -1693,7 +1720,7 @@ const stageLabels = {
             const line = document.createElement('p');
             line.className = 'receipt-statement';
             line.textContent = answer.statement;
-            sentReceipt.append(line);
+            card.append(line);
             return;
           }
           if (!list) list = document.createElement('dl');
