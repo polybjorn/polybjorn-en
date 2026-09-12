@@ -451,13 +451,18 @@ const stageLabels = {
        the form - a sentence pinned to the left of a full-width panel is mostly
        empty panel. It sits over the button it belongs to, centred with it.
        Only an endpoint refusal is shown this way; see .form-error-quiet. */
+    /* Centred, not pushed right. It used to sit hard against the right edge to
+       line up with Send, which reads as alignment when the box is nearly as wide
+       as the card and as a stray when it is one short sentence - and the
+       shortest message here is the one that matters most, the send that did not
+       go through. Centred, it belongs to the card rather than to the button. */
     .form-error {
       font-size: 0.92rem;
       color: #e8b775;
       line-height: 1.45;
       width: fit-content;
       max-width: 100%;
-      margin: 0 0 2rem auto;
+      margin: 0 auto 2rem;
       background: #2c2419;
       border: 1px solid #7a5a30;
       border-radius: 8px;
