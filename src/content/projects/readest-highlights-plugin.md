@@ -18,7 +18,7 @@ links:
 
 A highlight in a paper book is stuck on its page. [Readest](https://readest.com) solves that half: every highlight I make is kept and easy to revisit. But my notes live in [Obsidian](https://obsidian.md), where things get searched and linked together, and getting the highlights into that same place was the gap I wanted to close.
 
-A small plugin closes it. Open Obsidian, run a command, and your book highlights show up as notes, one per book. Run it again later and the notes update in place instead of piling up duplicates.
+[A small plugin](https://github.com/polybjorn/obsidian-readest-highlights) closes it. Open Obsidian, run a command, and your book highlights show up as notes, one per book. Run it again later and the notes update in place instead of piling up duplicates.
 
 Each note has the title, author, and year at the top, followed by the highlights as a list, each with its page number and any notes you wrote alongside it.
 
