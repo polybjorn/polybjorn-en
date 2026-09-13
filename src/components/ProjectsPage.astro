@@ -65,11 +65,6 @@ const altLangPath = lang === 'no' ? '/projects' : '/prosjekter';
       display: inline-flex;
     }
     .rss:hover { color: #6AAEEE; }
-    .lang-note {
-      color: #8a8f99;
-      font-size: 0.95rem;
-      margin: -1rem 0 2rem;
-    }
     ul { list-style: none; }
     li { margin-bottom: 2rem; }
     a.card {
@@ -138,7 +133,6 @@ const altLangPath = lang === 'no' ? '/projects' : '/prosjekter';
       <h1>{tr.projectsTitle}</h1>
       {lang === 'en' && <a class="rss" href="/projects/rss.xml" aria-label={tr.projectsRssAria}><Rss size={20} strokeWidth={2} /></a>}
     </div>
-    {lang === 'no' && <p class="lang-note">{tr.projectsLangNote}</p>}
     {projects.length === 0 ? (
       <p class="empty">{tr.projectsEmpty}</p>
     ) : (
