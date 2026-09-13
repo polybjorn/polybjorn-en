@@ -1,5 +1,14 @@
 /**
- * Where the PGP key sits, on every page that prints the email address.
+ * The contact row, on every page that has one.
+ *
+ * Two pages print the same three ways to reach him, and for a day they printed
+ * them in two different orders - the 3D printing page was left alone while the
+ * key was added to the home page, and nothing said the two had to agree. The
+ * order here is phone, Signal, email: the two that hang off a phone number
+ * first, then the mailbox with its key at the end of the row, where there is
+ * nothing after it for the key to look like it belongs to.
+ *
+ * The rest of this file is where the PGP key sits.
  *
  * It used to be a peer of Signal in the home page's contact row, which framed
  * it as a way to get in touch. Nobody gets in touch by PGP: the key is a
@@ -24,7 +33,24 @@ const PAGES = [
   { path: 'no/3d-printing/index.html', lang: 'no', page: '3d printing' },
 ];
 
+// Phone and email are written in by script from base64, so the containers are
+// what identifies them. Signal is a plain link.
+const KIND = item =>
+  item.querySelector('#phone') ? 'phone'
+  : item.querySelector('#email') ? 'email'
+  : item.querySelector('a[href*="signal.me"]') ? 'signal'
+  : 'unknown';
+
 for (const { path, lang, page } of PAGES) {
+  test(`${page} ${lang}: the contact row is in the agreed order`, () => {
+    const doc = loadPage(path).window.document;
+    // The row holding the phone number, not the GitHub and music row further
+    // down the home page.
+    const row = doc.getElementById('phone').closest('.contact-row');
+
+    assert.deepEqual([...row.querySelectorAll('.contact-item')].map(KIND), ['phone', 'signal', 'email']);
+  });
+
   test(`${page} ${lang}: the key hangs off the email address`, () => {
     const doc = loadPage(path).window.document;
     const key = doc.querySelector('a[href="/pubkey.asc"]');
