@@ -217,9 +217,16 @@ if (lang === 'no' && !noindex) {
       </nav>
     ) : (
       <div class="corner">
-      <a class="corner-link lang-toggle" href={otherUrl} title={otherLang === 'no' ? 'Norsk' : 'English'}>
+      <a
+        class="corner-link lang-toggle"
+        href={otherUrl}
+        hreflang={otherLang}
+        lang={otherLang}
+        title={otherLang === 'no' ? 'Norsk' : 'English'}
+        aria-label={otherLang === 'no' ? 'Bytt til norsk' : 'Switch to English'}
+      >
         {otherLang === 'no' ? (
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" style="width:28px;height:21px;display:block;border-radius:4px;">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" aria-hidden="true" style="width:28px;height:21px;display:block;border-radius:4px;">
             <path fill="#ed2939" d="M0 0h640v480H0z"/>
             <path fill="#fff" d="M180 0h120v480H180z"/>
             <path fill="#fff" d="M0 180h640v120H0z"/>
@@ -227,7 +234,7 @@ if (lang === 'no' && !noindex) {
             <path fill="#002664" d="M0 210h640v60H0z"/>
           </svg>
         ) : (
-          <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 640 480" style="width:28px;height:21px;display:block;border-radius:4px;">
+          <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 640 480" aria-hidden="true" style="width:28px;height:21px;display:block;border-radius:4px;">
             <defs>
               <g id="eu-d">
                 <g id="eu-b">

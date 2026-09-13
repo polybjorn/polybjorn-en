@@ -17,11 +17,11 @@ import { loadPage } from './helpers/page.mjs';
 const DIST = join(dirname(fileURLToPath(import.meta.url)), '..', 'dist');
 
 const PAGES = [
-  { path: '3d-printing/index.html', lang: 'en', href: '/3d-printing/enquiry' },
-  { path: 'no/3d-printing/index.html', lang: 'no', href: '/no/3d-printing/enquiry' },
+  { path: '3d-printing/index.html', lang: 'en', href: '/3d-printing/enquiry', gallery: '/gallery/made' },
+  { path: 'no/3d-printing/index.html', lang: 'no', href: '/no/3d-printing/enquiry', gallery: '/no/galleri/laget' },
 ];
 
-for (const { path, lang, href } of PAGES) {
+for (const { path, lang, href, gallery } of PAGES) {
   test(`${lang}: the page links to the enquiry form once, at the foot`, () => {
     const doc = loadPage(path).window.document;
     const links = [...doc.querySelectorAll(`a[href="${href}"]`)];
@@ -37,17 +37,36 @@ for (const { path, lang, href } of PAGES) {
     assert.ok(links[0].textContent.trim().length > 0);
   });
 
-  test(`${lang}: the gallery line stays with the pictures`, () => {
+  test(`${lang}: the way out to the gallery is the front page's arrow`, () => {
     const doc = loadPage(path).window.document;
-    const more = doc.querySelector('.examples-more');
+    const arrow = doc.querySelector('.examples-grid .more-arrow');
 
-    // It describes the grid, and it spent a while rendered in a section of its
-    // own below the contact block - which put an invitation to leave the site
-    // after the last thing on the page asking you to stay.
-    assert.ok(more, 'the way out to the gallery');
-    assert.ok(more.closest('section').querySelector('.examples-grid'), 'in the images section');
+    // A sentence under the grid said the same thing and read as a caption. The
+    // front page ends its row of examples with this arrow, so the reader has
+    // met it before; it takes the last cell so the row stays a rectangle.
+    assert.ok(arrow, 'the way out to the gallery');
+    assert.equal(arrow.getAttribute('href'), gallery);
+    assert.equal(arrow, arrow.parentElement.lastElementChild, 'in the last cell');
+    assert.equal(doc.querySelectorAll('.examples-grid .example').length, 3, 'after three examples');
+
+    // The front page's copy has a title and nothing else, which a screen reader
+    // is not obliged to read out. An arrow with no text needs a real name.
+    assert.ok(arrow.getAttribute('aria-label'), 'an arrow with no words still says where it goes');
+
     const contact = doc.querySelector('.contact-cta');
-    assert.ok(more.compareDocumentPosition(contact) & 4, 'and above the contact block');
+    assert.ok(arrow.compareDocumentPosition(contact) & 4, 'and above the contact block');
+  });
+
+  test(`${lang}: nothing is fenced off from the contact block`, () => {
+    // The rule over the contact block drew a line between the services and the
+    // one action on the page, which is the last place on this page that wants a
+    // border. The padding does the separating now.
+    const dom = loadPage(path, { styles: true });
+    const contact = dom.window.document.querySelector('.contact-cta');
+    const style = dom.window.getComputedStyle(contact);
+
+    assert.equal(style.borderTopStyle, 'none');
+    assert.notEqual(parseFloat(style.paddingTop), 0, 'the air it stood in stays');
   });
 
   test(`${lang}: the services are separated by rules, not by air`, () => {

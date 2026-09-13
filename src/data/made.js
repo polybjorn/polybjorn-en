@@ -658,7 +658,6 @@ export const projects = [
         type: "render",
         transparent: false,
         link: null,
-        featured3D: true,
       },
     ]
   },
