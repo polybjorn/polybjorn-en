@@ -39,6 +39,8 @@ cv/
   output/                   - generated PDFs (gitignored)
 scripts/
   prepare-deploy.mjs        - splits build output for two-repo deploy
+  build-preview.mjs         - builds a branch for the preview server's subpath
+  prepare-preview.mjs       - rewrites hand-written absolute URLs onto that base
 ```
 
 ## Dev-only previews
@@ -64,6 +66,34 @@ puts the same routes in a static build, for serving a preview from a machine of
 ours instead of starting a dev server by hand. A plain `npm run build` - what
 deploys - emits no `dev/` directory at all, rather than a page that hides
 itself.
+
+## Publishing a branch preview
+
+The fleet's preview server holds one directory per site and one below that per
+branch, so a preview is served from `/<site>/<branch>/` rather than from a root
+of its own. A build made for the root points every asset at `/_astro/...`,
+which 404s from a subpath while the HTML still renders, so it reads as a
+styling bug rather than a publishing one.
+
+```sh
+npm run preview:build
+site-preview publish polybjorn-en dist
+```
+
+`preview:build` derives the base path from the current branch, the same way the
+publisher derives the directory it will land in, and prints the publish command
+with the branch filled in. `BRANCH=herd/other` overrides it.
+
+Two halves make it work. Astro's `base` covers what Astro emits, including the
+font URLs compiled into the CSS, and `scripts/prepare-preview.mjs` prefixes what
+was written by hand in a component - a `/favicon.svg` or a `/projects`, which
+Astro leaves alone because it cannot tell them from a path the site does not
+own. Neither runs unless `PREVIEW_BASE` is set: `npm run build` is
+byte-for-byte what it was.
+
+One thing it does not reach: a URL a script builds at runtime. The 404 page
+sends its home link to `/`, which leaves the preview and lands on the server's
+own index.
 
 ## Tests
 
