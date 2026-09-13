@@ -48,15 +48,21 @@ test('there are articles to check', () => {
 for (const slug of articles) {
   const page = `projects/${slug}/index.html`;
 
-  test(`${slug}: the corner link is the repository, not the flag`, () => {
+  test(`${slug}: the corner holds the article's links, not the flag`, () => {
     const doc = loadPage(page).window.document;
-    const corner = doc.querySelectorAll('.corner-link');
+    const corner = [...doc.querySelectorAll('.corner-link')];
 
-    assert.equal(corner.length, 1, 'the corner holds one link or none, never two');
+    assert.ok(corner.length > 0, 'every article has at least its repository to link');
     assert.equal(doc.querySelectorAll('.lang-toggle').length, 0, 'the flag led to a page that is not built');
-    assert.match(corner[0].href, /^https:\/\/github\.com\//);
-    assert.equal(corner[0].target, '_blank');
-    assert.ok(corner[0].getAttribute('aria-label'), 'an icon-only link needs a name');
+    assert.match(corner[0].href, /^https:\/\/github\.com\//, 'the repository is the first row');
+
+    for (const link of corner) {
+      const label = link.querySelector('.repo-label');
+      assert.equal(link.target, '_blank');
+      assert.ok(label, 'the icon alone got missed, so it says what it is where there is room');
+      assert.ok(link.getAttribute('aria-label').includes(label.textContent),
+        'the name a screen reader reads has to contain the name on screen');
+    }
   });
 
   test(`${slug}: the head does not point at a Norwegian version`, () => {
@@ -83,26 +89,23 @@ for (const slug of articles) {
 
   test(`${slug}: the corner link sits where the flag sat`, () => {
     const { window } = loadPage(page, { styles: true });
-    const style = window.getComputedStyle(window.document.querySelector('.corner-link'));
+    const style = window.getComputedStyle(window.document.querySelector('.corner'));
 
     // The flag is 21px tall at top: 1rem, so its middle is 26.5px down. The
     // 28px-tall box centres a 24px icon on the same line.
     assert.equal(style.position, 'fixed');
     assert.equal(style.right, '16px');
     assert.equal(style.top, '12.5px');
-    assert.equal(style.height, '28px');
+    assert.equal(window.getComputedStyle(window.document.querySelector('.corner-link')).height, '28px');
   });
 }
 
-test('an article that still has other links keeps them at the bottom', () => {
+test('an article with two links stacks them, repository first', () => {
   const doc = loadPage('projects/readest-highlights-plugin/index.html').window.document;
-  const buttons = [...doc.querySelectorAll('.link-buttons a')];
+  const corner = [...doc.querySelectorAll('.corner-link')];
 
-  assert.deepEqual(
-    buttons.map(a => a.href),
-    ['https://community.obsidian.md/plugins/readest-highlights'],
-    'only the repository link was meant to move',
-  );
+  assert.deepEqual(corner.map(a => a.querySelector('.repo-label').textContent), ['GitHub', 'Obsidian']);
+  assert.equal(doc.querySelectorAll('.link-buttons').length, 0, 'the bottom block emptied when the last button moved up');
 });
 
 test('the flag is untouched on a page that has a Norwegian version', () => {

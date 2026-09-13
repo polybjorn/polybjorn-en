@@ -7,7 +7,10 @@ coverAlt: Ferd map view with place pins
 thumb: /images/ferd-thumb.svg
 thumbAlt: A folded map with a dashed route and a location pin
 draft: false
-repo: https://github.com/polybjorn/ferd
+links:
+  - label: GitHub
+    href: https://github.com/polybjorn/ferd
+    icon: github
 ---
 
 For years my GPS routes from hikes sat in a folder on disk, and the places I'd been or wanted to go were mostly in my head. I'd never found a tool that held both.
