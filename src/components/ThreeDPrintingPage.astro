@@ -187,24 +187,6 @@ const serviceOrder = [
       display: inline-block;
     }
 
-    /* The hero's copy of the same link, and deliberately not a second button.
-       On a page this short both were in the viewport at once, so two identical
-       filled blocks competed where there is only one action - and a fill here
-       means something can be pressed, which is one claim, not two. The hero
-       keeps the route to the form; the button at the foot, after the examples
-       and the services and beside the phone number, is where the decision
-       actually gets made. */
-    .enquiry-link {
-      font-family: 'Piazzolla', serif;
-      font-size: 1.05rem;
-      color: #6aaeee;
-      text-decoration: underline;
-      display: inline-block;
-      margin-top: 1.4rem;
-    }
-
-    .enquiry-link:hover { color: #85bcf2; }
-
     .enquiry-cta:hover {
       background: #85bcf2;
     }
@@ -332,7 +314,6 @@ const serviceOrder = [
     <section class="hero">
       <h1>{td.h1}</h1>
       <p class="tagline">{td.tagline}</p>
-      <a class="enquiry-link" href={enquiryHref}>{td.enquiryCta}</a>
     </section>
 
     <section>

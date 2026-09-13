@@ -22,22 +22,19 @@ const PAGES = [
 ];
 
 for (const { path, lang, href } of PAGES) {
-  test(`${lang}: the page links to the enquiry form, top and bottom`, () => {
+  test(`${lang}: the page links to the enquiry form once, at the foot`, () => {
     const doc = loadPage(path).window.document;
     const links = [...doc.querySelectorAll(`a[href="${href}"]`)];
 
-    // Two routes to the form, one shape. The hero keeps a link, because
-    // someone who arrived meaning to enquire should not have to scroll for it;
-    // the button is at the foot, after the examples and the services, where
-    // the decision is actually made. Both were buttons for a day, and on a
-    // page this short they were in the viewport together.
-    assert.equal(links.length, 2, 'nothing linked to the form for the first week it existed');
-    assert.ok(doc.querySelector('.hero .enquiry-link'), 'a link in the hero');
+    // One route to the form. The hero had a second copy - first as a button,
+    // then as a plain link - and on a page this short both were in the viewport
+    // together either way, so the same words asked twice. The button sits at
+    // the foot, after the examples and the services and beside the phone
+    // number, where the decision is actually made.
+    assert.equal(links.length, 1, 'nothing linked to the form for the first week it existed');
     assert.ok(doc.querySelector('.contact-cta .enquiry-cta'), 'the button at the foot');
-    assert.equal(doc.querySelectorAll('.enquiry-cta').length, 1, 'and only one of them is a button');
-    for (const link of links) {
-      assert.ok(link.textContent.trim().length > 0);
-    }
+    assert.ok(!doc.querySelector('.hero a'), 'and the hero does not repeat it');
+    assert.ok(links[0].textContent.trim().length > 0);
   });
 
   test(`${lang}: the gallery line stays with the pictures`, () => {
@@ -47,7 +44,7 @@ for (const { path, lang, href } of PAGES) {
     // It describes the grid, and it spent a while rendered in a section of its
     // own below the contact block - which put an invitation to leave the site
     // after the last thing on the page asking you to stay.
-    assert.ok(more, 'the way out to the gallery and GrabCAD');
+    assert.ok(more, 'the way out to the gallery');
     assert.ok(more.closest('section').querySelector('.examples-grid'), 'in the images section');
     const contact = doc.querySelector('.contact-cta');
     assert.ok(more.compareDocumentPosition(contact) & 4, 'and above the contact block');
@@ -88,9 +85,7 @@ for (const { path, lang, href } of PAGES) {
     const unset = fill(doc.querySelector('.hero'));
 
     assert.notEqual(fill(doc.querySelector('.enquiry-cta')), unset, 'the one action is filled');
-    // The hero's route to the form included: it is a link, not a second button,
-    // so that "filled" goes on saying one thing on this page.
-    for (const el of doc.querySelectorAll('.enquiry-link, .service, .examples-grid .example, .contact-cta')) {
+    for (const el of doc.querySelectorAll('.service, .examples-grid .example, .contact-cta')) {
       assert.equal(fill(el), unset, el.className + ' is not something you press');
     }
   });
