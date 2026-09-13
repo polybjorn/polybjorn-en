@@ -10,6 +10,7 @@
     "astro": "astro",
     "test:worker": "node --test workers/enquiry/*.test.mjs",
     "build:preview": "PREVIEW=1 astro build",
+    "preview:build": "node scripts/build-preview.mjs",
     "test:pages": "node --test tests/*.test.mjs",
     "test": "npm run build && npm run test:worker && npm run test:pages"
   },
