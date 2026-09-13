@@ -2,7 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import { t } from '../data/translations.js';
 import { projects, cloudinaryUrl } from '../data/made.js';
-import { Phone, Mail, MessageCircle, ArrowLeft, ArrowUp, Boxes, Lightbulb, Hammer, Layers, Wrench, GraduationCap } from 'lucide-astro';
+import { Phone, Mail, MessageCircle, KeyRound, ArrowLeft, ArrowUp, Boxes, Lightbulb, Hammer, Layers, Wrench, GraduationCap } from 'lucide-astro';
 
 interface Props {
   lang: 'en' | 'no';
@@ -241,6 +241,19 @@ const serviceOrder = [
 
     .contact-item svg { position: relative; top: 1px; }
 
+    /* A property of the address beside it, not a fourth way to reach me:
+       nobody gets in touch "by PGP", and as a peer of Signal it read as a
+       channel. Smaller than the address and set off by a wider gap than the
+       item's own, so it attaches to the email rather than starting the next
+       item. */
+    .pgp {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      margin-left: 0.4rem;
+      font-size: 0.9em;
+    }
+
     .back-home {
       position: fixed;
       top: calc(1rem - 4px);
@@ -352,7 +365,7 @@ const serviceOrder = [
           <MessageCircle size={18} strokeWidth={1.5} style="color: #6aaeee;" />
           <a href="https://signal.me/#eu/bjanda.60">{tr.signal}</a>
         </span>
-        <span class="contact-item"><Mail size={18} strokeWidth={1.5} style="color: #E8A838;" /> <span id="email"></span></span>
+        <span class="contact-item"><Mail size={18} strokeWidth={1.5} style="color: #E8A838;" /> <span id="email"></span><span class="pgp"><KeyRound size={16} strokeWidth={1.5} style="color: #b08bd9;" /><a href="/pubkey.asc">PGP</a></span></span>
       </div>
     </section>
 
