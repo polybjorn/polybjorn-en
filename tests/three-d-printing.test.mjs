@@ -50,6 +50,18 @@ for (const { path, lang, href } of PAGES) {
     assert.ok(more.compareDocumentPosition(contact) & 4, 'and above the contact block');
   });
 
+  test(`${lang}: nothing is fenced off from the contact block`, () => {
+    // The rule over the contact block drew a line between the services and the
+    // one action on the page, which is the last place on this page that wants a
+    // border. The padding does the separating now.
+    const dom = loadPage(path, { styles: true });
+    const contact = dom.window.document.querySelector('.contact-cta');
+    const style = dom.window.getComputedStyle(contact);
+
+    assert.equal(style.borderTopStyle, 'none');
+    assert.notEqual(parseFloat(style.paddingTop), 0, 'the air it stood in stays');
+  });
+
   test(`${lang}: the services are separated by rules, not by air`, () => {
     // The cards went because a fill means something can be pressed here, and
     // what replaced them was a wider gap - which reads as one loose block
