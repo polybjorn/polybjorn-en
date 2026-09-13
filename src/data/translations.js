@@ -46,7 +46,6 @@ export const t = {
       h1: "3D printing",
       tagline: "Parts modelled, printed and finished in Haugesund - from a single prototype to a small series.",
       servicesHeading: "Services",
-      examplesMoreHtml: 'See more projects in the <a href="/gallery/made" style="color:#6aaeee;text-decoration:underline;">gallery</a>.',
       contactCta: "Or reach me directly.",
       enquiryCta: "Start an enquiry",
       services: {
@@ -144,7 +143,6 @@ export const t = {
       h1: "3D-printing",
       tagline: "Deler modellert, printet og ferdigstilt i Haugesund - fra én prototype til en liten serie.",
       servicesHeading: "Tjenester",
-      examplesMoreHtml: 'Se flere prosjekter i <a href="/no/galleri/laget" style="color:#6aaeee;text-decoration:underline;">galleriet</a>.',
       contactCta: "Eller ta kontakt direkte.",
       enquiryCta: "Start en henvendelse",
       services: {
