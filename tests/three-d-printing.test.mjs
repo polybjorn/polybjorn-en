@@ -22,13 +22,52 @@ const PAGES = [
 ];
 
 for (const { path, lang, href } of PAGES) {
-  test(`${lang}: the page links to the enquiry form`, () => {
+  test(`${lang}: the page links to the enquiry form, top and bottom`, () => {
     const doc = loadPage(path).window.document;
-    const cta = doc.querySelector('.enquiry-cta');
+    const ctas = [...doc.querySelectorAll('.enquiry-cta')];
 
-    assert.ok(cta, 'nothing linked to the form for the first week it existed');
-    assert.equal(cta.getAttribute('href'), href, 'and it stays in the language being read');
-    assert.ok(cta.textContent.trim().length > 0);
+    // One in the hero, where someone forms an intention, and one at the foot,
+    // where someone who has just read the services decides. With only the hero
+    // copy, the page's one action was off-screen at the moment it was wanted
+    // and the page ended on the fallback.
+    assert.equal(ctas.length, 2, 'nothing linked to the form for the first week it existed');
+    assert.ok(doc.querySelector('.hero .enquiry-cta'));
+    assert.ok(doc.querySelector('.contact-cta .enquiry-cta'));
+    for (const cta of ctas) {
+      assert.equal(cta.getAttribute('href'), href, 'and it stays in the language being read');
+      assert.ok(cta.textContent.trim().length > 0);
+    }
+  });
+
+  test(`${lang}: the gallery line stays with the pictures`, () => {
+    const doc = loadPage(path).window.document;
+    const more = doc.querySelector('.examples-more');
+
+    // It describes the grid, and it spent a while rendered in a section of its
+    // own below the contact block - which put an invitation to leave the site
+    // after the last thing on the page asking you to stay.
+    assert.ok(more, 'the way out to the gallery and GrabCAD');
+    assert.ok(more.closest('section').querySelector('.examples-grid'), 'in the images section');
+    const contact = doc.querySelector('.contact-cta');
+    assert.ok(more.compareDocumentPosition(contact) & 4, 'and above the contact block');
+  });
+
+  test(`${lang}: the services are separated by rules, not by air`, () => {
+    // The cards went because a fill means something can be pressed here, and
+    // what replaced them was a wider gap - which reads as one loose block
+    // rather than six. A hairline is the separator this page already owns.
+    const dom = loadPage(path, { styles: true });
+    const services = [...dom.window.document.querySelectorAll('.service')];
+    const style = el => dom.window.getComputedStyle(el);
+
+    assert.equal(services.length, 6);
+    services.forEach((service, i) => {
+      const { borderRightStyle, borderBottomStyle } = style(service);
+      // Two columns, three rows: a rule between the columns and under every row
+      // but the last. Nothing draws a box around the outside of the grid.
+      assert.equal(borderRightStyle, i % 2 === 0 ? 'solid' : 'none', `right of ${i}`);
+      assert.equal(borderBottomStyle, i < 4 ? 'solid' : 'none', `under ${i}`);
+    });
   });
 
   test(`${lang}: the link goes to a page that is built`, () => {
@@ -37,7 +76,7 @@ for (const { path, lang, href } of PAGES) {
     assert.ok(existsSync(join(DIST, href.replace(/^\//, ''), 'index.html')), `${href} is not in dist`);
   });
 
-  test(`${lang}: the button is the only filled block`, () => {
+  test(`${lang}: the button is the only filled thing`, () => {
     // A fill on this page means something can be pressed. Everything below the
     // hero used to be a filled, rounded box - images, services and the contact
     // block, at two greys against a third - so nothing was lifted because
@@ -47,7 +86,9 @@ for (const { path, lang, href } of PAGES) {
     const fill = el => dom.window.getComputedStyle(el).backgroundColor;
     const unset = fill(doc.querySelector('.hero'));
 
-    assert.notEqual(fill(doc.querySelector('.enquiry-cta')), unset, 'the one action is filled');
+    for (const cta of doc.querySelectorAll('.enquiry-cta')) {
+      assert.notEqual(fill(cta), unset, 'the one action is filled');
+    }
     for (const el of doc.querySelectorAll('.service, .examples-grid .example, .contact-cta')) {
       assert.equal(fill(el), unset, el.className + ' is not something you press');
     }

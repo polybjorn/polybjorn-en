@@ -71,25 +71,48 @@ const serviceOrder = [
       margin-bottom: 3.5rem;
     }
 
+    /* The same kind of text as the enquiry form's section headings, and for
+       the reason that settled it there: at 1.5rem, white and centred, the one
+       heading left on this page was a louder version of a service title rather
+       than a different thing from it. Small, spaced and in the accent reads as
+       the name of a block. */
     h2 {
       font-family: 'Piazzolla', serif;
-      font-size: 1.5rem;
-      color: #fff;
+      font-size: 0.8rem;
       font-weight: 700;
-      margin-bottom: 1.5rem;
-      text-align: center;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: #6aaeee;
+      margin-bottom: 1.2rem;
     }
 
+    /* Hairlines, where the cards left empty space. A fill on this page means
+       something can be pressed, so the cards had to go - but six short blocks
+       separated by nothing but air read as one loose block, and the wider the
+       gap grew the more it looked like the grid had come apart. The rule is the
+       one the contact block already draws, so this introduces nothing new. */
     .services {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      /* Wider gaps than the cards had padding, because the space is now the
-         only thing separating one service from the next. */
-      gap: 2.2rem 3rem;
     }
 
     .service {
-      padding: 0;
+      padding: 1.4rem 1.6rem;
+    }
+
+    /* Only the sides that meet a rule are padded, so the block's outer edges
+       line up with the heading above it and the page's other sections. */
+    .service:nth-child(odd) {
+      border-right: 1px solid #333840;
+      padding-left: 0;
+    }
+
+    .service:nth-child(even) { padding-right: 0; }
+    .service:nth-child(-n+2) { padding-top: 0; }
+    .service:nth-last-child(-n+2) { padding-bottom: 0; }
+
+    .service:not(:nth-last-child(-n+2)) {
+      border-bottom: 1px solid #333840;
     }
 
     .service-head {
@@ -118,24 +141,10 @@ const serviceOrder = [
       flex-shrink: 0;
     }
 
-    .prose p {
-      font-family: 'Piazzolla', serif;
-      font-size: 1.05rem;
-      line-height: 1.75;
-      color: #ccc;
-      margin-bottom: 1rem;
-      max-width: 680px;
-      margin-left: auto;
-      margin-right: auto;
-    }
-
-    .prose p:last-child { margin-bottom: 0; }
-
     .examples-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 1rem;
-      margin-bottom: 1rem;
     }
 
     .examples-grid .example {
@@ -156,10 +165,9 @@ const serviceOrder = [
 
     .examples-more {
       font-family: 'Piazzolla', serif;
-      text-align: center;
       color: #888;
       font-size: 0.95rem;
-      margin-top: 1rem;
+      margin-top: 0.9rem;
     }
 
     .examples-more a {
@@ -175,10 +183,11 @@ const serviceOrder = [
       background: #6aaeee;
       border-radius: 8px;
       padding: 0.8rem 2rem;
-      margin-top: 1.6rem;
       text-decoration: none;
       display: inline-block;
     }
+
+    .hero .enquiry-cta { margin-top: 1.6rem; }
 
     .enquiry-cta:hover {
       background: #85bcf2;
@@ -200,11 +209,13 @@ const serviceOrder = [
       padding: 2.2rem 0 0;
     }
 
+    /* A connector between the button and the row under it, not a statement of
+       its own - so it is quieter than either. */
     .contact-cta p {
       font-family: 'Piazzolla', serif;
-      font-size: 1.1rem;
-      color: #ccc;
-      margin-bottom: 1.2rem;
+      font-size: 1rem;
+      color: #9aa2ad;
+      margin: 1.4rem 0 1rem;
     }
 
     .contact-row {
@@ -273,9 +284,14 @@ const serviceOrder = [
       main { padding: 2.5rem 1.25rem 2rem; }
       h1 { font-size: 1.9rem; }
       .tagline { font-size: 1rem; }
-      .services { grid-template-columns: 1fr; gap: 1rem; }
-      .service { padding: 1.2rem; }
-      h2 { font-size: 1.3rem; }
+      .services { grid-template-columns: 1fr; }
+      .service, .service:nth-child(odd), .service:nth-child(even) {
+        padding: 1.2rem 0;
+        border-right: none;
+      }
+      .service:first-child { padding-top: 0; }
+      .service:last-child { padding-bottom: 0; border-bottom: none; }
+      .service:not(:last-child) { border-bottom: 1px solid #333840; }
       .examples-grid { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
       .contact-row { gap: 1rem; flex-direction: column; align-items: center; }
     }
@@ -309,6 +325,7 @@ const serviceOrder = [
           </div>
         ))}
       </div>
+      <p class="examples-more" set:html={td.examplesMoreHtml}></p>
     </section>
 
     <section>
@@ -327,6 +344,7 @@ const serviceOrder = [
     </section>
 
     <section class="contact-cta">
+      <a class="enquiry-cta" href={enquiryHref}>{td.enquiryCta}</a>
       <p>{td.contactCta}</p>
       <div class="contact-row">
         <span class="contact-item"><Phone size={18} strokeWidth={1.5} style="color: #4CAF82;" /> <span id="phone"></span></span>
@@ -336,10 +354,6 @@ const serviceOrder = [
         </span>
         <span class="contact-item"><Mail size={18} strokeWidth={1.5} style="color: #E8A838;" /> <span id="email"></span></span>
       </div>
-    </section>
-
-    <section>
-      <p class="examples-more" set:html={td.examplesMoreHtml}></p>
     </section>
 
   </main>
