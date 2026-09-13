@@ -24,18 +24,19 @@ const PAGES = [
 for (const { path, lang, href } of PAGES) {
   test(`${lang}: the page links to the enquiry form, top and bottom`, () => {
     const doc = loadPage(path).window.document;
-    const ctas = [...doc.querySelectorAll('.enquiry-cta')];
+    const links = [...doc.querySelectorAll(`a[href="${href}"]`)];
 
-    // One in the hero, where someone forms an intention, and one at the foot,
-    // where someone who has just read the services decides. With only the hero
-    // copy, the page's one action was off-screen at the moment it was wanted
-    // and the page ended on the fallback.
-    assert.equal(ctas.length, 2, 'nothing linked to the form for the first week it existed');
-    assert.ok(doc.querySelector('.hero .enquiry-cta'));
-    assert.ok(doc.querySelector('.contact-cta .enquiry-cta'));
-    for (const cta of ctas) {
-      assert.equal(cta.getAttribute('href'), href, 'and it stays in the language being read');
-      assert.ok(cta.textContent.trim().length > 0);
+    // Two routes to the form, one shape. The hero keeps a link, because
+    // someone who arrived meaning to enquire should not have to scroll for it;
+    // the button is at the foot, after the examples and the services, where
+    // the decision is actually made. Both were buttons for a day, and on a
+    // page this short they were in the viewport together.
+    assert.equal(links.length, 2, 'nothing linked to the form for the first week it existed');
+    assert.ok(doc.querySelector('.hero .enquiry-link'), 'a link in the hero');
+    assert.ok(doc.querySelector('.contact-cta .enquiry-cta'), 'the button at the foot');
+    assert.equal(doc.querySelectorAll('.enquiry-cta').length, 1, 'and only one of them is a button');
+    for (const link of links) {
+      assert.ok(link.textContent.trim().length > 0);
     }
   });
 
@@ -86,10 +87,10 @@ for (const { path, lang, href } of PAGES) {
     const fill = el => dom.window.getComputedStyle(el).backgroundColor;
     const unset = fill(doc.querySelector('.hero'));
 
-    for (const cta of doc.querySelectorAll('.enquiry-cta')) {
-      assert.notEqual(fill(cta), unset, 'the one action is filled');
-    }
-    for (const el of doc.querySelectorAll('.service, .examples-grid .example, .contact-cta')) {
+    assert.notEqual(fill(doc.querySelector('.enquiry-cta')), unset, 'the one action is filled');
+    // The hero's route to the form included: it is a link, not a second button,
+    // so that "filled" goes on saying one thing on this page.
+    for (const el of doc.querySelectorAll('.enquiry-link, .service, .examples-grid .example, .contact-cta')) {
       assert.equal(fill(el), unset, el.className + ' is not something you press');
     }
   });
