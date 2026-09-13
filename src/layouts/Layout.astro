@@ -1,7 +1,7 @@
 ---
 import '@fontsource/piazzolla/400.css';
 import '@fontsource/piazzolla/700.css';
-const { lang = 'en', title, description, image, noindex = false, altLangPath } = Astro.props;
+const { lang = 'en', title, description, image, noindex = false, altLangPath, enOnly = false, links = [] } = Astro.props;
 const otherLang = lang === 'en' ? 'no' : 'en';
 const path = Astro.url.pathname;
 const stripped = lang === 'no' ? (path.replace(/^\/no/, '') || '/') : path;
@@ -13,6 +13,17 @@ const canonicalUrl = lang === 'en' ? enUrl : noUrl;
 const otherUrl = lang === 'en'
   ? noUrl
   : `${enUrl}?lang=en`;
+// The corner icons, drawn at 24px in their own colour. GitHub's mark is black,
+// which is nothing on this background, so it takes the white it is given on
+// dark elsewhere; Obsidian keeps the purple it had as a button. Keeping them
+// here means an article names an icon rather than pasting SVG into its prose,
+// which is how the GitHub button ended up duplicated in all three.
+const CORNER_ICONS = {
+  github: { color: '#fff', path: 'M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12', title: 'GitHub repository' },
+  obsidian: { color: '#9387D9', path: 'M19.355 18.538a68.967 68.959 0 0 0 1.858-2.954.81.81 0 0 0-.062-.9c-.516-.685-1.504-2.075-2.042-3.362-.553-1.321-.636-3.375-.64-4.377a1.707 1.707 0 0 0-.358-1.05l-3.198-4.064a3.744 3.744 0 0 1-.076.543c-.106.503-.307 1.004-.536 1.5-.134.29-.29.6-.446.914l-.31.626c-.516 1.068-.997 2.227-1.132 3.59-.124 1.26.046 2.73.815 4.481.128.011.257.025.386.044a6.363 6.363 0 0 1 3.326 1.505c.916.79 1.744 1.922 2.415 3.5zM8.199 22.569c.073.012.146.02.22.02.78.024 2.095.092 3.16.29.87.16 2.593.64 4.01 1.055 1.083.316 2.198-.548 2.355-1.664.114-.814.33-1.735.725-2.58l-.01.005c-.67-1.87-1.522-3.078-2.416-3.849a5.295 5.295 0 0 0-2.778-1.257c-1.54-.216-2.952.19-3.84.45.532 2.218.368 4.829-1.425 7.531zM5.533 9.938c-.023.1-.056.197-.098.29L2.82 16.059a1.602 1.602 0 0 0 .313 1.772l4.116 4.24c2.103-3.101 1.796-6.02.836-8.3-.728-1.73-1.832-3.081-2.55-3.831zM9.32 14.01c.615-.183 1.606-.465 2.745-.534-.683-1.725-.848-3.233-.716-4.577.154-1.552.7-2.847 1.235-3.95.113-.235.223-.454.328-.664.149-.297.288-.577.419-.86.217-.47.379-.885.46-1.27.08-.38.08-.72-.014-1.043-.095-.325-.297-.675-.68-1.06a1.6 1.6 0 0 0-1.475.36l-4.95 4.452a1.602 1.602 0 0 0-.513.952l-.427 2.83c.672.59 2.328 2.316 3.335 4.711.09.21.175.43.253.653z', title: 'Obsidian community plugins' },
+};
+const cornerLinks = enOnly ? links.filter(l => CORNER_ICONS[l.icon]) : [];
+
 const ogImage = image ?? 'https://res.cloudinary.com/djpkffk5u/image/upload/c_fill,g_center,w_1200,h_630/v1772729286/polybjorn-banner-navy-1500x500_rvluaz.png';
 
 const schemas = [{
@@ -90,7 +101,7 @@ if (lang === 'no' && !noindex) {
     <meta name="author" content="Bjørn Andreas Andersen" />
     <link rel="canonical" href={canonicalUrl} />
     <link rel="alternate" hreflang="en" href={enUrl} />
-    <link rel="alternate" hreflang="no" href={noUrl} />
+    {!enOnly && <link rel="alternate" hreflang="no" href={noUrl} />}
     <link rel="alternate" hreflang="x-default" href="https://polybjorn.com" />
     {lang === 'en' && <link rel="alternate" type="application/rss+xml" title="Bjørn A. Andersen - Projects" href="https://polybjorn.com/projects/rss.xml" />}
     <!-- Open Graph -->
@@ -130,17 +141,44 @@ if (lang === 'no' && !noindex) {
       html {
         scrollbar-gutter: stable;
       }
-      .lang-toggle {
+      /* The top right corner: the flag on pages that have a counterpart in the
+         other language, the article's own links on the ones that do not. The
+         first row is centred 26.5px down the page either way, which is where
+         the 21px-tall flag has always sat. */
+      .corner {
         position: fixed;
-        top: 1rem;
+        top: calc(1rem - 3.5px);
         right: 1rem;
-        display: inline-block;
-        text-decoration: none;
         z-index: 100;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 0.35rem;
+      }
+      .corner-link {
+        height: 28px;
+        display: inline-flex;
+        align-items: center;
+        text-decoration: none;
         opacity: 0.75;
         transition: opacity 0.3s, transform 0.3s;
         line-height: 0;
         font-size: 0;
+      }
+      .repo-link { color: #ccc; }
+      .repo-link:hover { color: #fff; }
+      /* The parent zeroes the font size so the flag has no stray line box.
+         The label has to put one back. */
+      .repo-label {
+        font-family: 'Piazzolla', serif;
+        font-size: 0.95rem;
+        line-height: 1;
+        margin-right: 0.5rem;
+      }
+      /* Names the icon where there is room for it. On a phone the corner is
+         over the cover image and the icon has to speak for itself. */
+      @media (max-width: 640px) {
+        .repo-label { display: none; }
       }
       .skip-link {
         position: absolute;
@@ -158,8 +196,8 @@ if (lang === 'no' && !noindex) {
       .skip-link:focus {
         top: 1rem;
       }
-      .lang-toggle:hover { opacity: 1; }
-      .lang-toggle.hidden {
+      .corner-link:hover { opacity: 1; }
+      .corner-link.hidden {
         opacity: 0;
         pointer-events: none;
         transform: translateY(-0.5rem);
@@ -168,52 +206,70 @@ if (lang === 'no' && !noindex) {
   </head>
   <body>
     <a href="#main" class="skip-link">Skip to content</a>
-    <a class="lang-toggle" href={otherUrl} title={otherLang === 'no' ? 'Norsk' : 'English'}>
-      {otherLang === 'no' ? (
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" style="width:28px;height:21px;display:block;border-radius:4px;">
-          <path fill="#ed2939" d="M0 0h640v480H0z"/>
-          <path fill="#fff" d="M180 0h120v480H180z"/>
-          <path fill="#fff" d="M0 180h640v120H0z"/>
-          <path fill="#002664" d="M210 0h60v480h-60z"/>
-          <path fill="#002664" d="M0 210h640v60H0z"/>
-        </svg>
-      ) : (
-        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 640 480" style="width:28px;height:21px;display:block;border-radius:4px;">
-          <defs>
-            <g id="eu-d">
-              <g id="eu-b">
-                <path id="eu-a" d="m0-1-.3 1 .5.1z"/>
-                <use xlink:href="#eu-a" transform="scale(-1 1)"/>
+    {enOnly ? cornerLinks.length > 0 && (
+      <nav class="corner" aria-label="Project links">
+        {cornerLinks.map(link => (
+          <a class="corner-link repo-link" href={link.href} target="_blank" rel="noopener" title={CORNER_ICONS[link.icon].title} aria-label={CORNER_ICONS[link.icon].title}>
+            <span class="repo-label">{link.label}</span>
+            <svg fill={CORNER_ICONS[link.icon].color} role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" style="width:24px;height:24px;display:block;flex-shrink:0;"><path d={CORNER_ICONS[link.icon].path}/></svg>
+          </a>
+        ))}
+      </nav>
+    ) : (
+      <div class="corner">
+      <a class="corner-link lang-toggle" href={otherUrl} title={otherLang === 'no' ? 'Norsk' : 'English'}>
+        {otherLang === 'no' ? (
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" style="width:28px;height:21px;display:block;border-radius:4px;">
+            <path fill="#ed2939" d="M0 0h640v480H0z"/>
+            <path fill="#fff" d="M180 0h120v480H180z"/>
+            <path fill="#fff" d="M0 180h640v120H0z"/>
+            <path fill="#002664" d="M210 0h60v480h-60z"/>
+            <path fill="#002664" d="M0 210h640v60H0z"/>
+          </svg>
+        ) : (
+          <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 640 480" style="width:28px;height:21px;display:block;border-radius:4px;">
+            <defs>
+              <g id="eu-d">
+                <g id="eu-b">
+                  <path id="eu-a" d="m0-1-.3 1 .5.1z"/>
+                  <use xlink:href="#eu-a" transform="scale(-1 1)"/>
+                </g>
+                <g id="eu-c">
+                  <use xlink:href="#eu-b" transform="rotate(72)"/>
+                  <use xlink:href="#eu-b" transform="rotate(144)"/>
+                </g>
+                <use xlink:href="#eu-c" transform="scale(-1 1)"/>
               </g>
-              <g id="eu-c">
-                <use xlink:href="#eu-b" transform="rotate(72)"/>
-                <use xlink:href="#eu-b" transform="rotate(144)"/>
+            </defs>
+            <path fill="#039" d="M0 0h640v480H0z"/>
+            <g fill="#fc0" transform="translate(320 242.3)scale(23.7037)">
+              <use xlink:href="#eu-d" width="100%" height="100%" y="-6"/>
+              <use xlink:href="#eu-d" width="100%" height="100%" y="6"/>
+              <g id="eu-e">
+                <use xlink:href="#eu-d" width="100%" height="100%" x="-6"/>
+                <use xlink:href="#eu-d" width="100%" height="100%" transform="rotate(-144 -2.3 -2.1)"/>
+                <use xlink:href="#eu-d" width="100%" height="100%" transform="rotate(144 -2.1 -2.3)"/>
+                <use xlink:href="#eu-d" width="100%" height="100%" transform="rotate(72 -4.7 -2)"/>
+                <use xlink:href="#eu-d" width="100%" height="100%" transform="rotate(72 -5 .5)"/>
               </g>
-              <use xlink:href="#eu-c" transform="scale(-1 1)"/>
+              <use xlink:href="#eu-e" width="100%" height="100%" transform="scale(-1 1)"/>
             </g>
-          </defs>
-          <path fill="#039" d="M0 0h640v480H0z"/>
-          <g fill="#fc0" transform="translate(320 242.3)scale(23.7037)">
-            <use xlink:href="#eu-d" width="100%" height="100%" y="-6"/>
-            <use xlink:href="#eu-d" width="100%" height="100%" y="6"/>
-            <g id="eu-e">
-              <use xlink:href="#eu-d" width="100%" height="100%" x="-6"/>
-              <use xlink:href="#eu-d" width="100%" height="100%" transform="rotate(-144 -2.3 -2.1)"/>
-              <use xlink:href="#eu-d" width="100%" height="100%" transform="rotate(144 -2.1 -2.3)"/>
-              <use xlink:href="#eu-d" width="100%" height="100%" transform="rotate(72 -4.7 -2)"/>
-              <use xlink:href="#eu-d" width="100%" height="100%" transform="rotate(72 -5 .5)"/>
-            </g>
-            <use xlink:href="#eu-e" width="100%" height="100%" transform="scale(-1 1)"/>
-          </g>
-        </svg>
-      )}
-    </a>
+          </svg>
+        )}
+      </a>
+      </div>
+    )}
     <slot />
     <script>
-      const flag = document.querySelector('.lang-toggle');
-      window.addEventListener('scroll', () => {
-        flag.classList.toggle('hidden', window.scrollY > 60);
-      }, { passive: true });
+      // The flag gets out of the way once you start reading. The repository
+      // link stays: it is the article's own link, wanted at the end as much as
+      // at the top, and there is no second copy of it further down the page.
+      const corner = document.querySelector('.corner-link:not(.repo-link)');
+      if (corner) {
+        window.addEventListener('scroll', () => {
+          corner.classList.toggle('hidden', window.scrollY > 60);
+        }, { passive: true });
+      }
     </script>
   </body>
 </html>

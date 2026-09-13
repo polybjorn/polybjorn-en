@@ -13,7 +13,9 @@ const projects = (await getCollection('projects', ({ data }) => !data.draft))
 
 const fmt = (d) => d.toISOString().slice(0, 10);
 const cardHref = (slug) => lang === 'no' ? `https://polybjorn.com/projects/${slug}` : `/projects/${slug}`;
-const altLangPath = lang === 'no' ? '/projects' : '/no/prosjekter';
+// The path on the other site, not on this one: polybjorn.no serves the
+// Norwegian build at its root, so /no/prosjekter is a 404 over there.
+const altLangPath = lang === 'no' ? '/projects' : '/prosjekter';
 ---
 
 <Layout lang={lang} title={`${tr.projectsTitle} - Bjørn A. Andersen`} description={tr.projectsDescription} altLangPath={altLangPath}>

@@ -33,6 +33,12 @@ for (const entry of readdirSync(DIST, { withFileTypes: true })) {
   }
 }
 
+// GitHub Pages serves 404.html from the site root, and the loop above skips
+// top-level HTML. Without this copy polybjorn.no falls back to GitHub's own
+// 404 page; the page picks its language from the hostname, so one file covers
+// both sites.
+cpSync(join(DIST, '404.html'), join(DIST_NO, '404.html'));
+
 // 2. Fix internal links in NO HTML files: /no/ → /
 for (const file of getHtmlFiles(DIST_NO)) {
   let html = readFileSync(file, 'utf8');

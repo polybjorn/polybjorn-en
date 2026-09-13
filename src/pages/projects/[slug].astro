@@ -21,7 +21,7 @@ const { Content } = await render(project);
 const fmt = (d: Date) => d.toISOString().slice(0, 10);
 ---
 
-<Layout lang="en" title={`${project.data.title} - Bjørn A. Andersen`} description={project.data.description}>
+<Layout lang="en" title={`${project.data.title} - Bjørn A. Andersen`} description={project.data.description} enOnly links={project.data.links}>
   <style>
     body {
       background: #1e2228;
@@ -36,7 +36,10 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
     main {
       width: 100%;
       max-width: 720px;
-      padding: 3rem 1.5rem 4rem;
+      /* The last line needs room under it, and the to-top arrow sits in the
+         bottom 3rem of the viewport. 4rem was enough while every article ended
+         in a button block; two of them no longer do. */
+      padding: 3rem 1.5rem 7rem;
     }
     .back-home {
       position: fixed;

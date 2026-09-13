@@ -15,6 +15,13 @@ const projects = defineCollection({
     coverAlt: z.string().optional(),
     thumb: z.string().optional(),
     thumbAlt: z.string().optional(),
+    // Shown in the top right corner, in this order, where a page with a
+    // Norwegian counterpart shows the flag. Articles have none.
+    links: z.array(z.object({
+      label: z.string(),
+      href: z.string().url(),
+      icon: z.enum(['github', 'obsidian']),
+    })).default([]),
     draft: z.boolean().default(false),
   }),
 });
