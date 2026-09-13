@@ -224,7 +224,10 @@ if (lang === 'no' && !noindex) {
     )}
     <slot />
     <script>
-      const corner = document.querySelector('.corner-link');
+      // The flag gets out of the way once you start reading. The repository
+      // link stays: it is the article's own link, wanted at the end as much as
+      // at the top, and there is no second copy of it further down the page.
+      const corner = document.querySelector('.corner-link:not(.repo-link)');
       if (corner) {
         window.addEventListener('scroll', () => {
           corner.classList.toggle('hidden', window.scrollY > 60);

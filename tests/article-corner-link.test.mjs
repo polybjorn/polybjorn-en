@@ -17,6 +17,26 @@ import { loadPage } from './helpers/page.mjs';
 
 const DIST = join(dirname(fileURLToPath(import.meta.url)), '..', 'dist');
 
+/**
+ * Astro compiles the layout's inline script into a module, and jsdom does not
+ * execute those, so a scroll test against a freshly loaded page proves nothing.
+ * This runs the one script that drives the corner as a classic script, then
+ * scrolls. The flag test below is the control: if the harness stops working,
+ * that is where it shows up.
+ */
+function scrollPast(page) {
+  const { window } = loadPage(page);
+  const script = [...window.document.querySelectorAll('script[type="module"]:not([src])')]
+    .find(el => el.textContent.includes('corner-link'));
+
+  assert.ok(script, 'the corner is no longer driven by an inline script');
+  window.eval(script.textContent);
+  Object.defineProperty(window, 'scrollY', { value: 400, configurable: true });
+  window.dispatchEvent(new window.Event('scroll'));
+
+  return window.document.querySelector('.corner-link');
+}
+
 const articles = readdirSync(join(DIST, 'projects'), { withFileTypes: true })
   .filter(e => e.isDirectory())
   .map(e => e.name);
@@ -46,12 +66,19 @@ for (const slug of articles) {
     assert.match(doc.querySelector('link[rel="canonical"]').href, /^https:\/\/polybjorn\.com\//);
   });
 
-  test(`${slug}: the repository is linked once, at the top`, () => {
+  test(`${slug}: the repository button is gone from the bottom`, () => {
     const doc = loadPage(page).window.document;
-    const inBody = [...doc.querySelectorAll('article a')]
+    const buttons = [...doc.querySelectorAll('.link-buttons a')]
       .filter(a => /^https:\/\/github\.com\/polybjorn\//.test(a.href));
 
-    assert.deepEqual(inBody.map(a => a.href), [], 'it moved out of the body when it moved into the corner');
+    // Prose is free to link the repository as many times as it reads well.
+    // What moved into the corner is the button that used to close the page.
+    assert.deepEqual(buttons.map(a => a.href), [], 'the button moved into the corner');
+  });
+
+  test(`${slug}: the corner link does not fade out on scroll`, () => {
+    assert.equal(scrollPast(page).classList.contains('hidden'), false,
+      'the flag hides once you read on, the repository link stays');
   });
 
   test(`${slug}: the corner link sits where the flag sat`, () => {
@@ -83,6 +110,8 @@ test('the flag is untouched on a page that has a Norwegian version', () => {
   const corner = doc.querySelector('.corner-link');
 
   assert.ok(corner.classList.contains('lang-toggle'));
+  assert.ok(scrollPast('projects/index.html').classList.contains('hidden'),
+    'and it still gets out of the way on scroll, which is what the article test is measured against');
   assert.equal(corner.getAttribute('href'), 'https://polybjorn.no/prosjekter');
   assert.ok(readFileSync(join(DIST, 'no/prosjekter/index.html'), 'utf8'), 'and it goes somewhere that is built');
 });
