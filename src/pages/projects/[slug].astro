@@ -21,7 +21,7 @@ const { Content } = await render(project);
 const fmt = (d: Date) => d.toISOString().slice(0, 10);
 ---
 
-<Layout lang="en" title={`${project.data.title} - Bjørn A. Andersen`} description={project.data.description}>
+<Layout lang="en" title={`${project.data.title} - Bjørn A. Andersen`} description={project.data.description} enOnly repo={project.data.repo}>
   <style>
     body {
       background: #1e2228;

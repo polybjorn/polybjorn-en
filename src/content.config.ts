@@ -15,6 +15,9 @@ const projects = defineCollection({
     coverAlt: z.string().optional(),
     thumb: z.string().optional(),
     thumbAlt: z.string().optional(),
+    // Shown as the corner link in the top right, where a page with a
+    // Norwegian counterpart shows the flag. Articles have none.
+    repo: z.string().url().optional(),
     draft: z.boolean().default(false),
   }),
 });
