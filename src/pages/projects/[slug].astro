@@ -36,7 +36,10 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
     main {
       width: 100%;
       max-width: 720px;
-      padding: 3rem 1.5rem 4rem;
+      /* The last line needs room under it, and the to-top arrow sits in the
+         bottom 3rem of the viewport. 4rem was enough while every article ended
+         in a button block; two of them no longer do. */
+      padding: 3rem 1.5rem 7rem;
     }
     .back-home {
       position: fixed;
