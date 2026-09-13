@@ -13,12 +13,31 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    # Nothing here has ever taken more than a couple of minutes. Without this,
+    # a job that hangs rather than fails sits at "running" for GitHub's six
+    # hour default, which reads as still working rather than broken.
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - run: npm install
+          cache: npm
+      # `npm install` was resolving the tree afresh on every deploy while the
+      # forge gate ran `npm ci` against the lockfile - so the versions that
+      # passed the gate were not necessarily the versions that shipped. Same
+      # command in both places now, and the lockfile is the answer in both.
+      - run: npm ci
+      # The gate on the forge runs these, but the forge is not what publishes.
+      # A push that reaches here has been reviewed and merged; this is the last
+      # point at which a broken build is still unpublished.
+      #
+      # Order matters: `npm test` is `astro build` plus both suites, and the
+      # page tests read dist. `build:deploy` then rebuilds and rewrites it for
+      # the two-repo split - it replaces dist/no with redirect stubs - so tests
+      # run after it see ten-line stubs instead of pages. Measured: 29 of them
+      # fail that way. The second build is a few seconds and buys the order.
+      - run: npm test
       - run: npm run build:deploy
       - uses: actions/upload-pages-artifact@v3
         with:
@@ -34,6 +53,7 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -44,6 +64,7 @@ jobs:
   indexnow:
     needs: deploy
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - name: Submit URLs to IndexNow
