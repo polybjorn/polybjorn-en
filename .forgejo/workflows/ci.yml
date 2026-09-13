@@ -18,16 +18,40 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# One run per ref. Four pushes to a pull request branch in a row queue four
+# builds on a runner with one slot, and only the last of them says anything
+# about what is being merged. Pushes to main are never cancelled: the
+# attribution job reads the range a push added, so a run skipped there is a
+# hole in the record rather than a repeat of it.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   build:
     runs-on: docker
+    # A green run here takes about fifteen seconds. With no timeout a wedged
+    # runner holds the job at "running" until Forgejo's six hour default, which
+    # reads as still working rather than broken - and on a single-slot runner it
+    # keeps attribution queued behind it for the same six hours. Ten minutes is
+    # far more than the job has ever needed and still fails the same evening.
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+      # The only step that talks to the network, so the only one that stalls
+      # instead of failing.
       - run: npm ci
+        timeout-minutes: 5
       - run: npm run build
+      # The suite was in the repo and outside the gate: nothing ran it unless
+      # someone ran it by hand. `npm test` builds first, which the step above
+      # has already done, so the two halves are run directly instead.
+      - run: npm run test:worker
+      - run: npm run test:pages
 
   attribution:
     runs-on: docker
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
         with:
