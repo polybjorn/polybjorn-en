@@ -554,37 +554,11 @@ export const BASE_FIELDS = [
     label: { en: 'Name', no: 'Navn' },
   },
   {
-    // Signal used to be folded into the phone field ("Phone or Signal"),
-    // which read as if it were one contact method when it's really two -
-    // and it made the section intro's "phone or email, at least one" claim
-    // technically inaccurate (Signal wasn't actually one of the two named
-    // options). Its own field also drops the need to pattern-match "does
-    // this look like a phone number" to decide whether to reveal a
-    // separate "prefer Signal" checkbox.
-    // An example of the shape, now that the page refuses one that is not a
-    // number - better to show it than to refuse it afterwards.
-    id: 'contactPhone',
-    type: 'text',
-    inputType: 'tel',
-    autocomplete: 'tel',
-    required: false,
-    placeholder: { en: '+47 123 45 678', no: '+47 123 45 678' },
-    label: { en: 'Phone', no: 'Telefon' },
-  },
-  {
     id: 'contactCompany',
     type: 'text',
     required: false,
     autocomplete: 'organization',
     label: { en: 'Company', no: 'Firma' },
-  },
-  {
-    id: 'contactEmail',
-    type: 'text',
-    inputType: 'email',
-    autocomplete: 'email',
-    required: false,
-    label: { en: 'Email', no: 'E-post' },
   },
   {
     // The old label was just "Location", which got read as "street address".
@@ -604,6 +578,24 @@ export const BASE_FIELDS = [
     label: { en: 'Town or area', no: 'Sted eller område' },
   },
   {
+    // Signal used to be folded into the phone field ("Phone or Signal"),
+    // which read as if it were one contact method when it's really two -
+    // and it made the section intro's "phone or email, at least one" claim
+    // technically inaccurate (Signal wasn't actually one of the two named
+    // options). Its own field also drops the need to pattern-match "does
+    // this look like a phone number" to decide whether to reveal a
+    // separate "prefer Signal" checkbox.
+    // An example of the shape, now that the page refuses one that is not a
+    // number - better to show it than to refuse it afterwards.
+    id: 'contactPhone',
+    type: 'text',
+    inputType: 'tel',
+    autocomplete: 'tel',
+    required: false,
+    placeholder: { en: '+47 123 45 678', no: '+47 123 45 678' },
+    label: { en: 'Phone', no: 'Telefon' },
+  },
+  {
     // "eller lenke" rather than "eller signal.me-lenke": this field is half a
     // row wide, and a placeholder that does not fit is cut off with nothing to
     // say it was. A username is the case that needs showing anyway - the shape
@@ -614,6 +606,14 @@ export const BASE_FIELDS = [
     required: false,
     placeholder: { en: 'name.42 or a link', no: 'navn.42 eller lenke' },
     label: { en: 'Signal', no: 'Signal' },
+  },
+  {
+    id: 'contactEmail',
+    type: 'text',
+    inputType: 'email',
+    autocomplete: 'email',
+    required: false,
+    label: { en: 'Email', no: 'E-post' },
   },
   {
     // Was a standing sub-header on every enquiry ("Enquiries are treated

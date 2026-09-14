@@ -118,3 +118,62 @@ for (const { path, lang } of PAGES) {
     assert.equal(style.width, 'fit-content', 'centring only reads as centring while the box is its content width');
   });
 }
+
+/**
+ * The contact block reads as two groups - who someone is, then how to reach
+ * them - and reads the same way in the receipt as in the brief (#28).
+ *
+ * This is pinned because the two documents used to agree by coincidence. The
+ * brief walks BASE_FIELDS; the receipt used to walk the DOM, and the DOM is a
+ * two-column grid whose rows pair an identity field with a contact one. The
+ * two orders happened to match, so nothing looked wrong - and reordering
+ * either one alone would have silently desynced the copy a client keeps from
+ * the brief filed against it.
+ */
+const CONTACT_ORDER = [
+  'contactName',
+  'contactCompany',
+  'contactLocation',
+  'contactPhone',
+  'contactSignal',
+  'contactEmail',
+];
+
+test('the declared field order is the grouped one, identity before contact methods', async () => {
+  const { BASE_FIELDS } = await import('../src/data/intakeForm.js');
+  const contact = BASE_FIELDS.map(field => field.id).filter(id => id.startsWith('contact'));
+  assert.deepEqual(contact, CONTACT_ORDER);
+});
+
+for (const { path, lang } of PAGES) {
+  test(`${lang}: the receipt lists the contact block in the declared order`, async () => {
+    const { doc } = await sentPage(path);
+    const { BASE_FIELDS } = await import('../src/data/intakeForm.js');
+
+    const labelOf = id => BASE_FIELDS.find(field => field.id === id).label[lang];
+    const shown = [...doc.querySelectorAll('#sent-receipt dt')].map(dt => dt.textContent.trim());
+    const contactLabels = CONTACT_ORDER.map(labelOf);
+
+    // Only the contact ones, in the order the receipt happens to print them.
+    const printed = shown.filter(label => contactLabels.includes(label));
+    assert.deepEqual(printed, contactLabels);
+  });
+
+  test(`${lang}: the form still pairs identity with contact method across each row`, async () => {
+    // The order above moves the two documents, not the page. If this fails,
+    // the grid has been reordered too and the layout argument on #28 - that
+    // the two columns are what make the row order read correctly - no longer
+    // holds.
+    const dom = loadPage(path);
+    const rows = [...dom.window.document.querySelectorAll('#stage-contact .field-row')]
+      .map(row => [...row.querySelectorAll('[data-field]')].map(el => el.dataset.field))
+      // The column-heading row carries no fields, and [].every() is true.
+      .filter(row => row.length > 0 && row.every(id => id.startsWith('contact')));
+
+    assert.deepEqual(rows, [
+      ['contactName', 'contactPhone'],
+      ['contactCompany', 'contactEmail'],
+      ['contactLocation', 'contactSignal'],
+    ]);
+  });
+}

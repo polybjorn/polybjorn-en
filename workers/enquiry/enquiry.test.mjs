@@ -13,6 +13,7 @@ import assert from 'node:assert/strict';
 
 import worker from './index.js';
 import { safeFilename, inspect } from './files.js';
+import { BASE_FIELDS } from '../../src/data/intakeForm.js';
 
 const PULL_TOKEN = 'test-token-not-a-real-one';
 
@@ -318,4 +319,57 @@ test('a GET on the submit path is not a submit', async () => {
   const kv = kvStub();
   const response = await worker.fetch(new Request('https://polybjorn.no/api/enquiry'), envWith(kv));
   assert.equal(response.status, 405);
+});
+
+/**
+ * The brief lists the contact block in the declared order, which is the same
+ * order the receipt on the page shows (#28).
+ *
+ * The two used to agree by accident: the brief walks BASE_FIELDS, while the
+ * page's receipt walked the DOM, and the DOM is a two-column grid pairing an
+ * identity field with a contact one on each row. Reordering either alone would
+ * have left the copy a client keeps and the brief filed against it disagreeing,
+ * with nothing to say so. tests/enquiry-receipt.test.mjs pins the other half.
+ */
+test('the brief lists the contact block grouped, identity before contact methods', async () => {
+  const kv = kvStub();
+  const response = await worker.fetch(
+    post(
+      baseForm({
+        contactName: 'Kari Nordmann',
+        contactCompany: 'Nordmann AS',
+        contactLocation: 'Haugesund',
+        contactPhone: '+47 123 45 678',
+        contactSignal: 'kari.42',
+        contactEmail: 'kari@example.com',
+      }),
+      {},
+    ),
+    envWith(kv),
+  );
+  assert.equal(response.status, 201);
+
+  const { id } = await response.json();
+  const { brief } = await kv.get(`enquiry:${id}`, 'json');
+
+  const expected = [
+    'contactName',
+    'contactCompany',
+    'contactLocation',
+    'contactPhone',
+    'contactSignal',
+    'contactEmail',
+  ];
+  const at = expected.map(fieldId => {
+    const label = BASE_FIELDS.find(field => field.id === fieldId).label.no;
+    const index = brief.indexOf(label);
+    assert.notEqual(index, -1, `${label} is missing from the brief entirely`);
+    return index;
+  });
+
+  assert.deepEqual(
+    at,
+    [...at].sort((a, b) => a - b),
+    `the brief reads ${expected.join(', ')} out of order`,
+  );
 });
