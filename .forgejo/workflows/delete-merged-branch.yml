@@ -3,55 +3,73 @@
 # admin-only and was never set; this is the same job as a file in the repo,
 # where it can be read and changed without admin rights.
 #
-# Only branches under herd/ are touched, and only when the PR actually merged.
-# A closed-unmerged PR, anyone else's branch and main are all left alone.
+# Only branches under herd/ are touched, and only when they are merged. A
+# closed-unmerged PR, anyone else's branch and main are all left alone.
+#
+# Two jobs, because an event is not a guarantee. The merge of PR #70 - the one
+# that added this file - produced no run at all, not this workflow's and not
+# CI's, so the branch it was meant to delete stayed and eleven others had to be
+# swept by hand. A job that only reacts to an event goes back to piling
+# branches up the moment one is missed, and says nothing while it does. The
+# scheduled sweep is what makes a missed event cost a day instead of forever,
+# and it is also what covers branches merged before this file existed.
 name: Delete merged branch
 
 on:
   pull_request:
     types: [closed]
+  schedule:
+    # Daily, off the hour: the runner has one slot, and CI has first claim on
+    # it. Forgejo runs a scheduled workflow from the default branch, so this
+    # sweeps with whatever is on main rather than with any branch's copy.
+    - cron: '17 4 * * *'
+  workflow_dispatch:
 
 jobs:
-  delete:
-    # The whole guard is here rather than in the script: a job that does not
-    # run is clearer in the run list than a job that runs and decides to do
-    # nothing.
+  # The fast path: no listing, no git, just the branch the event names.
+  merged:
     if: >-
+      github.event_name == 'pull_request' &&
       github.event.pull_request.merged == true &&
       startsWith(github.event.pull_request.head.ref, 'herd/')
     runs-on: docker
     timeout-minutes: 5
     steps:
-      # node's global fetch rather than curl: the runner image is node:22,
-      # not python, so this uses the one HTTP client node already ships with.
+      - uses: actions/checkout@v4
       - name: Delete the head branch
         env:
           TOKEN: ${{ github.token }}
           API: ${{ github.server_url }}/api/v1/repos/${{ github.repository }}
-          BRANCH: ${{ github.event.pull_request.head.ref }}
+        run: node .forgejo/scripts/delete-branches.mjs "${{ github.event.pull_request.head.ref }}"
+
+  # The backstop: every herd/ branch already contained in main, whatever put it
+  # there and whatever failed to notice.
+  sweep:
+    if: github.event_name != 'pull_request'
+    runs-on: docker
+    timeout-minutes: 10
+    steps:
+      # fetch-depth 0 for the whole history and every branch: --merged answers
+      # with what it can see, and a shallow clone can see one branch and one
+      # commit, which would report every other branch as unmerged.
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Delete every merged herd/ branch
+        env:
+          TOKEN: ${{ github.token }}
+          API: ${{ github.server_url }}/api/v1/repos/${{ github.repository }}
         run: |
-          node - <<'JS'
-          (async () => {
-            const branch = process.env.BRANCH;
-            const url = `${process.env.API}/branches/${encodeURIComponent(branch)}`;
-
-            const res = await fetch(url, {
-              method: "DELETE",
-              headers: { Authorization: `token ${process.env.TOKEN}` },
-            });
-
-            if (res.status === 404) {
-              console.log(`${branch} is already gone`);
-              return;
-            }
-
-            if (!res.ok) {
-              console.log(`could not delete ${branch}: ${res.status} ${res.statusText}`);
-              console.log(await res.text());
-              process.exitCode = 1;
-              return;
-            }
-
-            console.log(`deleted ${branch} (${res.status})`);
-          })();
-          JS
+          set -eu
+          # git decides what "merged" means, not a string comparison: a branch
+          # is gone only when its commits are reachable from main.
+          branches="$(git branch -r --merged origin/main \
+            | sed 's|^ *origin/||' \
+            | grep '^herd/' || true)"
+          if [ -z "$branches" ]; then
+            echo "no merged herd/ branches"
+            exit 0
+          fi
+          echo "$branches"
+          # shellcheck disable=SC2086
+          node .forgejo/scripts/delete-branches.mjs $branches
