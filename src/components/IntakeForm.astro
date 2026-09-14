@@ -937,7 +937,7 @@ const stageLabels = {
 
   <a class="to-top" href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});this.classList.remove('visible');return false;" aria-label={tr.backTopAria}><ArrowUp size={28} strokeWidth={1.5} /></a>
 
-  <script define:vars={{ stageIds: STAGE_IDS, stageLabels, contactMethodRequired: td.contactMethodRequired, fileTooLarge: td.fileTooLarge, chooseFilesLabel: td.chooseFilesLabel, addFilesLabel: td.addFilesLabel, removeFileLabel: td.removeFileLabel, submitMissingNote: td.submitMissingNote, placeholderSets: PLACEHOLDER_SETS, copyrightByOrderType: COPYRIGHT_BY_ORDER_TYPE, choosePlaceholder: td.choosePlaceholder, invalidEmailMessage: td.invalidEmailMessage, descriptionTooShort: td.descriptionTooShort, invalidPhoneMessage: td.invalidPhoneMessage, invalidSignalMessage: td.invalidSignalMessage, submitLabel: td.submitLabel, sendingLabel: td.sendingLabel, sentMessage: td.sentMessage, sendFailed: td.sendFailed, sendRateLimited: td.sendRateLimited, attachmentsTooLarge: td.attachmentsTooLarge, tooManyFiles: td.tooManyFiles, fileTypeRejected: td.fileTypeRejected, fileContentRejected: td.fileContentRejected, numberLocale: lang === 'no' ? 'nb-NO' : 'en-GB' }}>
+  <script define:vars={{ stageIds: STAGE_IDS, fieldOrder: BASE_FIELDS.map((f: any) => f.id), stageLabels, contactMethodRequired: td.contactMethodRequired, fileTooLarge: td.fileTooLarge, chooseFilesLabel: td.chooseFilesLabel, addFilesLabel: td.addFilesLabel, removeFileLabel: td.removeFileLabel, submitMissingNote: td.submitMissingNote, placeholderSets: PLACEHOLDER_SETS, copyrightByOrderType: COPYRIGHT_BY_ORDER_TYPE, choosePlaceholder: td.choosePlaceholder, invalidEmailMessage: td.invalidEmailMessage, descriptionTooShort: td.descriptionTooShort, invalidPhoneMessage: td.invalidPhoneMessage, invalidSignalMessage: td.invalidSignalMessage, submitLabel: td.submitLabel, sendingLabel: td.sendingLabel, sentMessage: td.sentMessage, sendFailed: td.sendFailed, sendRateLimited: td.sendRateLimited, attachmentsTooLarge: td.attachmentsTooLarge, tooManyFiles: td.tooManyFiles, fileTypeRejected: td.fileTypeRejected, fileContentRejected: td.fileContentRejected, numberLocale: lang === 'no' ? 'nb-NO' : 'en-GB' }}>
     const form = document.getElementById('intake-form');
 
     // Shown only at the foot of the page, which is the rest of the site's rule
@@ -1830,11 +1830,26 @@ const stageLabels = {
         if (!stage) return;
 
         const answers = [];
-        stage.querySelectorAll('[data-field]').forEach(wrapper => {
-          if (wrapper.hidden) return;
-          const answer = readAnswer(wrapper);
-          if (answer) answers.push(answer);
-        });
+        // Ordered by the declared field order, not by where the markup puts
+        // them. The contact block is a two-column grid whose rows pair a field
+        // about who you are with one about how to reach you, so reading the
+        // DOM gives who, how, who, how, while the brief the endpoint builds
+        // walks BASE_FIELDS. Those two agreed only because BASE_FIELDS
+        // happened to be in the same order as the rows - reorder either one
+        // alone and the receipt a client keeps and the brief filed against it
+        // stop matching, with nothing to say so. One declared order, read by
+        // both (#28).
+        const rank = wrapper => {
+          const at = fieldOrder.indexOf(wrapper.dataset.field);
+          return at === -1 ? Number.MAX_SAFE_INTEGER : at;
+        };
+        [...stage.querySelectorAll('[data-field]')]
+          .sort((a, b) => rank(a) - rank(b))
+          .forEach(wrapper => {
+            if (wrapper.hidden) return;
+            const answer = readAnswer(wrapper);
+            if (answer) answers.push(answer);
+          });
         if (!answers.length) return;
 
         const section = document.createElement('section');
