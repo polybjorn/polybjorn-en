@@ -97,6 +97,49 @@ export const ORDER_TYPES = [
   },
 ];
 
+// Which ownership answers each order type leaves standing.
+//
+// "Hvem eier designet?" asks where the design came from, so the answer above it
+// rules some of them out by contradiction: someone who has just said they have
+// nothing but an idea cannot also hold a licensed file, and someone who has a
+// finished file does not have "no design yet". The dropdown is a popup, closed
+// until it is opened, so every answer that cannot be true is a line to read and
+// dismiss on the one question here with legal weight.
+//
+// The rule is contradiction, not likelihood. An option stays unless the answer
+// above makes it false, which is why each list is longer than the obvious one:
+// a physical part to copy is most often a scan, but it can equally be your own
+// part whose file is lost, or someone else's with their blessing - and those
+// are the answers that decide whether it can be printed at all. Filter by what
+// is likely instead and the honest answer is the one that goes missing,
+// invisibly, from a list nobody can see is short.
+//
+// What each list drops:
+// - file: the file exists, so only "no design yet" contradicts it. A scan
+//   someone already did is a real provenance for a finished file.
+// - sketch: a licensed file and a scan both name an artefact this answer says
+//   is not there. A sketch of your own, someone else's drawing shared with
+//   permission, or nothing but a description all stay.
+// - physical: there is a part, so "no design yet" is false, and a purchased
+//   file is not what is in the room.
+// - idea: there is no design, so one answer is the only one that can be true.
+//   That leaves a dropdown holding a single option - a click that cannot be
+//   wrong. Hiding the question outright in that case is the alternative, and
+//   was not the call taken; this one keeps every order type working the same
+//   way, and the question stays optional so it can still be skipped.
+//
+// Nothing here answers on anyone's behalf: it removes only answers the visitor
+// has already contradicted, and the field stays blank until it is picked (the
+// copyright field below says why that matters). Without script nothing is
+// filtered and the native dropdown lists all five - the behaviour up to now,
+// which is not wrong, only longer.
+export const COPYRIGHT_BY_ORDER_TYPE = {
+  file: ['own', 'licensed', 'scan', 'permitted'],
+  sketch: ['own', 'permitted', 'none-yet'],
+  physical: ['own', 'scan', 'permitted'],
+  idea: ['none-yet'],
+};
+
 // The order here is the order the enquiry is read in. The worker walks this
 // array to build the brief it stores for pi-rovar (workers/enquiry/index.js),
 // so this list and the form's own layout are two halves of one contract: the
@@ -199,6 +242,10 @@ export const BASE_FIELDS = [
     // where being wrong costs the most. Left blank it arrives blank, which is
     // honest, and the answer gets asked for directly - the same reasoning that
     // removed the requirement grid.
+    //
+    // Which of the five are offered depends on the order type above - see
+    // COPYRIGHT_BY_ORDER_TYPE. That removes answers, it never picks one, so
+    // the paragraph above still holds.
     id: 'copyright',
     type: 'select',
     required: false,
