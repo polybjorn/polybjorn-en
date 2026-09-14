@@ -26,7 +26,11 @@ const cornerLinks = enOnly ? links.filter(l => CORNER_ICONS[l.icon]) : [];
 
 const ogImage = image ?? 'https://res.cloudinary.com/djpkffk5u/image/upload/c_fill,g_center,w_1200,h_630/v1772729286/polybjorn-banner-navy-1500x500_rvluaz.png';
 
-const schemas = [{
+// JSON-LD is not one shape: the Person block gives alternateName a single
+// string and the ProfessionalService block gives it two, which is valid and
+// which TypeScript reads as a contradiction if it infers the element type from
+// whichever object comes first.
+const schemas: Record<string, unknown>[] = [{
   "@context": "https://schema.org",
   "@type": "Person",
   "@id": "https://polybjorn.com/#person",

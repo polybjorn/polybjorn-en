@@ -248,7 +248,7 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
 
     const thumbs = document.querySelectorAll('.cover-btn, .gallery-thumb, .img-zoom');
     if (thumbs.length) {
-      const items = Array.from(thumbs).map(t => ({
+      const items = Array.from(thumbs as NodeListOf<HTMLElement>).map(t => ({
         src: t.dataset.full,
         alt: t.querySelector('img')?.alt ?? '',
       }));
