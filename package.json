@@ -12,6 +12,7 @@
     "build:preview": "PREVIEW=1 astro build",
     "preview:build": "node scripts/build-preview.mjs",
     "test:pages": "node --test tests/*.test.mjs",
+    "check:links": "node .forgejo/scripts/check-external-links.mjs",
     "check": "astro check",
     "test": "npm run build && npm run test:worker && npm run test:pages"
   },
