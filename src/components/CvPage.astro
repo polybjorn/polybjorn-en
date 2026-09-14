@@ -2,6 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import { t } from '../data/translations.js';
 import { cv } from '../data/cv.js';
+import type { CvEntry, Localised, SoftwareGroup } from '../data/cv.js';
 import { ArrowUp, ArrowLeft } from 'lucide-astro';
 
 interface Props {
@@ -363,7 +364,7 @@ const backHref = lang === 'no' ? '/no' : '/';
 
     <section>
       <h2>{tr.experience}</h2>
-      {cv.experience.map(entry => (
+      {cv.experience.map((entry: CvEntry) => (
         <div class="entry">
           <div class="period">{typeof entry.period === 'string' ? entry.period : entry.period[lang]}</div>
           <div class="entry-content">
@@ -396,7 +397,7 @@ const backHref = lang === 'no' ? '/no' : '/';
 
     <section>
       <h2>{tr.education}</h2>
-      {cv.education.map(entry => (
+      {cv.education.map((entry: CvEntry) => (
         <div class="entry">
           <div class="period">{typeof entry.period === 'string' ? entry.period : entry.period[lang]}</div>
           <div class="entry-content">
@@ -410,7 +411,7 @@ const backHref = lang === 'no' ? '/no' : '/';
     <section>
       <h2>{tr.skills}</h2>
       <ul class="skills-list">
-        {cv.skills.map(skill => (
+        {cv.skills.map((skill: Localised) => (
           <li>{skill[lang]}</li>
         ))}
       </ul>
@@ -418,11 +419,11 @@ const backHref = lang === 'no' ? '/no' : '/';
 
     <section>
       <h2>{tr.software}</h2>
-      {cv.software.map(cat => (
+      {cv.software.map((cat: SoftwareGroup) => (
         <div class="software-group">
           <h3>{cat.category[lang]}</h3>
           <ul class="software-list">
-            {cat.tools.map(item => <li>{item}</li>)}
+            {cat.tools.map((item: string) => <li>{item}</li>)}
           </ul>
         </div>
       ))}
@@ -445,8 +446,8 @@ const backHref = lang === 'no' ? '/no' : '/';
     }, { threshold: 0.1 });
     document.querySelectorAll('h2').forEach(el => observer.observe(el));
 
-    const backHome = document.querySelector('.back-home');
-    const scrollTop = document.querySelector('.to-top');
+    const backHome = document.querySelector('.back-home')!;
+    const scrollTop = document.querySelector('.to-top')!;
     window.addEventListener('scroll', () => {
       backHome.classList.toggle('hidden', window.scrollY > 60);
       scrollTop.classList.toggle('visible', window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 20);
