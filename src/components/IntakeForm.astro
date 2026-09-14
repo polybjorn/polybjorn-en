@@ -1414,6 +1414,54 @@ const stageLabels = {
 
         const field = wrap.closest('[data-field]');
 
+        // A row that vanishes between two frames reads as a glitch rather than
+        // as an answer being taken off the table, and the page moves under the
+        // thumb that just tapped. So it collapses: height and the field's own
+        // bottom margin, which is what the row above actually feels, plus the
+        // fade.
+        //
+        // Measured and animated rather than transitioned from a CSS class,
+        // because the height it has to leave from is whatever the label and the
+        // control add up to at this width - a max-height guess either clips the
+        // field or spends the first half of the ease going nowhere. Every other
+        // moving part on this page is a CSS transition; this one cannot be.
+        //
+        // No Web Animations (jsdom, and anything old enough to lack it) or
+        // reduced motion: the row goes at once, which is the behaviour before
+        // this and is not wrong, only abrupt.
+        const canAnimate = !prefersReducedMotion && typeof field?.animate === 'function';
+        const outerHeight = () =>
+          field.offsetHeight + (parseFloat(getComputedStyle(field).marginBottom) || 0);
+        let collapsing = null;
+        let settled = false;
+
+        const setFieldShown = shown => {
+          if (!field) return;
+          if (!canAnimate || !settled) {
+            field.hidden = !shown;
+            return;
+          }
+          if (shown === !field.hidden && !collapsing) return;
+          // An answer changed twice before the first collapse finished is one
+          // interruption, not a queue: cancel and measure where it is now.
+          if (collapsing) collapsing.cancel();
+          if (shown) field.hidden = false;
+          const height = shown ? outerHeight() : field.offsetHeight;
+          const margin = parseFloat(getComputedStyle(field).marginBottom) || 0;
+          const shut = { height: '0px', marginBottom: '0px', opacity: 0 };
+          const open = { height: (shown ? height - margin : height) + 'px', marginBottom: margin + 'px', opacity: 1 };
+          field.style.overflow = 'hidden';
+          collapsing = field.animate(shown ? [shut, open] : [open, shut], {
+            duration: shown ? 200 : 160,
+            easing: 'ease',
+          });
+          collapsing.finished.then(() => {
+            field.hidden = !shown;
+            field.style.overflow = '';
+            collapsing = null;
+          }, () => {});
+        };
+
         const applyAllowed = () => {
           const picked = form.querySelector('input[name="orderType"]:checked');
           const allowed = picked ? allowedFor[picked.value] : null;
@@ -1423,7 +1471,7 @@ const stageLabels = {
           // question higher up, which the brief already carries directly above
           // it. So the row goes, and nothing is recorded on anyone's behalf.
           const soleAnswer = Boolean(allowed && allowed.length === 1);
-          if (field) field.hidden = soleAnswer;
+          setFieldShown(!soleAnswer);
           options.forEach(option => {
             const keep = !allowed || allowed.includes(option.dataset.value);
             option.hidden = !keep;
@@ -1451,8 +1499,11 @@ const stageLabels = {
         form.querySelectorAll('input[name="orderType"]').forEach(input => {
           input.addEventListener('change', applyAllowed);
         });
-        // A reload can restore a checked radio without firing an event.
+        // A reload can restore a checked radio without firing an event. That
+        // pass is the page settling, not an answer changing, so it does not
+        // animate - a row cannot collapse out of a state nobody saw it in.
         applyAllowed();
+        settled = true;
       }
     });
 

@@ -12,7 +12,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
-import { COPYRIGHT_BY_ORDER_TYPE } from '../src/data/intakeForm.js';
+import { BASE_FIELDS, COPYRIGHT_BY_ORDER_TYPE } from '../src/data/intakeForm.js';
 import { PAGES, loadPage, settle } from './helpers/page.mjs';
 
 const pick = (doc, value) => {
@@ -37,8 +37,9 @@ for (const { path, lang } of PAGES) {
 
   test(on('every ownership answer is offered until an order type is picked'), async () => {
     const doc = loadPage(path).window.document;
-    assert.equal(onScreen(doc).length, 5);
-    assert.equal(offered(doc).length, 5);
+    const all = BASE_FIELDS.find(field => field.id === 'copyright').options.map(option => option.value);
+    assert.deepEqual(onScreen(doc), all);
+    assert.deepEqual(offered(doc), all);
   });
 
   test(on('the order type takes away the answers it contradicts'), async () => {
