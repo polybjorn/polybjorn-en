@@ -5,14 +5,18 @@ import { ArrowLeft, ArrowUp, Rss } from 'lucide-astro';
 import { cloudinaryUrl } from '../data/made.js';
 import { t } from '../data/translations.js';
 
-const { lang } = Astro.props;
+interface Props {
+  lang: 'en' | 'no';
+}
+
+const { lang } = Astro.props as Props;
 const tr = t[lang];
 
 const projects = (await getCollection('projects', ({ data }) => !data.draft))
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 
-const fmt = (d) => d.toISOString().slice(0, 10);
-const cardHref = (slug) => lang === 'no' ? `https://polybjorn.com/projects/${slug}` : `/projects/${slug}`;
+const fmt = (d: Date) => d.toISOString().slice(0, 10);
+const cardHref = (slug: string) => lang === 'no' ? `https://polybjorn.com/projects/${slug}` : `/projects/${slug}`;
 // The path on the other site, not on this one: polybjorn.no serves the
 // Norwegian build at its root, so /no/prosjekter is a 404 over there.
 const altLangPath = lang === 'no' ? '/projects' : '/prosjekter';
@@ -163,8 +167,8 @@ const altLangPath = lang === 'no' ? '/projects' : '/prosjekter';
   </main>
   <a class="to-top" href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});this.classList.remove('visible');return false;" aria-label={tr.projectsToTopAria}><ArrowUp size={28} strokeWidth={1.5} /></a>
   <script>
-    const backHome = document.querySelector('.back-home');
-    const scrollTop = document.querySelector('.to-top');
+    const backHome = document.querySelector('.back-home')!;
+    const scrollTop = document.querySelector('.to-top')!;
     window.addEventListener('scroll', () => {
       backHome.classList.toggle('hidden', window.scrollY > 60);
       scrollTop.classList.toggle('visible', window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 20);

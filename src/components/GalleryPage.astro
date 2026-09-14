@@ -23,12 +23,21 @@ const altLangPath = isMade
   ? (lang === 'en' ? '/galleri/laget' : '/gallery/made')
   : (lang === 'en' ? '/galleri/funnet' : '/gallery/found');
 
-const images = isMade
+interface GalleryImage {
+  url: string;
+  alt: string;
+  title?: string;
+  link?: string | null;
+  transparent?: boolean;
+  project?: string;
+}
+
+const images: GalleryImage[] = isMade
   ? (() => {
       const flat = projects.flatMap(p => p.images.map(img => ({ ...img, project: p.title })));
       // Seeded shuffle — consistent order per build, feels random
       const seed = 42;
-      const seeded = (n) => { let x = Math.sin(n + seed) * 10000; return x - Math.floor(x); };
+      const seeded = (n: number) => { let x = Math.sin(n + seed) * 10000; return x - Math.floor(x); };
       return flat.map((img, i) => ({ img, sort: seeded(i) })).sort((a, b) => a.sort - b.sort).map(x => x.img);
     })()
   : found;
@@ -245,14 +254,14 @@ const images = isMade
   </main>
 
   <script>
-    const backHome = document.querySelector('.back-home');
+    const backHome = document.querySelector('.back-home')!;
     window.addEventListener('scroll', () => {
       backHome.classList.toggle('hidden', window.scrollY > 60);
     }, { passive: true });
   </script>
 
   <script>
-    const grid = document.getElementById('grid');
+    const grid = document.getElementById('grid')!;
     const imgs = Array.from(grid.querySelectorAll('img'));
     let loaded = 0;
     const threshold = Math.min(imgs.length, 8);

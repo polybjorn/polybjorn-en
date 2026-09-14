@@ -239,8 +239,8 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
   </main>
   <a class="to-top" href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});this.classList.remove('visible');return false;" aria-label="To top"><ArrowUp size={28} strokeWidth={1.5} /></a>
   <script>
-    const backHome = document.querySelector('.back-home');
-    const scrollTop = document.querySelector('.to-top');
+    const backHome = document.querySelector('.back-home')!;
+    const scrollTop = document.querySelector('.to-top')!;
     window.addEventListener('scroll', () => {
       backHome.classList.toggle('hidden', window.scrollY > 60);
       scrollTop.classList.toggle('visible', window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 20);
@@ -249,7 +249,7 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
     const thumbs = document.querySelectorAll('.cover-btn, .gallery-thumb, .img-zoom');
     if (thumbs.length) {
       const items = Array.from(thumbs as NodeListOf<HTMLElement>).map(t => ({
-        src: t.dataset.full,
+        src: t.dataset.full ?? '',
         alt: t.querySelector('img')?.alt ?? '',
       }));
       let idx = 0;
@@ -258,10 +258,10 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
       lightbox.className = 'gallery-lightbox';
       lightbox.innerHTML = '<button class="close" type="button" aria-label="Close">×</button><img alt="" />';
       document.body.appendChild(lightbox);
-      const lbImg = lightbox.querySelector('img');
+      const lbImg = lightbox.querySelector('img')!;
       lbImg.style.cursor = 'pointer';
 
-      const show = i => {
+      const show = (i: number) => {
         idx = (i + items.length) % items.length;
         lbImg.src = items[idx].src;
         lbImg.alt = items[idx].alt;
@@ -271,7 +271,7 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
       const isOpen = () => lightbox.classList.contains('open');
       const closeLb = () => lightbox.classList.remove('open');
 
-      lightbox.querySelector('.close').addEventListener('click', closeLb);
+      lightbox.querySelector('.close')!.addEventListener('click', closeLb);
       lightbox.addEventListener('click', e => { if (e.target === lightbox) closeLb(); });
       lbImg.addEventListener('click', e => {
         e.stopPropagation();

@@ -33,6 +33,7 @@ jobs:
       # passed the gate were not necessarily the versions that shipped. Same
       # command in both places now, and the lockfile is the answer in both.
       - run: npm ci
+      - run: npm run check
       # The gate on the forge runs these, but the forge is not what publishes.
       # A push that reaches here has been reviewed and merged; this is the last
       # point at which a broken build is still unpublished.
