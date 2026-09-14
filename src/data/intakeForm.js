@@ -263,7 +263,13 @@ export const BASE_FIELDS = [
     // are visible together in the dropdown.
     options: [
       { value: 'own', en: 'My own design', no: 'Mitt eget design' },
-      { value: 'licensed', en: 'A licensed or purchased file', no: 'En lisensiert eller kjøpt fil' },
+      // Named for how the file was got, not for the rights it came with. The
+      // ordinary case for a finished file is a free download - Printables,
+      // Thingiverse, GrabCAD, a forum - where nobody read a licence at all, and
+      // "lisensiert" asks that person to assert a legal status they never
+      // checked. Picking it should not be a claim; it is the same reasoning
+      // that named 'owned-part' for the fact rather than the permission.
+      { value: 'licensed', en: 'A file I downloaded or bought', no: 'En fil jeg har lastet ned eller kjøpt' },
       { value: 'scan', en: 'A scan of an existing part', no: 'En skann av en eksisterende del' },
       // The answer someone holding a broken part actually has, and the one
       // this list went without: they own the thing, somebody else designed it,
