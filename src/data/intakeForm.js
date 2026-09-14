@@ -97,6 +97,56 @@ export const ORDER_TYPES = [
   },
 ];
 
+// Which ownership answers each order type leaves standing.
+//
+// "Hvem eier designet?" asks where the design came from, so the answer above it
+// rules some of them out by contradiction: someone who has just said they have
+// nothing but an idea cannot also hold a licensed file, and someone who has a
+// finished file does not have "no design yet". The dropdown is a popup, closed
+// until it is opened, so every answer that cannot be true is a line to read and
+// dismiss on the one question here with legal weight.
+//
+// The rule is contradiction, not likelihood. An option stays unless the answer
+// above makes it false, which is why each list is longer than the obvious one:
+// a physical part to copy is most often a scan, but it can equally be your own
+// part whose file is lost, or someone else's with their blessing - and those
+// are the answers that decide whether it can be printed at all. Filter by what
+// is likely instead and the honest answer is the one that goes missing,
+// invisibly, from a list nobody can see is short.
+//
+// What each list drops:
+// - file: the file exists, so only "no design yet" contradicts it. A scan
+//   someone already did is a real provenance for a finished file.
+// - sketch: a licensed file and a scan both name an artefact this answer says
+//   is not there. Measurements taken off a part somebody else made are the
+//   same case as the part itself, so that answer stays here too.
+// - physical: there is a part, so "no design yet" is false, and a purchased
+//   file is not what is in the room. A scan goes with them: someone who had
+//   one would have answered "a finished 3D file" a question earlier - the scan
+//   is the work being asked for, not something they arrive with. What is left
+//   is who designed the original, which is the whole of what this question
+//   needs to know: usually somebody else, occasionally them, rarely somebody
+//   else who said yes.
+// - idea: there is no design, so one answer is the only one that can be true -
+//   and one answer left is not a question. A dropdown holding a single option
+//   is a click that cannot be wrong, and the answer it would record is the one
+//   just given a question higher up, which the brief carries directly above it.
+//   So the form hides the row in that case rather than offering a list of one
+//   (IntakeForm.astro), and records nothing: any list of one is treated this
+//   way, so a later edit to the lists above needs no second decision here.
+//
+// Nothing here answers on anyone's behalf: it removes only answers the visitor
+// has already contradicted, and the field stays blank until it is picked (the
+// copyright field below says why that matters). Without script nothing is
+// filtered and the native dropdown lists all five - the behaviour up to now,
+// which is not wrong, only longer.
+export const COPYRIGHT_BY_ORDER_TYPE = {
+  file: ['own', 'licensed', 'scan', 'permitted'],
+  sketch: ['own', 'owned-part', 'permitted', 'none-yet'],
+  physical: ['own', 'owned-part', 'permitted'],
+  idea: ['none-yet'],
+};
+
 // The order here is the order the enquiry is read in. The worker walks this
 // array to build the brief it stores for pi-rovar (workers/enquiry/index.js),
 // so this list and the form's own layout are two halves of one contract: the
@@ -199,6 +249,10 @@ export const BASE_FIELDS = [
     // where being wrong costs the most. Left blank it arrives blank, which is
     // honest, and the answer gets asked for directly - the same reasoning that
     // removed the requirement grid.
+    //
+    // Which of the five are offered depends on the order type above - see
+    // COPYRIGHT_BY_ORDER_TYPE. That removes answers, it never picks one, so
+    // the paragraph above still holds.
     id: 'copyright',
     type: 'select',
     required: false,
@@ -211,6 +265,19 @@ export const BASE_FIELDS = [
       { value: 'own', en: 'My own design', no: 'Mitt eget design' },
       { value: 'licensed', en: 'A licensed or purchased file', no: 'En lisensiert eller kjøpt fil' },
       { value: 'scan', en: 'A scan of an existing part', no: 'En skann av en eksisterende del' },
+      // The answer someone holding a broken part actually has, and the one
+      // this list went without: they own the thing, somebody else designed it,
+      // and nobody asked anyone's permission. Without it that enquiry either
+      // skips the question or picks something untrue - on the one question here
+      // where being wrong costs the most - and skipping looks the same as not
+      // reading it.
+      //
+      // Named for the fact, not for the permission. "Someone else's design - no
+      // permission" invites a lie by making the honest answer sound like an
+      // admission; whether it matters is a conversation (own use, a design
+      // right long expired, a shape that is purely functional), and that
+      // conversation starts from what is true.
+      { value: 'owned-part', en: 'A part I own, designed by someone else', no: 'En del jeg eier, designet av andre' },
       { value: 'permitted', en: "Someone else's design - shared with permission", no: 'Andres design - delt med tillatelse' },
       { value: 'none-yet', en: 'No design yet - starting from a description', no: 'Ikke noe design ennå - starter fra en beskrivelse' },
     ],
