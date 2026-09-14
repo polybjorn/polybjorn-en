@@ -1,0 +1,57 @@
+# Deletes the head branch when a pull request merges. The forge-native way to
+# do this is the repo setting default_delete_branch_after_merge, which is
+# admin-only and was never set; this is the same job as a file in the repo,
+# where it can be read and changed without admin rights.
+#
+# Only branches under herd/ are touched, and only when the PR actually merged.
+# A closed-unmerged PR, anyone else's branch and main are all left alone.
+name: Delete merged branch
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  delete:
+    # The whole guard is here rather than in the script: a job that does not
+    # run is clearer in the run list than a job that runs and decides to do
+    # nothing.
+    if: >-
+      github.event.pull_request.merged == true &&
+      startsWith(github.event.pull_request.head.ref, 'herd/')
+    runs-on: docker
+    timeout-minutes: 5
+    steps:
+      # node's global fetch rather than curl: the runner image is node:22,
+      # not python, so this uses the one HTTP client node already ships with.
+      - name: Delete the head branch
+        env:
+          TOKEN: ${{ github.token }}
+          API: ${{ github.server_url }}/api/v1/repos/${{ github.repository }}
+          BRANCH: ${{ github.event.pull_request.head.ref }}
+        run: |
+          node - <<'JS'
+          (async () => {
+            const branch = process.env.BRANCH;
+            const url = `${process.env.API}/branches/${encodeURIComponent(branch)}`;
+
+            const res = await fetch(url, {
+              method: "DELETE",
+              headers: { Authorization: `token ${process.env.TOKEN}` },
+            });
+
+            if (res.status === 404) {
+              console.log(`${branch} is already gone`);
+              return;
+            }
+
+            if (!res.ok) {
+              console.log(`could not delete ${branch}: ${res.status} ${res.statusText}`);
+              console.log(await res.text());
+              process.exitCode = 1;
+              return;
+            }
+
+            console.log(`deleted ${branch} (${res.status})`);
+          })();
+          JS
