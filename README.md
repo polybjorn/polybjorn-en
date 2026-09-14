@@ -101,7 +101,13 @@ own index.
 npm test              # build, then both suites
 npm run test:worker   # the enquiry endpoint, against a KV stub
 npm run test:pages    # the built pages, driven in jsdom
+npm run check         # astro check, against the strict tsconfig
 ```
+
+Both gates run the check and both suites - the forge on every pull request and
+on main, the deploy workflow again before publishing. The node version is
+written in `.nvmrc` and nowhere else; the forge gate asserts that the runner it
+is handed agrees with it.
 
 The page tests run against `dist`, not the source: Astro's scoping, bundling and
 minifier sit between a component and the browser, and at least one bug has lived
