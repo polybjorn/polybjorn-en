@@ -52,24 +52,24 @@ jobs:
       # Fail here, before two minutes of network sweeping, rather than in the
       # step that writes the issue. A run that does all the work and then
       # cannot report it has found the links and told nobody, which is the
-      # exact failure mode this whole workflow exists to close.
+      # exact failure this whole workflow exists to close.
       #
-      # FORGE_PR_TOKEN is a user-scope Actions secret covering nixfleet,
-      # lokalverket-no, rovar-no and polybjorn-en, so this repo inherits it and
-      # needs none of its own. The automatic token is tried as a fallback
-      # because it may well be enough for issues - it is refused on /pulls
-      # ("Can not read pulls"), but that is a different endpoint. Whichever one
-      # is used, only its length is ever printed.
-      - name: A token that can write issues
+      # The probe makes a real request. Its first version printed the length of
+      # the secret and called that a check, and the run then swept for two
+      # minutes and died on "403: token does not have at least one of required
+      # scope(s): [read:issue]" - FORGE_PR_TOKEN is scoped for opening pull
+      # requests and cannot touch issues at all.
+      #
+      # Both candidates are handed over as environment variables and the script
+      # picks whichever the forge accepts, so the choice is made in one place
+      # and made the same way here and in the reporting step below. Neither
+      # value is printed and neither reaches a command line.
+      - name: A credential that can reach issues
         env:
+          AUTOMATIC_TOKEN: ${{ github.token }}
           FORGE_PR_TOKEN: ${{ secrets.FORGE_PR_TOKEN }}
-        run: |
-          set -eu
-          if [ -n "${FORGE_PR_TOKEN:-}" ]; then
-            echo "using FORGE_PR_TOKEN, ${#FORGE_PR_TOKEN} characters"
-          else
-            echo "FORGE_PR_TOKEN is not set; falling back to the automatic token"
-          fi
+          API: ${{ github.server_url }}/api/v1/repos/${{ github.repository }}
+        run: node .forgejo/scripts/report-link-failures.mjs --probe
 
       # The container image comes from the runner's docker label in nixfleet,
       # so nothing here makes it agree with .nvmrc. Same guard as ci.yml.
@@ -99,6 +99,7 @@ jobs:
 
       - name: Report into an issue
         env:
-          TOKEN: ${{ secrets.FORGE_PR_TOKEN || github.token }}
+          AUTOMATIC_TOKEN: ${{ github.token }}
+          FORGE_PR_TOKEN: ${{ secrets.FORGE_PR_TOKEN }}
           API: ${{ github.server_url }}/api/v1/repos/${{ github.repository }}
         run: node .forgejo/scripts/report-link-failures.mjs link-report.json

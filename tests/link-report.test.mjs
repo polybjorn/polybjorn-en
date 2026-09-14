@@ -30,8 +30,12 @@ const SCRIPT = join(
 );
 const TOKEN = 'stub-token-never-printed';
 
-/** A forge that holds one list of issues and remembers every call. */
-function stubForge(issues = []) {
+/**
+ * A forge that holds one list of issues, remembers every call, and refuses any
+ * credential it was not told about - which is what FORGE_PR_TOKEN does in
+ * reality, with a 403 naming the scope it lacks.
+ */
+function stubForge(issues = [], accepts = [TOKEN]) {
   const calls = [];
   let nextNumber = 100;
 
@@ -40,8 +44,16 @@ function stubForge(issues = []) {
     req.on('data', chunk => (body += chunk));
     req.on('end', () => {
       const payload = body ? JSON.parse(body) : null;
-      calls.push({ method: req.method, path: req.url, payload });
+      const offered = (req.headers.authorization ?? '').replace(/^token /, '');
+      calls.push({ method: req.method, path: req.url, payload, offered });
       res.setHeader('Content-Type', 'application/json');
+
+      if (!accepts.includes(offered)) {
+        res.statusCode = 403;
+        return res.end(
+          '{"message":"token does not have at least one of required scope(s): [read:issue]"}',
+        );
+      }
 
       if (req.method === 'GET' && req.url.startsWith('/issues?')) {
         return res.end(JSON.stringify(issues.filter(i => i.state !== 'closed')));
@@ -65,7 +77,7 @@ function stubForge(issues = []) {
   return { server, calls, issues };
 }
 
-function run(report, forge) {
+function run(report, forge, { env = { TOKEN }, args } = {}) {
   return new Promise((resolve, reject) => {
     const dir = mkdtempSync(join(tmpdir(), 'link-report-'));
     const file = join(dir, 'report.json');
@@ -73,13 +85,25 @@ function run(report, forge) {
 
     forge.server.listen(0, '127.0.0.1', () => {
       const { port } = forge.server.address();
+      // TOKEN, AUTOMATIC_TOKEN and FORGE_PR_TOKEN are cleared first: this host
+      // has a real FORGEJO_TOKEN in the environment and inheriting a stray one
+      // would make the test pass for the wrong reason.
       execFile(
         process.execPath,
-        [SCRIPT, file],
-        { env: { ...process.env, API: `http://127.0.0.1:${port}`, TOKEN } },
+        [SCRIPT, ...(args ?? [file])],
+        {
+          env: {
+            ...process.env,
+            TOKEN: '',
+            AUTOMATIC_TOKEN: '',
+            FORGE_PR_TOKEN: '',
+            API: `http://127.0.0.1:${port}`,
+            ...env,
+          },
+        },
         (error, stdout, stderr) => {
           forge.server.close();
-          if (error) reject(new Error(`${error.message}\n${stdout}\n${stderr}`));
+          if (error) reject(Object.assign(new Error(`${error.message}\n${stdout}\n${stderr}`), { stdout, code: error.code }));
           else resolve(stdout);
         },
       );
@@ -176,4 +200,39 @@ test('the token is never printed, and never reaches the command line', async () 
   const forge = stubForge();
   const out = await run({ ...clean, dead: [deadLink] }, forge);
   assert.doesNotMatch(out, new RegExp(TOKEN), 'the token reached stdout');
+});
+
+test('--probe accepts a credential the forge answers, and writes nothing', async () => {
+  const forge = stubForge();
+  const out = await run(clean, forge, { args: ['--probe'] });
+
+  assert.match(out, /can read issues: HTTP 200/);
+  assert.deepEqual(forge.calls.filter(c => c.method !== 'GET'), [], 'a probe only reads');
+});
+
+test('a credential the forge refuses is passed over for one it accepts', async () => {
+  // The real shape of this: FORGE_PR_TOKEN resolves, is 40 characters, and is
+  // answered 403 "[read:issue]" because it is scoped for pull requests.
+  const forge = stubForge([], ['the-one-that-works']);
+  const out = await run(clean, forge, {
+    env: { FORGE_PR_TOKEN: 'scoped-for-pulls-only', AUTOMATIC_TOKEN: 'the-one-that-works' },
+  });
+
+  assert.match(out, /AUTOMATIC_TOKEN \(18 characters\) can read issues: HTTP 200/);
+  assert.doesNotMatch(out, /the-one-that-works/, 'the value itself is never printed');
+  assert.doesNotMatch(out, /scoped-for-pulls-only/);
+});
+
+test('no usable credential stops the run rather than sweeping and staying quiet', async () => {
+  const forge = stubForge([], ['nothing-here-matches']);
+  const failure = await run(clean, forge, {
+    env: { FORGE_PR_TOKEN: 'scoped-for-pulls-only' },
+  }).then(
+    () => null,
+    error => error,
+  );
+
+  assert.ok(failure, 'the script must not exit 0 when it cannot reach issues');
+  assert.equal(failure.code, 1);
+  assert.match(failure.stdout, /would be found and never reported/);
 });

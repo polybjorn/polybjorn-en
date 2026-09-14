@@ -30,26 +30,75 @@ const MARKER = '<!-- external-link-check -->';
 const OK_RATE_FLOOR = 0.8;
 const TITLE = 'ci: external links are failing';
 
-const [reportPath] = process.argv.slice(2);
-const { API, TOKEN } = process.env;
+// Environment variables that might hold a usable credential, best first.
+// TOKEN is what a person running this by hand sets; the other two are what the
+// workflow has. None of them is assumed to work - see resolveToken.
+const TOKEN_NAMES = ['TOKEN', 'AUTOMATIC_TOKEN', 'FORGE_PR_TOKEN'];
 
-if (!reportPath) {
+const args = process.argv.slice(2);
+const probeOnly = args[0] === '--probe';
+const reportPath = probeOnly ? null : args[0];
+const { API } = process.env;
+
+if (!probeOnly && !reportPath) {
   console.log('usage: report-link-failures.mjs <report.json>');
+  console.log('       report-link-failures.mjs --probe');
   process.exit(2);
 }
-if (!API || !TOKEN) {
-  console.log('API and TOKEN must be set');
+if (!API) {
+  console.log('API must be set');
   process.exit(2);
 }
 
-const auth = { Authorization: `token ${TOKEN}`, 'Content-Type': 'application/json' };
+/**
+ * The first credential in the environment that the forge actually accepts.
+ *
+ * **It makes a request rather than checking that a variable is non-empty.**
+ * The workflow's first version printed the length of its secret and called
+ * that a check; the run then swept for two minutes and died on
+ * `403: token does not have at least one of required scope(s): [read:issue]`,
+ * because FORGE_PR_TOKEN is scoped for opening pull requests and cannot touch
+ * issues at all. A credential check that does not use the credential proves
+ * only that a variable is set.
+ *
+ * Run once from the workflow with --probe before the sweep, so that a run
+ * which could never report its findings stops before spending the time, and
+ * again here for the real work.
+ *
+ * A read is not proof of a write, and this forge has nothing non-destructive
+ * that would prove one. The write is still checked by making it - but only
+ * when there is something to report, and it fails loudly when it fails.
+ */
+async function resolveToken() {
+  for (const name of TOKEN_NAMES) {
+    const value = process.env[name];
+    if (!value) continue;
+    const res = await fetch(`${API}/issues?state=open&type=issues&limit=1`, {
+      headers: { Authorization: `token ${value}` },
+    });
+    // The length, never the value, and never the header it went in.
+    console.log(`${name} (${value.length} characters) can read issues: HTTP ${res.status}`);
+    if (res.ok) return value;
+  }
+
+  console.log('');
+  console.log('No credential here can read issues on this repo, so a dead link');
+  console.log('would be found and never reported. Stopping.');
+  console.log(`Tried: ${TOKEN_NAMES.filter(n => process.env[n]).join(', ') || '(none were set)'}`);
+  process.exit(1);
+}
+
+const token = await resolveToken();
+if (probeOnly) process.exit(0);
+
+const auth = { Authorization: `token ${token}`, 'Content-Type': 'application/json' };
 
 /**
  * Every forge call goes through here so that a failure says what was being
- * attempted and what came back. The automatic Actions token can push a branch
- * but is refused on some endpoints - Forgejo answers POST /pulls with a 404
- * reading "Can not read pulls" - so a permissions problem arrives here looking
- * like a missing route, and the body is the only thing that tells them apart.
+ * attempted and what came back. A permissions problem on this forge can arrive
+ * looking like a missing route - the automatic token is refused on POST /pulls
+ * with a 404 reading "Can not read pulls" - so the response body is the only
+ * thing that separates the two, and it is always printed.
  */
 async function api(method, path, body) {
   const res = await fetch(`${API}${path}`, {
