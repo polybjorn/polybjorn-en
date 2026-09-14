@@ -1,0 +1,104 @@
+# Weekly check that the site's external links still resolve, reporting into an
+# issue on this repo rather than onto a merge.
+#
+# This is deliberately not part of CI. An external link check asks a question
+# about the world, not about the diff, and a third party being down for an hour
+# must not block a merge - a red tick with nothing wrong behind it is worse
+# than no check, because it teaches you to skim past the one that matters.
+# `tests/internal-links.test.mjs` is the half that does gate, and it can,
+# because the file tree answers it offline.
+#
+# The two scripts do the work and carry the reasoning: check-external-links.mjs
+# for the three-verdict rule and the per-host pacing, report-link-failures.mjs
+# for why the report is an issue.
+name: External links
+
+on:
+  schedule:
+    # Mondays, early, off the hour. Weekly rather than daily because the thing
+    # it finds - a GrabCAD model removed, a company site renamed - is a content
+    # edit rather than an outage, and a report nobody is in a hurry to read
+    # should not arrive every morning. Forgejo runs a scheduled workflow from
+    # the default branch, so this sweeps with whatever is on main.
+    - cron: '43 5 * * 1'
+  workflow_dispatch:
+
+# The run takes about two minutes of mostly waiting, but it holds the runner's
+# one slot while it does. Never more than one at a time, and a dispatch while
+# the schedule is mid-run waits rather than doubling up on the same hosts.
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: docker
+    # The sweep paces itself per host (2s between grabcad's 54, 400ms between
+    # cloudinary's 121) and every request has a 20s timeout with one retry, so
+    # the worst case is bounded well under this. Generous rather than tight:
+    # the failure this guards against is a wedged runner sitting at "running"
+    # until Forgejo's six hour default, not a slow host.
+    timeout-minutes: 25
+    env:
+      # Same bounded npm retries as ci.yml, for the same measured reason: the
+      # default chain spends 70s giving up on a registry that does not answer,
+      # and 7m25s in the shape media-runner fails in (nixfleet #136).
+      npm_config_fetch_retries: 1
+      npm_config_fetch_timeout: 15000
+      npm_config_fetch_retry_maxtimeout: 20000
+    steps:
+      - uses: actions/checkout@v4
+
+      # Fail here, before two minutes of network sweeping, rather than in the
+      # step that writes the issue. A run that does all the work and then
+      # cannot report it has found the links and told nobody, which is the
+      # exact failure mode this whole workflow exists to close.
+      #
+      # FORGE_PR_TOKEN is a user-scope Actions secret covering nixfleet,
+      # lokalverket-no, rovar-no and polybjorn-en, so this repo inherits it and
+      # needs none of its own. The automatic token is tried as a fallback
+      # because it may well be enough for issues - it is refused on /pulls
+      # ("Can not read pulls"), but that is a different endpoint. Whichever one
+      # is used, only its length is ever printed.
+      - name: A token that can write issues
+        env:
+          FORGE_PR_TOKEN: ${{ secrets.FORGE_PR_TOKEN }}
+        run: |
+          set -eu
+          if [ -n "${FORGE_PR_TOKEN:-}" ]; then
+            echo "using FORGE_PR_TOKEN, ${#FORGE_PR_TOKEN} characters"
+          else
+            echo "FORGE_PR_TOKEN is not set; falling back to the automatic token"
+          fi
+
+      # The container image comes from the runner's docker label in nixfleet,
+      # so nothing here makes it agree with .nvmrc. Same guard as ci.yml.
+      - name: Node matches .nvmrc
+        run: |
+          set -eu
+          want=$(tr -d 'v \n' < .nvmrc | cut -d. -f1)
+          have=$(node -p 'process.versions.node.split(".")[0]')
+          [ "$want" = "$have" ] || {
+            echo "runner is on node $have, .nvmrc asks for $want"
+            exit 1
+          }
+
+      - run: npm ci
+        timeout-minutes: 5
+
+      # The links are read out of the built site, not out of src/: what ships
+      # is what a reader clicks, and a link assembled at build time exists
+      # nowhere else.
+      - run: npm run build
+
+      # Never fails the job on a dead link. Finding one is the job working, and
+      # a red run here would be a weekly notification with no way to act on it
+      # from the run list. A non-zero exit means the check itself broke.
+      - name: Check external links
+        run: node .forgejo/scripts/check-external-links.mjs --out link-report.json
+
+      - name: Report into an issue
+        env:
+          TOKEN: ${{ secrets.FORGE_PR_TOKEN || github.token }}
+          API: ${{ github.server_url }}/api/v1/repos/${{ github.repository }}
+        run: node .forgejo/scripts/report-link-failures.mjs link-report.json
