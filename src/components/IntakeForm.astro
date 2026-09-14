@@ -1412,9 +1412,18 @@ const stageLabels = {
       if (allowedFor) {
         const nativeFor = value => Array.from(select.options).find(option => option.value === value);
 
+        const field = wrap.closest('[data-field]');
+
         const applyAllowed = () => {
           const picked = form.querySelector('input[name="orderType"]:checked');
           const allowed = picked ? allowedFor[picked.value] : null;
+          // One answer left is not a question. "Bare en idé" rules out four of
+          // the five, and a dropdown holding the fifth is a click that cannot
+          // be wrong - and the answer it would record is the one just given a
+          // question higher up, which the brief already carries directly above
+          // it. So the row goes, and nothing is recorded on anyone's behalf.
+          const soleAnswer = Boolean(allowed && allowed.length === 1);
+          if (field) field.hidden = soleAnswer;
           options.forEach(option => {
             const keep = !allowed || allowed.includes(option.dataset.value);
             option.hidden = !keep;
@@ -1429,7 +1438,7 @@ const stageLabels = {
           // rides along from a control nobody can see. So it goes - with a
           // change event, because the marks and the receipt read the select
           // and not the button.
-          if (select.value && allowed && !allowed.includes(select.value)) {
+          if (select.value && (soleAnswer || (allowed && !allowed.includes(select.value)))) {
             select.value = '';
             shown.textContent = choosePlaceholder;
             shown.classList.remove('has-value');

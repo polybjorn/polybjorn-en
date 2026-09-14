@@ -53,6 +53,26 @@ for (const { path, lang } of PAGES) {
     }
   });
 
+  test(on('the question goes when one answer is left'), async () => {
+    // A dropdown holding a single option is a click that cannot be wrong, and
+    // the answer it would record is the one picked a question higher up. The
+    // row goes and nothing is recorded - with styles, because .field-row is a
+    // grid and a display rule beats [hidden] where one exists.
+    const doc = loadPage(path, { styles: true }).window.document;
+    const field = doc.querySelector('#intake-form [data-field="copyright"]');
+
+    pick(doc, 'file');
+    assert.equal(doc.defaultView.getComputedStyle(field).display === 'none', false);
+
+    pick(doc, 'idea');
+    assert.equal(doc.defaultView.getComputedStyle(field).display, 'none');
+    assert.equal(doc.getElementById('copyright').value, '');
+
+    // And it comes back, because the answer above it is not final either.
+    pick(doc, 'sketch');
+    assert.equal(doc.defaultView.getComputedStyle(field).display === 'none', false);
+  });
+
   test(on('an answer that no longer fits is cleared, not submitted unseen'), async () => {
     const dom = loadPage(path);
     const doc = dom.window.document;

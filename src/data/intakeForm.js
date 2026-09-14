@@ -122,11 +122,13 @@ export const ORDER_TYPES = [
 //   permission, or nothing but a description all stay.
 // - physical: there is a part, so "no design yet" is false, and a purchased
 //   file is not what is in the room.
-// - idea: there is no design, so one answer is the only one that can be true.
-//   That leaves a dropdown holding a single option - a click that cannot be
-//   wrong. Hiding the question outright in that case is the alternative, and
-//   was not the call taken; this one keeps every order type working the same
-//   way, and the question stays optional so it can still be skipped.
+// - idea: there is no design, so one answer is the only one that can be true -
+//   and one answer left is not a question. A dropdown holding a single option
+//   is a click that cannot be wrong, and the answer it would record is the one
+//   just given a question higher up, which the brief carries directly above it.
+//   So the form hides the row in that case rather than offering a list of one
+//   (IntakeForm.astro), and records nothing: any list of one is treated this
+//   way, so a later edit to the lists above needs no second decision here.
 //
 // Nothing here answers on anyone's behalf: it removes only answers the visitor
 // has already contradicted, and the field stays blank until it is picked (the
