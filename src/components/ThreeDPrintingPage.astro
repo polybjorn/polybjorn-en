@@ -16,14 +16,14 @@ const backHref = lang === 'no' ? '/no' : '/';
 const galleryHref = lang === 'no' ? '/no/galleri/laget' : '/gallery/made';
 const enquiryHref = lang === 'no' ? '/no/3d-printing/enquiry' : '/3d-printing/enquiry';
 
-const serviceOrder = [
+const serviceOrder = ([
   { key: 'modelling', icon: Boxes },
   { key: 'consultation', icon: Lightbulb },
   { key: 'prototyping', icon: Hammer },
   { key: 'smallBatch', icon: Layers },
   { key: 'support', icon: Wrench },
   { key: 'courses', icon: GraduationCap },
-];
+] as const);
 ---
 
 <Layout
@@ -378,11 +378,11 @@ const serviceOrder = [
   <script>
     const phone = atob('KzQ3IDk2OSAxMSA1ODc=');
     const email = atob('YW5kZXJzZW5AcG9seWJqb3JuLmNvbQ==');
-    document.getElementById('phone').textContent = phone;
-    document.getElementById('email').textContent = email;
+    document.getElementById('phone')!.textContent = phone;
+    document.getElementById('email')!.textContent = email;
 
-    const backHome = document.querySelector('.back-home');
-    const scrollTop = document.querySelector('.to-top');
+    const backHome = document.querySelector('.back-home')!;
+    const scrollTop = document.querySelector('.to-top')!;
     window.addEventListener('scroll', () => {
       backHome.classList.toggle('hidden', window.scrollY > 60);
       scrollTop.classList.toggle('visible', window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 20);

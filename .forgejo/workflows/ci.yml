@@ -76,6 +76,11 @@ jobs:
       # that stalls instead of failing.
       - run: npm ci
         timeout-minutes: 5
+      # tsconfig has extended astro/tsconfigs/strict since the repo was set up
+      # and nothing ran the checker, so the intent was recorded and unenforced.
+      # It is enforced from here: the 47 errors that had accumulated are fixed,
+      # and the cheapest moment to keep that true is before the build.
+      - run: npm run check
       - run: npm run build
       # The suite was in the repo and outside the gate: nothing ran it unless
       # someone ran it by hand. `npm test` builds first, which the step above
