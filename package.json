@@ -12,10 +12,11 @@
     "build:preview": "PREVIEW=1 astro build",
     "preview:build": "node scripts/build-preview.mjs",
     "test:pages": "node --test tests/*.test.mjs",
+    "check": "astro check",
     "test": "npm run build && npm run test:worker && npm run test:pages"
   },
   "engines": {
-    "node": ">=20"
+    "node": ">=22"
   },
   "dependencies": {
     "@astrojs/rss": "^4.0.19",
@@ -28,6 +29,8 @@
     "rough-notation": "^0.5.1"
   },
   "devDependencies": {
-    "jsdom": "^30.0.1"
+    "@astrojs/check": "^0.9.10",
+    "jsdom": "^30.0.1",
+    "typescript": "^6.0.3"
   }
 }

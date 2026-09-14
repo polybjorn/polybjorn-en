@@ -45,9 +45,10 @@ const { lang } = Astro.props;
   // is deferred, and filling controls it has not wired up yet would leave the
   // file list and the validation state out of step with what is on screen.
   window.addEventListener('load', () => {
-    window.fetch = async () => ({ ok: true, status: 201, json: async () => ({ ok: true, id: 'preview' }) });
+    // A stub with only the parts the form reads, so it is not a Response.
+    window.fetch = (async () => ({ ok: true, status: 201, json: async () => ({ ok: true, id: 'preview' }) })) as unknown as typeof fetch;
     if (!fillSample(document)) return;
     attachSampleFile(document);
-    document.getElementById('intake-form').requestSubmit();
+    (document.getElementById('intake-form') as HTMLFormElement).requestSubmit();
   });
 </script>

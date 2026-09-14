@@ -19,9 +19,14 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+      # .nvmrc is the one place the version is written. The forge runner gets
+      # its node from a container image chosen in nixfleet, which this repo
+      # cannot set - so the gate checks that the two agree rather than trusting
+      # that they do, and moving the line is a one-line change here plus that
+      # image. "22" is the line, not a frozen patch: it takes the newest 22.x.
       - uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version-file: .nvmrc
           cache: npm
       # `npm install` was resolving the tree afresh on every deploy while the
       # forge gate ran `npm ci` against the lockfile - so the versions that

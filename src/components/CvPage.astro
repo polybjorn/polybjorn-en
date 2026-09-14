@@ -437,7 +437,7 @@ const backHref = lang === 'no' ? '/no' : '/';
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
-          const a = annotate(entry.target, { type: 'underline', color: '#6AAEEE', strokeWidth: 2, animationDuration: 800 });
+          const a = annotate(entry.target as HTMLElement, { type: 'underline', color: '#6AAEEE', strokeWidth: 2, animationDuration: 800 });
           a.show();
           observer.unobserve(entry.target);
         }
