@@ -114,6 +114,27 @@ minifier sit between a component and the browser, and at least one bug has lived
 entirely in that gap. Some of them ask for a computed style rather than reading
 the DOM, because markup looks identical whether a rule applied or never matched.
 
+## External links
+
+Internal links are covered by `tests/internal-links.test.mjs`, which gates
+merges: it can, because the file tree answers it offline.
+
+External links are swept weekly instead, by
+`.forgejo/workflows/external-links.yml`, which reports into a single issue it
+opens, edits and closes by itself. It is deliberately not a gate - an external
+link check asks a question about the world rather than about the diff, and a
+third party being down for an hour must not stop a merge.
+
+```sh
+npm run check:links   # the same sweep by hand, about two minutes
+```
+
+Our own hostnames are skipped, hosts are paced individually, and only a 404, a
+410 or a hostname that does not resolve counts as a dead link - a 403, a 429 or
+a timeout is recorded as unreadable and kept out of the report. The reasoning,
+and the measurements behind it, are in the header comment of
+`.forgejo/scripts/check-external-links.mjs`.
+
 ## CV generation
 
 CV data in `src/data/cv.yaml` feeds both the website and PDF output via [Typst](https://typst.app).
