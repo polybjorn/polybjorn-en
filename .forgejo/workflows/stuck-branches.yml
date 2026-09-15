@@ -1,0 +1,54 @@
+# Watches the branch cleanup itself.
+#
+# #73 asked for something that says when the daily sweep in
+# delete-merged-branch.yml stops running, and concluded the assertion had to
+# come from outside the workflow. What cannot be trusted is the scheduler: a
+# schedule that does not fire produces no run, and a run list is only evidence
+# about runs that exist. But #80 settled the same argument for deletion, and
+# the rule that came out of it applies here too - check the end state, not the
+# report.
+#
+# So this asks git whether any herd/ branch already merged into main is still
+# on the remote, which is the thing the sweep exists to prevent. One assertion
+# covers the schedule having stopped, the sweep having failed, and the
+# pull_request event having been dropped.
+#
+# It hangs off push to main rather than a timer, which is what keeps it clear
+# of the blind spot it is watching for. Merges are also the only thing that
+# creates these branches, so the week where nobody merges - the week this does
+# not run - is the week in which nothing can pile up.
+name: Stuck branches
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: docker
+    timeout-minutes: 10
+    steps:
+      # fetch-depth 0 for the whole history: --is-ancestor answers with what it
+      # can see, and a shallow clone can see one commit.
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+
+      # Explicit, rather than trusting the checkout to have brought the other
+      # branches' refs along. If it has not, the check finds no branches at all
+      # and reports a clean remote on every run - a watchdog that cannot bark,
+      # which is worse than none. This costs a second and removes the question.
+      - name: Fetch the remote's branch refs
+        run: git fetch --prune origin "+refs/heads/*:refs/remotes/origin/*"
+
+      - name: Look for merged herd/ branches still on the remote
+        run: node .forgejo/scripts/check-stuck-branches.mjs --json stuck-branches.json
+
+      - name: Report what it found
+        env:
+          AUTOMATIC_TOKEN: ${{ github.token }}
+          FORGE_PR_TOKEN: ${{ secrets.FORGE_PR_TOKEN }}
+          API: ${{ github.server_url }}/api/v1/repos/${{ github.repository }}
+        run: node .forgejo/scripts/report-stuck-branches.mjs stuck-branches.json

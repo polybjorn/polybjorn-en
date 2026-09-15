@@ -14,12 +14,12 @@
  */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { createServer } from 'node:http';
-import { execFile } from 'node:child_process';
 import { mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+
+import { STUB_TOKEN as TOKEN, runAgainstForge, stubForge } from './helpers/stub-forge.mjs';
 
 const SCRIPT = join(
   dirname(fileURLToPath(import.meta.url)),
@@ -28,87 +28,11 @@ const SCRIPT = join(
   'scripts',
   'report-link-failures.mjs',
 );
-const TOKEN = 'stub-token-never-printed';
-
-/**
- * A forge that holds one list of issues, remembers every call, and refuses any
- * credential it was not told about - which is what FORGE_PR_TOKEN does in
- * reality, with a 403 naming the scope it lacks.
- */
-function stubForge(issues = [], accepts = [TOKEN]) {
-  const calls = [];
-  let nextNumber = 100;
-
-  const server = createServer((req, res) => {
-    let body = '';
-    req.on('data', chunk => (body += chunk));
-    req.on('end', () => {
-      const payload = body ? JSON.parse(body) : null;
-      const offered = (req.headers.authorization ?? '').replace(/^token /, '');
-      calls.push({ method: req.method, path: req.url, payload, offered });
-      res.setHeader('Content-Type', 'application/json');
-
-      if (!accepts.includes(offered)) {
-        res.statusCode = 403;
-        return res.end(
-          '{"message":"token does not have at least one of required scope(s): [read:issue]"}',
-        );
-      }
-
-      if (req.method === 'GET' && req.url.startsWith('/issues?')) {
-        return res.end(JSON.stringify(issues.filter(i => i.state !== 'closed')));
-      }
-      if (req.method === 'POST' && req.url === '/issues') {
-        const created = { number: (nextNumber += 1), state: 'open', ...payload };
-        issues.push(created);
-        return res.end(JSON.stringify(created));
-      }
-      const match = req.url.match(/^\/issues\/(\d+)(\/comments)?$/);
-      if (match) {
-        const issue = issues.find(i => i.number === Number(match[1]));
-        Object.assign(issue, match[2] ? {} : payload);
-        return res.end(JSON.stringify(issue));
-      }
-      res.statusCode = 404;
-      res.end('{"message":"no such endpoint"}');
-    });
-  });
-
-  return { server, calls, issues };
-}
-
-function run(report, forge, { env = { TOKEN }, args } = {}) {
-  return new Promise((resolve, reject) => {
-    const dir = mkdtempSync(join(tmpdir(), 'link-report-'));
-    const file = join(dir, 'report.json');
-    writeFileSync(file, JSON.stringify({ checkedAt: '2026-09-14T20:00:00.000Z', total: 199, ...report }));
-
-    forge.server.listen(0, '127.0.0.1', () => {
-      const { port } = forge.server.address();
-      // TOKEN, AUTOMATIC_TOKEN and FORGE_PR_TOKEN are cleared first: this host
-      // has a real FORGEJO_TOKEN in the environment and inheriting a stray one
-      // would make the test pass for the wrong reason.
-      execFile(
-        process.execPath,
-        [SCRIPT, ...(args ?? [file])],
-        {
-          env: {
-            ...process.env,
-            TOKEN: '',
-            AUTOMATIC_TOKEN: '',
-            FORGE_PR_TOKEN: '',
-            API: `http://127.0.0.1:${port}`,
-            ...env,
-          },
-        },
-        (error, stdout, stderr) => {
-          forge.server.close();
-          if (error) reject(Object.assign(new Error(`${error.message}\n${stdout}\n${stderr}`), { stdout, code: error.code }));
-          else resolve(stdout);
-        },
-      );
-    });
-  });
+function run(report, forge, { env, args } = {}) {
+  const dir = mkdtempSync(join(tmpdir(), 'link-report-'));
+  const file = join(dir, 'report.json');
+  writeFileSync(file, JSON.stringify({ checkedAt: '2026-09-14T20:00:00.000Z', total: 199, ...report }));
+  return runAgainstForge(SCRIPT, args ?? [file], forge, env ?? { TOKEN });
 }
 
 const deadLink = {
