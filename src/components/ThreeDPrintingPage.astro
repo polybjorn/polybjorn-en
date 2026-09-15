@@ -142,13 +142,21 @@ const serviceOrder = ([
       flex-shrink: 0;
     }
 
+    /* Three pictures and a way out, centred as one group: the row is as wide
+       as what is in it, not as wide as the text above it. Filling a four-column
+       grid, the arrow was handed a whole picture's worth of column and sat
+       alone in the middle of it, which read as a fourth picture that had not
+       loaded. */
     .examples-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
       gap: 1rem;
     }
 
     .examples-grid .example {
+      flex: 0 1 200px;
       border-radius: 8px;
       overflow: hidden;
       aspect-ratio: 1 / 1;
@@ -166,12 +174,15 @@ const serviceOrder = ([
 
     /* The front page ends its row of examples with this same arrow, so the
        reader has already been taught that it means "the rest of them". It
-       takes a cell of the grid rather than sitting under it: a sentence below
-       the pictures read as a caption, and this is a way out, not a caption. */
+       stays on the row rather than sitting under it: a sentence below the
+       pictures read as a caption, and this is a way out, not a caption. As on
+       the front page it is only as wide as it needs to be. */
     .examples-grid .more-arrow {
       display: flex;
+      flex: 0 0 auto;
       align-items: center;
       justify-content: center;
+      padding: 0 0.5rem;
       color: #888;
       text-decoration: none;
       transition: color 0.2s;
@@ -306,7 +317,8 @@ const serviceOrder = ([
       .service:first-child { padding-top: 0; }
       .service:last-child { padding-bottom: 0; border-bottom: none; }
       .service:not(:last-child) { border-bottom: 1px solid #333840; }
-      .examples-grid { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+      .examples-grid { gap: 0.75rem; }
+      .examples-grid .example { flex: 0 1 140px; }
       .contact-row { gap: 1rem; flex-direction: column; align-items: center; }
     }
   </style>
@@ -327,12 +339,12 @@ const serviceOrder = ([
               ? <a href={img.link} target="_blank" rel="noopener" aria-label={img.title}><img
                   src={cloudinaryUrl(img.url, { width: 600 })}
                   srcset={`${cloudinaryUrl(img.url, { width: 400 })} 400w, ${cloudinaryUrl(img.url, { width: 600 })} 600w, ${cloudinaryUrl(img.url, { width: 800 })} 800w`}
-                  sizes="(max-width: 720px) 50vw, 25vw"
+                  sizes="(max-width: 720px) 140px, 200px"
                   alt="" loading="lazy" /></a>
               : <img
                   src={cloudinaryUrl(img.url, { width: 600 })}
                   srcset={`${cloudinaryUrl(img.url, { width: 400 })} 400w, ${cloudinaryUrl(img.url, { width: 600 })} 600w, ${cloudinaryUrl(img.url, { width: 800 })} 800w`}
-                  sizes="(max-width: 720px) 50vw, 25vw"
+                  sizes="(max-width: 720px) 140px, 200px"
                   alt={img.alt} loading="lazy" />
             }
           </div>
