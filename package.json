@@ -13,6 +13,7 @@
     "preview:build": "node scripts/build-preview.mjs",
     "test:pages": "node --test tests/*.test.mjs",
     "check:links": "node .forgejo/scripts/check-external-links.mjs",
+    "check:branches": "node .forgejo/scripts/check-stuck-branches.mjs",
     "check": "astro check",
     "test": "npm run build && npm run test:worker && npm run test:pages"
   },
