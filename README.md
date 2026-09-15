@@ -135,6 +135,37 @@ a timeout is recorded as unreadable and kept out of the report. The reasoning,
 and the measurements behind it, are in the header comment of
 `.forgejo/scripts/check-external-links.mjs`.
 
+## Branch cleanup
+
+A merged `herd/` branch is deleted by `.forgejo/workflows/delete-merged-branch.yml`:
+the `merged` job takes the branch the merge event names, and a daily sweep at
+04:17 catches whatever the event missed. Both delete over git -
+`git push origin --delete` removes the ref and `git ls-remote` decides whether it
+worked - because this forge answers 204 to a DELETE that did not delete, and
+recreates a deleted ref at its old sha within about two seconds. So the delete
+retries up to four times and only a ref that survives all four fails the job.
+
+A second workflow watches the first. `stuck-branches.yml` runs on every push to
+main and asks whether any `herd/` branch already contained in main is still on
+the remote after 26 hours, reporting into a single issue it opens, edits and
+closes by itself - the same shape the link check uses. It deliberately does not
+ask whether the sweep ran: a schedule that does not fire produces no run, so the
+end state is the only thing worth asserting.
+
+```sh
+npm run check:branches   # the same question, against this clone's remote
+```
+
+Both jobs fetch the remote's branch refs in a step of their own before selecting
+anything. That is not decoration: `actions/checkout` here leaves no
+remote-tracking refs at all, not even `origin/main`. The sweep selected over
+refs that were never present from the day it was added until the day it was
+fixed, printing "no merged herd/ branches" - which is also what a working sweep
+prints on a clean remote, which is why two runs went by without anyone noticing.
+`tests/branch-jobs-fetch.test.mjs` asserts the fetch step is still there, because
+no behaviour test can catch its absence: a job selecting over refs that do not
+exist reports an empty remote and exits 0.
+
 ## CV generation
 
 CV data in `src/data/cv.yaml` feeds both the website and PDF output via [Typst](https://typst.app).
