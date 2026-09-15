@@ -31,7 +31,8 @@
 // is watching for. Anything tighter reports the gap between a merge and the
 // job that deletes it, which is a job doing its work rather than a failure.
 import { writeFileSync } from 'node:fs';
-import { spawnSync } from 'node:child_process';
+
+import { herdBranches, isMerged, landedAt, requireMain } from './herd-branches.mjs';
 
 const args = process.argv.slice(2);
 const hoursArg = args.indexOf('--hours');
@@ -44,65 +45,24 @@ if (!Number.isFinite(THRESHOLD_HOURS) || THRESHOLD_HOURS < 0) {
   process.exit(2);
 }
 
-function git(...a) {
-  const res = spawnSync('git', a, { encoding: 'utf8' });
-  return {
-    ok: res.status === 0,
-    status: res.status,
-    out: (res.stdout ?? '').trim(),
-    err: (res.stderr ?? '').trim(),
-  };
-}
-
-function must(...a) {
-  const res = git(...a);
-  if (!res.ok) {
-    console.log(`git ${a.join(' ')} failed (${res.status}): ${res.err}`);
-    process.exit(2);
-  }
-  return res.out;
-}
-
 // origin/main has to be readable, or every branch below would look unmerged
 // and the check would invent a problem on every run.
-must('rev-parse', '--verify', 'origin/main');
-
-// `**` matters: a single `*` stops at the slash, and every branch here is
-// herd/<topic>, so the pattern without it matches nothing and the check
-// reports a clean remote forever.
-const refs = must('for-each-ref', '--format=%(refname:short)', 'refs/remotes/origin/herd/**')
-  .split('\n')
-  .filter(Boolean);
+requireMain();
 
 const now = Date.now();
+const names = herdBranches();
 const branches = [];
 
-for (const ref of refs) {
-  const name = ref.replace(/^origin\//, '');
+for (const name of names) {
+  if (!isMerged(name)) continue;
 
-  // Merged means reachable from main, which is git's own answer rather than a
-  // string comparison on the branch name.
-  if (!git('merge-base', '--is-ancestor', ref, 'origin/main').ok) continue;
+  const landed = landedAt(name);
+  if (!landed) continue;
 
-  // The first commit on the path from the tip to main is the one that brought
-  // it there: the merge commit for a merged PR, or the commit itself if it was
-  // pushed straight on.
-  //
-  // --topo-order --reverse, not the default. rev-list sorts by commit date, so
-  // in a history where dates and topology disagree - a rebase, a backdated
-  // commit, a merge of an old branch after a newer one - the oldest *date* on
-  // the path is some unrelated commit further along main, and the branch
-  // inherits its age. A test with three merges in one repository caught this
-  // reporting a branch merged 30 hours ago as 180 hours stuck.
-  const path = git('rev-list', '--ancestry-path', '--topo-order', '--reverse', `${ref}..origin/main`);
-  const landedCommit = path.ok && path.out ? path.out.split('\n')[0] : ref;
-  const landedAt = git('show', '-s', '--format=%cI', landedCommit);
-  if (!landedAt.ok) continue;
-
-  const ageHours = (now - Date.parse(landedAt.out)) / 3_600_000;
+  const ageHours = (now - Date.parse(landed)) / 3_600_000;
   branches.push({
     name,
-    landedAt: landedAt.out,
+    landedAt: landed,
     ageHours: Math.round(ageHours * 10) / 10,
     stuck: ageHours > THRESHOLD_HOURS,
   });
@@ -121,7 +81,7 @@ const report = {
 
 // Said even when there is nothing wrong: "the remote is clean" and "the check
 // never looked" are the same silence otherwise.
-console.log(`${refs.length} herd/ branch(es) on the remote, ${branches.length} already merged into main`);
+console.log(`${names.length} herd/ branch(es) on the remote, ${branches.length} already merged into main`);
 for (const b of branches) {
   console.log(`  ${b.name} landed ${b.landedAt} (${b.ageHours}h ago)${b.stuck ? ' STUCK' : ''}`);
 }
