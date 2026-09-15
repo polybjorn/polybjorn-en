@@ -61,18 +61,27 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: true
+
+      # #84: without this the job selects from refs that are not here. The
+      # checkout brings the history of the ref being built and nothing else, so
+      # for two months this job listed no branches whatever was on the remote
+      # and printed "no merged herd/ branches" to a remote it could not see.
+      # It is a step of its own rather than a line inside the script so that
+      # the fetch, and any failure of it, is visible in the job log.
+      - name: Fetch the remote's branch refs
+        run: git fetch --prune origin "+refs/heads/*:refs/remotes/origin/*"
+
       - name: Delete every merged herd/ branch
         run: |
           set -eu
           # git decides what "merged" means, not a string comparison: a branch
-          # is gone only when its commits are reachable from main.
-          branches="$(git branch -r --merged origin/main \
-            | sed 's|^ *origin/||' \
-            | grep '^herd/' || true)"
+          # is gone only when its commits are reachable from main. The
+          # selection is shared with the #73 watchdog so the two jobs cannot
+          # drift about what "ours" and "merged" mean.
+          branches="$(node .forgejo/scripts/list-merged-branches.mjs)"
           if [ -z "$branches" ]; then
             echo "no merged herd/ branches"
             exit 0
           fi
-          echo "$branches"
           # shellcheck disable=SC2086
           node .forgejo/scripts/delete-branches.mjs $branches
