@@ -64,8 +64,9 @@ jobs:
 
       # #84: without this the job selects from refs that are not here. The
       # checkout brings the history of the ref being built and nothing else, so
-      # for two months this job listed no branches whatever was on the remote
-      # and printed "no merged herd/ branches" to a remote it could not see.
+      # this job listed no branches whatever was on the remote and printed "no
+      # merged herd/ branches" to a remote it could not see. It never worked:
+      # it was added on 2026-09-14 and fixed on 2026-09-15, having run twice.
       # It is a step of its own rather than a line inside the script so that
       # the fetch, and any failure of it, is visible in the job log.
       - name: Fetch the remote's branch refs
