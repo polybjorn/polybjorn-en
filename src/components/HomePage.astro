@@ -36,7 +36,7 @@ const featuredImages = [
 ---
 
 <Layout lang={lang} title={tr.homeTitle} description={tr.homeDescription}>
-  <link slot="head" rel="preload" as="image" href="https://res.cloudinary.com/det9ftymo/image/upload/w_200/v1725405810/photo_jn86fv.jpg" />
+  <link slot="head" rel="preload" as="image" href="/images/polybjorn-mark.svg" />
 
   <style>
     body {
@@ -64,8 +64,7 @@ const featuredImages = [
     .hero img.avatar {
       width: 200px;
       height: 200px;
-      border-radius: 50%;
-      object-fit: cover;
+      object-fit: contain;
       margin-bottom: 1.5rem;
     }
 
@@ -270,7 +269,7 @@ const featuredImages = [
   <section class="hero">
     <img
       class="avatar"
-      src="https://res.cloudinary.com/det9ftymo/image/upload/w_200/v1725405810/photo_jn86fv.jpg"
+      src="/images/polybjorn-mark.svg"
       alt="Bjørn A. Andersen"
     />
     <h1>Bjørn A. Andersen</h1>
