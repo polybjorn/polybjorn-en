@@ -373,3 +373,48 @@ test('the brief lists the contact block grouped, identity before contact methods
     `the brief reads ${expected.join(', ')} out of order`,
   );
 });
+
+/**
+ * The confidentiality tick. It is the one answer that changes what the reader
+ * is allowed to do with every other answer, and as an ordinary row it rendered
+ * last in the brief, under the description and the contact details, as a bare
+ * untranslated `yes`. These pin the banner and the placement, because "it is
+ * in there somewhere" is exactly the property that failed.
+ */
+test('a confidential enquiry says so before any answer, in the form language', async () => {
+  for (const [lang, banner, row] of [
+    ['no', 'KONFIDENSIELT', 'Behandle henvendelsen konfidensielt: Ja'],
+    ['en', 'CONFIDENTIAL', 'Treat this enquiry as confidential: Yes'],
+  ]) {
+    const kv = kvStub();
+    const response = await worker.fetch(post(baseForm({ lang, confidential: 'yes' })), envWith(kv));
+    assert.equal(response.status, 201);
+    const { id } = await response.json();
+    const { brief, raw } = await kv.get(`enquiry:${id}`, 'json');
+
+    assert.match(brief, new RegExp(banner), `${lang}: the banner is present`);
+    assert.ok(brief.includes(row), `${lang}: the answer row stays, and is translated`);
+
+    // Placement is the point: before the first answer, not merely somewhere.
+    const firstAnswer = brief.indexOf(':', brief.indexOf('ID: '));
+    assert.ok(
+      brief.indexOf(banner) < brief.indexOf('\n\n', firstAnswer),
+      `${lang}: the banner sits above the answers`,
+    );
+    assert.ok(!brief.includes(': yes'), `${lang}: the wire value never reaches the prose`);
+
+    // The wire value is unchanged, so anything downstream still tests for 'yes'.
+    assert.equal(raw.confidential, 'yes');
+  }
+});
+
+test('an enquiry without the tick carries no banner at all', async () => {
+  for (const lang of ['no', 'en']) {
+    const kv = kvStub();
+    const { id } = await (await worker.fetch(post(baseForm({ lang })), envWith(kv))).json();
+    const { brief, raw } = await kv.get(`enquiry:${id}`, 'json');
+
+    assert.doesNotMatch(brief, /KONFIDENSIELT|CONFIDENTIAL/, `${lang}: absent means not confidential`);
+    assert.equal(raw.confidential, undefined, `${lang}: and the field is absent, not "no"`);
+  }
+});

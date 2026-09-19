@@ -144,8 +144,12 @@ function collectAnswers(form, lang) {
 
     if (field.type === 'checkbox') {
       if (trimmed !== 'yes') continue;
+      // `raw` keeps the wire value, so anything downstream still tests for
+      // 'yes'. `answers` is prose for a human, and a Norwegian brief that read
+      // "Behandle henvendelsen konfidensielt: yes" was the one untranslated
+      // word in it.
       raw[field.id] = 'yes';
-      answers.push({ id: field.id, label: field.label[lang], value: 'yes' });
+      answers.push({ id: field.id, label: field.label[lang], value: lang === 'no' ? 'Ja' : 'Yes' });
       continue;
     }
 
@@ -187,13 +191,24 @@ function formatSize(bytes, lang) {
   return `${number.format(bytes / (1024 * 1024))} MB`;
 }
 
-function renderBrief({ id, receivedAt, lang, answers, files }) {
+function renderBrief({ id, receivedAt, lang, answers, files, confidential }) {
   const lines = [
     lang === 'no' ? 'Henvendelse fra skjemaet på polybjorn.no' : 'Enquiry from the form on polybjorn.com',
     `${lang === 'no' ? 'Mottatt' : 'Received'}: ${formatReceived(receivedAt, lang)}`,
     `ID: ${id}`,
-    '',
   ];
+
+  // The tick is the one answer that changes what the reader may do with the
+  // rest, and as an ordinary answer row it sorted last, under the description
+  // and the contact details, where a skim misses it. It stays in the answer
+  // list as well: a banner is for reading, the row is for the record.
+  if (confidential) {
+    lines.push(lang === 'no'
+      ? 'KONFIDENSIELT - kunden har bedt om fortrolig behandling'
+      : 'CONFIDENTIAL - the customer asked for this to be kept private');
+  }
+
+  lines.push('');
 
   for (const answer of answers) {
     const multiline = answer.value.includes('\n');
@@ -316,7 +331,7 @@ async function handleSubmit(request, env) {
     answers,
     raw,
     files: manifest,
-    brief: renderBrief({ id, receivedAt, lang, answers, files: manifest }),
+    brief: renderBrief({ id, receivedAt, lang, answers, files: manifest, confidential: raw.confidential === 'yes' }),
   };
 
   // Files first. If a write fails halfway the envelope never appears, so the
