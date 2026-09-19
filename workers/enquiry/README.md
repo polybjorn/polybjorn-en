@@ -91,6 +91,14 @@ filed as it is. `answers` is the same thing structured, and `raw` is the
 machine-readable version keyed by field id, for anything that wants to read a
 single answer.
 
+A ticked confidentiality box appears as `raw.confidential: "yes"`, and adds a
+banner line to `brief` above the answers, in the enquiry's own language:
+`KONFIDENSIELT - kunden har bedt om fortrolig behandling` or
+`CONFIDENTIAL - the customer asked for this to be kept private`. It stays in
+`answers` as an ordinary row as well, so the record keeps it. Unticked submits
+nothing at all, which means the field is **absent** rather than `"no"`: treat a
+missing field as no, never as unknown.
+
 The id sorts chronologically and is safe as a folder name.
 
 No IP address is kept. `country` is what Cloudflare already knows from the
