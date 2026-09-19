@@ -20,8 +20,10 @@ kv_namespaces = [
   { binding = "ENQUIRIES", id = "ea8a9ce7a5a0474a874c2b5c0e5710cc" }
 ]
 
-# A burst limit per IP. The period can only be 10 or 60 seconds, so this stops a
-# flood rather than a slow drip; the daily ceiling in index.js covers the rest.
+# A burst limit per IP on submissions: handleSubmit is its only caller, so the
+# pull routes are not rate limited at all. The period can only be 10 or 60
+# seconds, so this stops a flood rather than a slow drip; MAX_PER_DAY in
+# index.js caps how many submissions a day get stored.
 # namespace_id is a number local to this worker, not an account resource.
 [[ratelimits]]
 name = "ENQUIRY_RATELIMIT"
