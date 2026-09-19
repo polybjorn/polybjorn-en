@@ -24,7 +24,8 @@
  *   - a cap on how long any one answer can be, and on how many files
  *   - known field names and known option values, so nothing unexpected reaches
  *     the PRM import
- *   - a burst rate limit per IP and a daily ceiling for the whole endpoint
+ *   - a burst rate limit per IP, and a ceiling on how many submissions get
+ *     stored in a day. Both are POST-only; the pull routes have neither.
  */
 
 import { BASE_FIELDS } from '../../src/data/intakeForm.js';
@@ -38,9 +39,11 @@ const MAX_TEXT_CHARS = 300;
 // A backstop, not a retention policy: the puller deletes what it has taken, and
 // this is what happens to anything it never managed to take.
 const KV_TTL_SECONDS = 14 * 24 * 60 * 60;
-// The whole endpoint, not per visitor. A handful of enquiries a month is the
-// expected volume, so this only ever trips on abuse, and it protects the KV
-// namespace and the Pi rather than any one submitter.
+// A ceiling on submissions stored in a day. Not per visitor, and not a request
+// budget: it counts what is already in KV for the date, so the pull routes
+// cannot spend it. A handful of enquiries a month is the expected volume, so
+// this only ever trips on abuse, and it protects the KV namespace and the Pi
+// rather than any one submitter.
 const MAX_PER_DAY = 50;
 
 const SITE_ORIGINS = [
@@ -282,7 +285,7 @@ async function handleSubmit(request, env) {
   const receivedAt = new Date().toISOString();
   const id = newId(receivedAt);
 
-  // A ceiling on the whole endpoint for the day. list() is eventually
+  // A ceiling on how many submissions a day get stored. list() is eventually
   // consistent, which is fine for a backstop, and it costs a read rather than
   // the write a counter would need.
   const today = id.slice(0, 9);
