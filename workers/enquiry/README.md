@@ -52,7 +52,9 @@ request never loads the page (nixfleet#87).
 - Only field names and option values the form could have produced. Anything else
   is dropped before it reaches the PRM.
 - At least one contact method, which is the form's one hard rule.
-- Three submissions per minute per IP, and 50 a day for the whole endpoint.
+- Three submissions per minute per IP, and 50 stored in a day. Both apply to
+  `POST` only: the daily figure counts enquiries already in KV for the date,
+  so the pull routes cannot spend it and are not rate limited at all.
 
 ## Pull API
 
