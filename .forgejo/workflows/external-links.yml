@@ -23,9 +23,11 @@ on:
     - cron: '43 5 * * 1'
   workflow_dispatch:
 
-# The run takes about two minutes of mostly waiting, but it holds the runner's
-# one slot while it does. Never more than one at a time, and a dispatch while
-# the schedule is mid-run waits rather than doubling up on the same hosts.
+# The run takes about two minutes of mostly waiting. It used to hold the
+# runner's only slot throughout; capacity went to 4 on 2026-09-20, so it no
+# longer stalls other repos. The group below stays for its own reason, which
+# never depended on the runner: a dispatch while the schedule is mid-run would
+# double up on the same external hosts.
 concurrency:
   group: ${{ github.workflow }}
   cancel-in-progress: false

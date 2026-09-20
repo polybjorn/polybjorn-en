@@ -25,9 +25,11 @@ on:
   pull_request:
     types: [closed]
   schedule:
-    # Daily, off the hour: the runner has one slot, and CI has first claim on
-    # it. Forgejo runs a scheduled workflow from the default branch, so this
-    # sweeps with whatever is on main rather than with any branch's copy.
+    # Daily, off the hour. That was for the runner's single slot, which CI had
+    # first claim on; capacity went to 4 on 2026-09-20, so this waits behind
+    # nothing now. Off the hour anyway, because the hour is what everything
+    # else picks. Forgejo runs a scheduled workflow from the default branch, so
+    # this sweeps with whatever is on main rather than with any branch's copy.
     - cron: '17 4 * * *'
   workflow_dispatch:
 
