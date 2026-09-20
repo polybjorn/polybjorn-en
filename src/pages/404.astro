@@ -1,7 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import { t } from '../data/translations.js';
-import { Link2Off } from 'lucide-astro';
+import { Link2Off } from '@lucide/astro';
 ---
 
 <Layout title="404 - Page not found" description="This page doesn't exist." noindex>
@@ -56,7 +56,7 @@ import { Link2Off } from 'lucide-astro';
 
   <main id="main">
     <div class="container">
-      <Link2Off size={64} strokeWidth={1.25} class="icon" />
+      <Link2Off size={64} stroke-width={1.25} class="icon" />
       <h1>404</h1>
       <p id="not-found-msg"></p>
       <a id="not-found-link" href="/"></a>

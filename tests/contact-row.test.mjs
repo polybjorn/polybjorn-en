@@ -72,3 +72,50 @@ for (const { path, lang, page } of PAGES) {
     assert.notEqual(style.opacity, '0');
   });
 }
+
+/**
+ * The second contact row, the one the tests above deliberately step around.
+ *
+ * Its GitHub icon is the single mark lucide does not carry. `lucide-astro` had
+ * a `Github` export; the `@lucide/astro` that replaced it drops brand marks
+ * altogether, so the mark is drawn from `src/data/brandIcons.js` rather than
+ * imported like every other icon on the page. Nothing asserted this row at all
+ * before, which is how that swap could have dropped the icon and still gone
+ * green.
+ */
+const MARK_PAGES = [
+  { path: 'index.html', lang: 'en' },
+  { path: 'no/index.html', lang: 'no' },
+];
+
+for (const { path, lang } of MARK_PAGES) {
+  test(`home ${lang}: the GitHub link keeps its mark`, () => {
+    const doc = loadPage(path).window.document;
+    const link = doc.querySelector('a[href="https://github.com/polybjorn"]');
+
+    assert.ok(link, 'the GitHub link is on the page');
+    const item = link.closest('.contact-item');
+    assert.ok(item, 'and it sits in a contact item');
+
+    const svg = item.querySelector('svg');
+    assert.ok(svg, 'the link is drawn with a mark beside it, not left as bare text');
+
+    // An empty or placeholder <path> would satisfy the check above while
+    // rendering nothing, so the drawing itself has to be there.
+    const d = svg.querySelector('path')?.getAttribute('d') ?? '';
+    assert.ok(d.length > 100, `the mark is a real outline, got ${d.length} chars of path`);
+  });
+
+  test(`home ${lang}: the icons are drawn at the weight the source asks for`, () => {
+    const doc = loadPage(path).window.document;
+    const icon = doc.querySelector('.contact-item svg.lucide');
+
+    assert.ok(icon, 'a lucide icon is in the contact row');
+    // `strokeWidth` is not an SVG attribute. Passed under that name it rode
+    // through to the markup verbatim and the icon kept lucide's default of 2,
+    // so every icon on the site drew heavier than it was written to. The prop
+    // is `stroke-width`, and this fails if it is ever spelled the other way.
+    assert.equal(icon.getAttribute('stroke-width'), '1.5');
+    assert.equal(icon.getAttribute('strokeWidth'), null);
+  });
+}

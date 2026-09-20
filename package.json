@@ -24,9 +24,9 @@
     "@astrojs/rss": "^4.0.19",
     "@astrojs/sitemap": "^3.7.3",
     "@fontsource/piazzolla": "^5.2.8",
+    "@lucide/astro": "^1.47.0",
     "@rollup/plugin-yaml": "^5.0.0",
     "astro": "^7.1.6",
-    "lucide-astro": "^0.556.0",
     "markdown-it": "^15.0.0",
     "rough-notation": "^0.5.1"
   },

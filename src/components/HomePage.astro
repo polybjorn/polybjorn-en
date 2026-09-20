@@ -2,7 +2,8 @@
 import Layout from '../layouts/Layout.astro';
 import { t } from '../data/translations.js';
 import { cloudinaryUrl } from '../data/made.js';
-import { Phone, Mail, MessageCircle, ArrowRight, Music, Github, KeyRound } from 'lucide-astro';
+import { Phone, Mail, MessageCircle, ArrowRight, Music, KeyRound } from '@lucide/astro';
+import { GITHUB_MARK } from '../data/brandIcons.js';
 
 interface Props {
   lang: 'en' | 'no';
@@ -303,12 +304,12 @@ const featuredImages = [
 
     <div class="contact">
       <div class="contact-row">
-        <span class="contact-item"><Phone size={18} strokeWidth={1.5} style="color: #4CAF82;" /> <span id="phone"></span></span>
+        <span class="contact-item"><Phone size={18} stroke-width={1.5} style="color: #4CAF82;" /> <span id="phone"></span></span>
         <span class="contact-item">
-          <MessageCircle size={18} strokeWidth={1.5} style="color: #6aaeee;" />
+          <MessageCircle size={18} stroke-width={1.5} style="color: #6aaeee;" />
           <a href="https://signal.me/#eu/bjanda.60">{tr.signal}</a>
         </span>
-        <span class="contact-item"><Mail size={18} strokeWidth={1.5} style="color: #E8A838;" /> <span id="email"></span><span class="pgp"><KeyRound size={16} strokeWidth={1.5} style="color: #b08bd9;" /><a href="/pubkey.asc">PGP</a></span></span>
+        <span class="contact-item"><Mail size={18} stroke-width={1.5} style="color: #E8A838;" /> <span id="email"></span><span class="pgp"><KeyRound size={16} stroke-width={1.5} style="color: #b08bd9;" /><a href="/pubkey.asc">PGP</a></span></span>
       </div>
 
     </div>
@@ -329,7 +330,7 @@ const featuredImages = [
           );
         })}
         <a href={galleryMadeHref} class="more-arrow" title={tr.viewAllModelsTitle} aria-label={tr.viewAllModelsTitle}>
-          <ArrowRight size={36} strokeWidth={1.5} />
+          <ArrowRight size={36} stroke-width={1.5} />
         </a>
       </div>
       <p style="margin-top:1rem;font-size:0.85rem;color:#999;" set:html={tr.bio2Html}></p>
@@ -339,11 +340,11 @@ const featuredImages = [
     <div class="contact">
       <div class="contact-row">
         <span class="contact-item">
-          <Github size={18} strokeWidth={1.5} style="color: #fff;" />
+          <svg width="18" height="18" viewBox="0 0 24 24" fill={GITHUB_MARK.color} role="img" aria-hidden="true"><path d={GITHUB_MARK.path}/></svg>
           <a href="https://github.com/polybjorn" target="_blank" rel="noopener">GitHub</a>
         </span>
         <span class="contact-item">
-          <Music size={18} strokeWidth={1.5} style="color: #EB743B;" />
+          <Music size={18} stroke-width={1.5} style="color: #EB743B;" />
           <a href="https://listenbrainz.org/user/driveway4514/stats/?range=this_year" target="_blank" rel="noopener">{tr.musicStats}</a>
         </span>
       </div>
