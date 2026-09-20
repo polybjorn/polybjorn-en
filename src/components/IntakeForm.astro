@@ -2,7 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import { t } from '../data/translations.js';
 import { BASE_FIELDS, COPYRIGHT_BY_ORDER_TYPE } from '../data/intakeForm.js';
-import { ArrowLeft, ArrowUp } from 'lucide-astro';
+import { ArrowLeft, ArrowUp } from '@lucide/astro';
 import IntakeField from './IntakeField.astro';
 
 interface Props {
@@ -740,7 +740,7 @@ const stageLabels = {
       fieldset.stage { padding: 1.15rem 1.15rem 1.4rem; }
     }  </style>
 
-  <a class="back-home" href={backHref} aria-label={tr.backHomeAria}><ArrowLeft size={28} strokeWidth={1.5} /></a>
+  <a class="back-home" href={backHref} aria-label={tr.backHomeAria}><ArrowLeft size={28} stroke-width={1.5} /></a>
 
   <main id="main">
     <section class="hero">
@@ -935,7 +935,7 @@ const stageLabels = {
     </section>
   </main>
 
-  <a class="to-top" href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});this.classList.remove('visible');return false;" aria-label={tr.backTopAria}><ArrowUp size={28} strokeWidth={1.5} /></a>
+  <a class="to-top" href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});this.classList.remove('visible');return false;" aria-label={tr.backTopAria}><ArrowUp size={28} stroke-width={1.5} /></a>
 
   <script define:vars={{ stageIds: STAGE_IDS, fieldOrder: BASE_FIELDS.map((f: any) => f.id), stageLabels, contactMethodRequired: td.contactMethodRequired, fileTooLarge: td.fileTooLarge, chooseFilesLabel: td.chooseFilesLabel, addFilesLabel: td.addFilesLabel, removeFileLabel: td.removeFileLabel, submitMissingNote: td.submitMissingNote, placeholderSets: PLACEHOLDER_SETS, copyrightByOrderType: COPYRIGHT_BY_ORDER_TYPE, choosePlaceholder: td.choosePlaceholder, invalidEmailMessage: td.invalidEmailMessage, descriptionTooShort: td.descriptionTooShort, invalidPhoneMessage: td.invalidPhoneMessage, invalidSignalMessage: td.invalidSignalMessage, submitLabel: td.submitLabel, sendingLabel: td.sendingLabel, sentMessage: td.sentMessage, sendFailed: td.sendFailed, sendRateLimited: td.sendRateLimited, attachmentsTooLarge: td.attachmentsTooLarge, tooManyFiles: td.tooManyFiles, fileTypeRejected: td.fileTypeRejected, fileContentRejected: td.fileContentRejected, numberLocale: lang === 'no' ? 'nb-NO' : 'en-GB' }}>
     const form = document.getElementById('intake-form');

@@ -2,7 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import { t } from '../data/translations.js';
 import { projects, cloudinaryUrl } from '../data/made.js';
-import { Phone, Mail, MessageCircle, KeyRound, ArrowLeft, ArrowRight, ArrowUp, Boxes, Lightbulb, Hammer, Layers, Wrench, GraduationCap } from 'lucide-astro';
+import { Phone, Mail, MessageCircle, KeyRound, ArrowLeft, ArrowRight, ArrowUp, Boxes, Lightbulb, Hammer, Layers, Wrench, GraduationCap } from '@lucide/astro';
 
 interface Props {
   lang: 'en' | 'no';
@@ -323,7 +323,7 @@ const serviceOrder = ([
     }
   </style>
 
-  <a class="back-home" href={backHref} aria-label={tr.backHomeAria}><ArrowLeft size={28} strokeWidth={1.5} /></a>
+  <a class="back-home" href={backHref} aria-label={tr.backHomeAria}><ArrowLeft size={28} stroke-width={1.5} /></a>
 
   <main id="main">
     <section class="hero">
@@ -350,7 +350,7 @@ const serviceOrder = ([
           </div>
         ))}
         <a class="more-arrow" href={galleryHref} title={tr.viewAllModelsTitle} aria-label={tr.viewAllModelsTitle}>
-          <ArrowRight size={36} strokeWidth={1.5} />
+          <ArrowRight size={36} stroke-width={1.5} />
         </a>
       </div>
     </section>
@@ -361,7 +361,7 @@ const serviceOrder = ([
         {serviceOrder.map(({ key, icon: Icon }) => (
           <div class="service">
             <div class="service-head">
-              <Icon size={22} strokeWidth={1.5} class="service-icon" />
+              <Icon size={22} stroke-width={1.5} class="service-icon" />
               <h3>{td.services[key].title}</h3>
             </div>
             <p>{td.services[key].body}</p>
@@ -374,18 +374,18 @@ const serviceOrder = ([
       <a class="enquiry-cta" href={enquiryHref}>{td.enquiryCta}</a>
       <p>{td.contactCta}</p>
       <div class="contact-row">
-        <span class="contact-item"><Phone size={18} strokeWidth={1.5} style="color: #4CAF82;" /> <span id="phone"></span></span>
+        <span class="contact-item"><Phone size={18} stroke-width={1.5} style="color: #4CAF82;" /> <span id="phone"></span></span>
         <span class="contact-item">
-          <MessageCircle size={18} strokeWidth={1.5} style="color: #6aaeee;" />
+          <MessageCircle size={18} stroke-width={1.5} style="color: #6aaeee;" />
           <a href="https://signal.me/#eu/bjanda.60">{tr.signal}</a>
         </span>
-        <span class="contact-item"><Mail size={18} strokeWidth={1.5} style="color: #E8A838;" /> <span id="email"></span><span class="pgp"><KeyRound size={16} strokeWidth={1.5} style="color: #b08bd9;" /><a href="/pubkey.asc">PGP</a></span></span>
+        <span class="contact-item"><Mail size={18} stroke-width={1.5} style="color: #E8A838;" /> <span id="email"></span><span class="pgp"><KeyRound size={16} stroke-width={1.5} style="color: #b08bd9;" /><a href="/pubkey.asc">PGP</a></span></span>
       </div>
     </section>
 
   </main>
 
-  <a class="to-top" href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});this.classList.remove('visible');return false;" aria-label={tr.backTopAria}><ArrowUp size={28} strokeWidth={1.5} /></a>
+  <a class="to-top" href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});this.classList.remove('visible');return false;" aria-label={tr.backTopAria}><ArrowUp size={28} stroke-width={1.5} /></a>
 
   <script>
     const phone = atob('KzQ3IDk2OSAxMSA1ODc=');

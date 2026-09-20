@@ -1,7 +1,7 @@
 ---
 import { getCollection, render } from 'astro:content';
 import Layout from '../../layouts/Layout.astro';
-import { ArrowLeft, ArrowUp } from 'lucide-astro';
+import { ArrowLeft, ArrowUp } from '@lucide/astro';
 import { cloudinaryUrl } from '../../data/made.js';
 
 export async function getStaticPaths() {
@@ -218,7 +218,7 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
     .to-top:hover { opacity: 1; color: #fff; }
   </style>
 
-  <a class="back-home" href="/projects" aria-label="Back to projects"><ArrowLeft size={28} strokeWidth={1.5} /></a>
+  <a class="back-home" href="/projects" aria-label="Back to projects"><ArrowLeft size={28} stroke-width={1.5} /></a>
   <main id="main">
     {project.data.cover && (
       <button class="cover-btn" type="button" data-full={cloudinaryUrl(project.data.cover, { width: 1600 })}>
@@ -237,7 +237,7 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
       <Content />
     </article>
   </main>
-  <a class="to-top" href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});this.classList.remove('visible');return false;" aria-label="To top"><ArrowUp size={28} strokeWidth={1.5} /></a>
+  <a class="to-top" href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});this.classList.remove('visible');return false;" aria-label="To top"><ArrowUp size={28} stroke-width={1.5} /></a>
   <script>
     const backHome = document.querySelector('.back-home')!;
     const scrollTop = document.querySelector('.to-top')!;

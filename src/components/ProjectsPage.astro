@@ -1,7 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import Layout from '../layouts/Layout.astro';
-import { ArrowLeft, ArrowUp, Rss } from 'lucide-astro';
+import { ArrowLeft, ArrowUp, Rss } from '@lucide/astro';
 import { cloudinaryUrl } from '../data/made.js';
 import { t } from '../data/translations.js';
 
@@ -131,11 +131,11 @@ const altLangPath = lang === 'no' ? '/projects' : '/prosjekter';
     .to-top:hover { opacity: 1; color: #fff; }
   </style>
 
-  <a class="back-home" href={lang === 'no' ? '/no' : '/'} aria-label={tr.backHomeAria}><ArrowLeft size={28} strokeWidth={1.5} /></a>
+  <a class="back-home" href={lang === 'no' ? '/no' : '/'} aria-label={tr.backHomeAria}><ArrowLeft size={28} stroke-width={1.5} /></a>
   <main id="main">
     <div class="heading">
       <h1>{tr.projectsTitle}</h1>
-      {lang === 'en' && <a class="rss" href="/projects/rss.xml" aria-label={tr.projectsRssAria}><Rss size={20} strokeWidth={2} /></a>}
+      {lang === 'en' && <a class="rss" href="/projects/rss.xml" aria-label={tr.projectsRssAria}><Rss size={20} stroke-width={2} /></a>}
     </div>
     {projects.length === 0 ? (
       <p class="empty">{tr.projectsEmpty}</p>
@@ -165,7 +165,7 @@ const altLangPath = lang === 'no' ? '/projects' : '/prosjekter';
       </ul>
     )}
   </main>
-  <a class="to-top" href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});this.classList.remove('visible');return false;" aria-label={tr.projectsToTopAria}><ArrowUp size={28} strokeWidth={1.5} /></a>
+  <a class="to-top" href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});this.classList.remove('visible');return false;" aria-label={tr.projectsToTopAria}><ArrowUp size={28} stroke-width={1.5} /></a>
   <script>
     const backHome = document.querySelector('.back-home')!;
     const scrollTop = document.querySelector('.to-top')!;
