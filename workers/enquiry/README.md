@@ -63,12 +63,21 @@ except the file bytes.
 
 | Method | Path | Answers with |
 | --- | --- | --- |
-| `GET` | `/api/enquiry/pending` | `{ pending: [{ id, receivedAt, lang, files }] }`, oldest first |
+| `GET` | `/api/enquiry/pending` | `{ pending: [{ id, receivedAt, lang, files, confidential }] }`, oldest first |
 | `GET` | `/api/enquiry/<id>` | `{ enquiry: <envelope> }` |
 | `GET` | `/api/enquiry/<id>/files/<index>` | the raw bytes, with `content-type` and a filename |
 | `DELETE` | `/api/enquiry/<id>` | `{ ok: true }`, and the attachments go with it |
 
 Delete is idempotent: a retry after a partial failure is a success, not a 404.
+
+`confidential` in the listing is `true` or `false`, normalised from the wire
+value (`'yes'` or absent) so nothing downstream has to know that shape. It is
+`null` for an enquiry stored before the field was added: KV metadata is written
+at put time and there is no rewrite path, so those keys cannot gain it, and
+reporting `false` would be a claim nobody checked. Fetch the envelope to settle
+one - `raw.confidential` is the source, and the brief's banner follows it.
+Because `null` is falsy like `false`, a consumer that must not miss a
+confidential enquiry should ship after the producer, once the queue has drained.
 
 The envelope:
 

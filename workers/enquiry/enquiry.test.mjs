@@ -418,3 +418,45 @@ test('an enquiry without the tick carries no banner at all', async () => {
     assert.equal(raw.confidential, undefined, `${lang}: and the field is absent, not "no"`);
   }
 });
+
+/**
+ * The same tick as seen by the puller, which reads key metadata and not the
+ * envelope. Two things are pinned: that an unticked box is a real `false` there
+ * rather than the absence the wire uses, and that an enquiry stored before the
+ * field existed reports `null`. KV metadata has no rewrite path, so that third
+ * state is not avoidable - it is only a question of whether it is honest about
+ * itself or arrives disguised as "not confidential".
+ */
+test('pending reports the confidentiality flag as a boolean', async () => {
+  const kv = kvStub();
+  const auth = { authorization: `Bearer ${PULL_TOKEN}` };
+
+  const yes = await (await worker.fetch(post(baseForm({ confidential: 'yes' })), envWith(kv))).json();
+  const no = await (await worker.fetch(post(baseForm()), envWith(kv))).json();
+
+  const listed = await (
+    await worker.fetch(new Request('https://polybjorn.no/api/enquiry/pending', { headers: auth }), envWith(kv))
+  ).json();
+  const byId = Object.fromEntries(listed.pending.map(entry => [entry.id, entry]));
+
+  assert.equal(byId[yes.id].confidential, true, 'the ticked box is true in the listing');
+  assert.equal(byId[no.id].confidential, false, 'and an unticked box is false there, not absent');
+});
+
+test('an enquiry stored before the flag existed reports unknown, not false', async () => {
+  const kv = kvStub();
+  const auth = { authorization: `Bearer ${PULL_TOKEN}` };
+
+  // Metadata as the worker wrote it before this field: the three keys it had.
+  await kv.put('enquiry:20260101T000000Z-oldentry', JSON.stringify({ id: '20260101T000000Z-oldentry' }), {
+    metadata: { receivedAt: '2026-01-01T00:00:00.000Z', lang: 'no', files: 0 },
+  });
+
+  const listed = await (
+    await worker.fetch(new Request('https://polybjorn.no/api/enquiry/pending', { headers: auth }), envWith(kv))
+  ).json();
+  const [entry] = listed.pending;
+
+  assert.ok('confidential' in entry, 'the key is there, so unknown is something a reader can test for');
+  assert.equal(entry.confidential, null, 'and it is null rather than false');
+});

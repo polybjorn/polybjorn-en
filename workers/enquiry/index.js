@@ -344,7 +344,11 @@ async function handleSubmit(request, env) {
   }
   await env.ENQUIRIES.put(`enquiry:${id}`, JSON.stringify(envelope), {
     expirationTtl: KV_TTL_SECONDS,
-    metadata: { receivedAt, lang, files: manifest.length },
+    // confidential is a real boolean here rather than the wire value, which is
+    // 'yes' or absent and never 'no'. A reader testing `if (entry.confidential)`
+    // against the string would be right by accident today and wrong the day the
+    // form starts sending a value for the unticked box.
+    metadata: { receivedAt, lang, files: manifest.length, confidential: raw.confidential === 'yes' },
   });
 
   return json(201, { ok: true, id });
@@ -363,7 +367,22 @@ async function handlePull(request, env, path) {
     const { keys } = await env.ENQUIRIES.list({ prefix: 'enquiry:' });
     return json(200, {
       ok: true,
-      pending: keys.map(key => ({ id: key.name.slice('enquiry:'.length), ...(key.metadata || {}) })),
+      pending: keys.map(key => {
+        const metadata = key.metadata || {};
+        return {
+          id: key.name.slice('enquiry:'.length),
+          ...metadata,
+          // null means unknown, and it happens for one reason: KV metadata is
+          // written at put time with no rewrite path, so an enquiry stored
+          // before this field existed can never gain it. Reporting false there
+          // would say "not confidential" about an enquiry nobody has checked,
+          // which is the only direction that costs anything. Resolve one by
+          // fetching the envelope - raw.confidential is the source. The case
+          // clears itself once the queue drains, and KV_TTL_SECONDS is the
+          // ceiling on how long an undrained one can sit.
+          confidential: typeof metadata.confidential === 'boolean' ? metadata.confidential : null,
+        };
+      }),
     });
   }
 
