@@ -11,14 +11,31 @@ polybjorn-en#16. The pulling half lives in nixfleet#112.
 
 ## Deploying
 
-From this directory, with wrangler logged in to the account that holds both
-zones:
+Merging does not deploy this. CI checks and builds the site; nothing in
+`.forgejo/workflows` touches wrangler, so a worker change is live only after
+someone runs the deploy by hand.
 
-1. `wrangler kv namespace create ENQUIRIES` and paste the id it prints into
-   `wrangler.toml`.
-2. `wrangler secret put PULL_TOKEN` with a long random string. The same value
-   goes into sops on pi-rovar.
-3. `wrangler deploy`.
+Wrangler is not a dependency of this repo and was not on PATH on the Mac when
+this was last deployed (2026-09-21), which is what keeping it out of
+`package.json` costs: CI's `npm ci` never installs it, and the deploy has to
+bring it itself. Run it through npx, pinned to the major this config is written
+for.
+
+**A code change is step 3 on its own.** From this directory, with wrangler
+logged in to the account that holds both zones - `npx wrangler@4 whoami` says
+whether it still is, and `npx wrangler@4 login` opens a browser if not:
+
+1. `npx wrangler@4 kv namespace create ENQUIRIES` and paste the id it prints
+   into `wrangler.toml`.
+2. `npx wrangler@4 secret put PULL_TOKEN` with a long random string. The same
+   value goes into sops on pi-rovar.
+3. `npx wrangler@4 deploy`.
+
+Steps 1 and 2 are one-time setup and are done: the namespace id is in
+`wrangler.toml` and the secret is set. Running them again against the live
+worker is destructive rather than idempotent - a new namespace is empty, so
+anything queued is orphaned, and a new token stops pi-rovar pulling until sops
+is updated to match.
 
 The routes in `wrangler.toml` put the endpoint on the site's own hostname, which
 is what keeps the form same-origin. Both zones are proxied through Cloudflare
