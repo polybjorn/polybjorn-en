@@ -31,7 +31,7 @@ jobs:
     steps:
       # fetch-depth 0 for the whole history: --is-ancestor answers with what it
       # can see, and a shallow clone can see one commit.
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
           persist-credentials: true

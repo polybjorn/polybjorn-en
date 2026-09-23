@@ -18,13 +18,13 @@ jobs:
     # hour default, which reads as still working rather than broken.
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       # .nvmrc is the one place the version is written. The forge runner gets
       # its node from a container image chosen in nixfleet, which this repo
       # cannot set - so the gate checks that the two agree rather than trusting
       # that they do, and moving the line is a one-line change here plus that
       # image. "22" is the line, not a frozen patch: it takes the newest 22.x.
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
           cache: npm
@@ -45,7 +45,7 @@ jobs:
       # fail that way. The second build is a few seconds and buys the order.
       - run: npm test
       - run: npm run build:deploy
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: dist/
       - uses: peaceiris/actions-gh-pages@v4
@@ -65,14 +65,14 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
 
   indexnow:
     needs: deploy
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Submit URLs to IndexNow
         run: |
           KEY="088dd9240f9674e496a7140b06f6f997"
