@@ -142,8 +142,17 @@ the `merged` job takes the branch the merge event names, and a daily sweep at
 04:17 catches whatever the event missed. Both delete over git -
 `git push origin --delete` removes the ref and `git ls-remote` decides whether it
 worked - because this forge answers 204 to a DELETE that did not delete, and
-recreates a deleted ref at its old sha within about two seconds. So the delete
-retries up to four times and only a ref that survives all four fails the job.
+recreates a deleted ref at its old sha within about two seconds.
+
+The two halves answer that recreation differently, on purpose. The sweep uses
+`.forgejo/scripts/delete-branches.mjs` and retries up to four times, failing only
+on a ref that survives all four. The `merged` job is
+`bjorn/ci-actions/delete-merged-branch@v1` since nixfleet #149, and that action
+deletes once: a ref that comes back is kept, marked `refs/specimens/<date>/<branch>`
+and the job goes red, because a second delete takes `logs/refs/heads/<branch>`
+with it and that reflog is the only thing that separates a recreated ref from one
+whose deletion never landed. The sweep is what clears a kept specimen the next
+morning.
 
 A second workflow watches the first. `stuck-branches.yml` runs on every push to
 main and asks whether any `herd/` branch already contained in main is still on

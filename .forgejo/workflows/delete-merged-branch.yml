@@ -16,9 +16,10 @@
 #
 # Both jobs delete over git rather than through the API, and both check the
 # result with git. The reasoning, and the measurements behind it, are in
-# delete-branches.mjs. What it means here: the checkout is not a convenience
-# any more, it is where the push credential comes from, so persist-credentials
-# is written out rather than left to the action's default.
+# delete-branches.mjs for the sweep and in the action's own header for the
+# merge path. The sweep's checkout is not a convenience, it is where its push
+# credential comes from, so persist-credentials is written out rather than left
+# to the action's default.
 name: Delete merged branch
 
 on:
@@ -34,7 +35,14 @@ on:
   workflow_dispatch:
 
 jobs:
-  # The fast path: no listing, no git, just the branch the event names.
+  # The fast path: no listing, no git of our own, just the branch the event
+  # names. It is bjorn/ci-actions/delete-merged-branch@v1 since nixfleet #149 -
+  # the same move the attribution job made - so this half no longer shares
+  # delete-branches.mjs with the sweep, and the two differ in one way that is
+  # deliberate: the action deletes ONCE and keeps what the forge puts back,
+  # marking it refs/specimens/<date>/<branch>, where the sweep still retries.
+  # A second delete erases the reflog that is the only evidence separating the
+  # two faults, and on this path there is a sweep tomorrow to clean up after it.
   merged:
     if: >-
       github.event_name == 'pull_request' &&
@@ -43,11 +51,16 @@ jobs:
     runs-on: docker
     timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v7
+      # No checkout: the action needs no working tree, and the push credential
+      # is the token passed below rather than one persist-credentials left
+      # behind. The full URL including the port is required - a bare
+      # `bjorn/ci-actions/...` resolves against data.forgejo.org.
+      - uses: https://git-ci.pebblecove.xyz:8447/bjorn/ci-actions/delete-merged-branch@v1
         with:
-          persist-credentials: true
-      - name: Delete the head branch
-        run: node .forgejo/scripts/delete-branches.mjs "${{ github.event.pull_request.head.ref }}"
+          token: ${{ github.token }}
+          branch: ${{ github.event.pull_request.head.ref }}
+          server-url: ${{ github.server_url }}
+          repository: ${{ github.repository }}
 
   # The backstop: every herd/ branch already contained in main, whatever put it
   # there and whatever failed to notice.
