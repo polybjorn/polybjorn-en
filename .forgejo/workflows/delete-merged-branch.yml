@@ -72,6 +72,12 @@ jobs:
       # fetch-depth 0 for the whole history and every branch: --merged answers
       # with what it can see, and a shallow clone can see one branch and one
       # commit, which would report every other branch as unmerged.
+      #
+      # Still actions/checkout rather than bjorn/ci-actions/checkout@v1, unlike
+      # the rest of the repo: delete-branches.mjs runs ls-remote and
+      # push --delete against origin, and persist-credentials below is what
+      # authenticates them. That action sets origin to the clean URL on purpose.
+      # bjorn/nixfleet#1000.
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0
