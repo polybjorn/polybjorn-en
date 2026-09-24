@@ -4,10 +4,14 @@ import Layout from '../../layouts/Layout.astro';
 import { ArrowLeft, ArrowUp } from '@lucide/astro';
 
 export async function getStaticPaths() {
-  // Same rule as the projects route: drafts stay reachable in dev so they can
+  // Drafts stay reachable in dev AND in a preview build, which is the only way
+  // site-preview can show one before it is published - the precedent is
+  // src/pages/dev/[view].astro, which gates on the same PREVIEW flag. A plain
+  // `npm run build`, which is what deploys, still emits no draft route.
+  // Same rule as the projects route otherwise: drafts stay out of prod so they can
   // be previewed, and are not built at all under PROD.
   const entries = await getCollection('writing', ({ data }) =>
-    import.meta.env.PROD ? !data.draft : true);
+    import.meta.env.DEV || process.env.PREVIEW === '1' || !data.draft);
   return entries.map(entry => ({
     params: { slug: entry.id },
     props: { entry },

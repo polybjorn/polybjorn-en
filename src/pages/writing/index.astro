@@ -3,7 +3,11 @@ import { getCollection } from 'astro:content';
 import Layout from '../../layouts/Layout.astro';
 import { ArrowLeft, ArrowUp, Rss } from '@lucide/astro';
 
-const entries = (await getCollection('writing', ({ data }) => !data.draft))
+// A draft is listed in dev and in a preview build for the same reason its
+// route is emitted there - see [slug].astro. The RSS channel stays strict,
+// because a feed is not what anyone previews.
+const entries = (await getCollection('writing', ({ data }) =>
+  import.meta.env.DEV || process.env.PREVIEW === '1' || !data.draft))
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 
 const fmt = (d: Date) => d.toISOString().slice(0, 10);
