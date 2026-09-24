@@ -52,7 +52,9 @@ jobs:
       # for a reason that has nothing to do with the network.
       npm_config_fetch_retry_maxtimeout: 20000
     steps:
-      - uses: actions/checkout@v7
+      - uses: https://git-ci.pebblecove.xyz:8447/bjorn/ci-actions/checkout@v1
+        with:
+          token: ${{ github.token }}
       # The container image comes from the runner's docker label, configured in
       # nixfleet, so nothing in this repo makes it agree with .nvmrc - and for a
       # while it did not: the gate ran node 22 while the deploy ran 24, which is

