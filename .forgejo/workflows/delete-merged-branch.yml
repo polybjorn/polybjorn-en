@@ -73,15 +73,18 @@ jobs:
       # with what it can see, and a shallow clone can see one branch and one
       # commit, which would report every other branch as unmerged.
       #
-      # Still actions/checkout rather than bjorn/ci-actions/checkout@v1, unlike
-      # the rest of the repo: delete-branches.mjs runs ls-remote and
-      # push --delete against origin, and persist-credentials below is what
-      # authenticates them. That action sets origin to the clean URL on purpose.
-      # bjorn/nixfleet#1000.
-      - uses: actions/checkout@v7
+      # credential-helper, because delete-branches.mjs runs ls-remote and
+      # push --delete against origin on a private repo - which is what kept this
+      # call site on actions/checkout when the rest of the repo moved
+      # (bjorn/nixfleet#1000). The token goes in a 0600 file in the runner's
+      # scratch with only its path in .git/config, rather than in
+      # persist-credentials' extraheader inside the workspace, where every later
+      # step in the job can read it. bjorn/ci-actions#18.
+      - uses: https://git-ci.pebblecove.xyz:8447/bjorn/ci-actions/checkout@v1
         with:
-          fetch-depth: 0
-          persist-credentials: true
+          token: ${{ github.token }}
+          depth: 0
+          credential-helper: true
 
       # #84: without this the job selects from refs that are not here. The
       # checkout brings the history of the ref being built and nothing else, so

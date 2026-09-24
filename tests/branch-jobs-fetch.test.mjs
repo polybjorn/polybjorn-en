@@ -11,12 +11,13 @@
  * is the right blunt test: losing the refs is the regression, and this is what
  * notices.
  *
- * The two jobs bring them in differently now, so each is held to its own shape
- * rather than to a rule that either could satisfy. The sweep keeps the explicit
- * step - it stays on actions/checkout, because persist-credentials is what
- * authenticates its delete push. The check takes bjorn/ci-actions/checkout@v1
- * at depth 0, whose fetch IS `+refs/heads/*:refs/remotes/origin/*`, so the step
- * would be a second copy of it (bjorn/nixfleet#1000).
+ * The two jobs bring them in differently, so each is held to its own shape
+ * rather than to a rule that either could satisfy. Both take
+ * bjorn/ci-actions/checkout@v1 at depth 0 now (bjorn/ci-actions#18 gave it a
+ * credential helper, which is what authenticates the sweep's delete push), and
+ * that fetch IS `+refs/heads/*:refs/remotes/origin/*` - but the sweep keeps its
+ * explicit step, because that one prunes and a ref deleted on the remote would
+ * otherwise come back as a local one.
  */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
