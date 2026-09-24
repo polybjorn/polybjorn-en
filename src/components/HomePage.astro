@@ -37,7 +37,7 @@ const featuredImages = [
 ---
 
 <Layout lang={lang} title={tr.homeTitle} description={tr.homeDescription}>
-  <link slot="head" rel="preload" as="image" href="/images/polybjorn-mark.svg" />
+  <link slot="head" rel="preload" as="image" type="image/webp" href="/images/polybjorn-mark.webp" />
 
   <style>
     body {
@@ -270,7 +270,9 @@ const featuredImages = [
   <section class="hero">
     <img
       class="avatar"
-      src="/images/polybjorn-mark.svg"
+      src="/images/polybjorn-mark.webp"
+      width="400"
+      height="400"
       alt="Bjørn A. Andersen"
     />
     <h1>Bjørn A. Andersen</h1>
