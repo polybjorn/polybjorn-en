@@ -9,7 +9,12 @@ export async function getStaticPaths() {
   // built for them and listed in the sitemap - unlisted, not unpublished.
   // Keep them reachable in dev so they can be previewed.
   const projects = await getCollection('projects', ({ data }) =>
-    import.meta.env.PROD ? !data.draft : true);
+    // A preview build is a PRODUCTION build, so gating on PROD alone hid a
+    // draft from site-preview: an empty listing and a 404 for the one page the
+    // preview existed to show. PREVIEW is the same flag src/pages/dev/[view].astro
+    // already gates on. A plain `npm run build`, which is what deploys, still
+    // emits no draft route.
+    import.meta.env.DEV || process.env.PREVIEW === '1' || !data.draft);
   return projects.map(project => ({
     params: { slug: project.id },
     props: { project },

@@ -12,7 +12,10 @@ interface Props {
 const { lang } = Astro.props as Props;
 const tr = t[lang];
 
-const projects = (await getCollection('projects', ({ data }) => !data.draft))
+// Listed wherever the route is emitted - see [slug].astro. The RSS channel
+// stays strict, because a feed is not what anyone previews.
+const projects = (await getCollection('projects', ({ data }) =>
+  import.meta.env.DEV || process.env.PREVIEW === '1' || !data.draft))
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 
 const fmt = (d: Date) => d.toISOString().slice(0, 10);
