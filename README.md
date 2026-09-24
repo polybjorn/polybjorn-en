@@ -173,11 +173,16 @@ it was added until the day it was fixed, printing "no merged herd/ branches" -
 which is also what a working sweep prints on a clean remote, which is why two
 runs went by without anyone noticing.
 
-The sweep keeps the explicit fetch step, because it stays on `actions/checkout`:
-`persist-credentials` is what authenticates its delete push. The stuck-branches
-check takes `bjorn/ci-actions/checkout@v1` at `depth: "0"`, whose fetch IS
-`+refs/heads/*:refs/remotes/origin/*`, so a step beside it would be a second copy
-of the same fetch. `tests/branch-jobs-fetch.test.mjs` holds each job to its own
+Both jobs check out with `bjorn/ci-actions/checkout@v1` at `depth: "0"`, whose
+fetch IS `+refs/heads/*:refs/remotes/origin/*`, so the stuck-branches check needs
+no step beside it - it would be a second copy of the same fetch. The sweep keeps
+its explicit one because that one prunes, and the composite starts from
+`git init` with nothing to prune. The sweep also passes `credential-helper: true`,
+which is what authenticates its delete push now that `persist-credentials` is
+gone: the token goes in a 0600 file outside the workspace rather than in
+`.git/config` inside it (bjorn/ci-actions#18).
+
+`tests/branch-jobs-fetch.test.mjs` holds each job to its own
 shape rather than to a rule either could satisfy, because no behaviour test can
 catch the absence: a job selecting over refs that do not exist reports an empty
 remote and exits 0.
