@@ -2,7 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import { t } from '../data/translations.js';
 import { cloudinaryUrl } from '../data/made.js';
-import { Phone, Mail, MessageCircle, ArrowRight, Music, KeyRound } from '@lucide/astro';
+import { Phone, Mail, MessageCircle, ArrowRight, Music, KeyRound, FileText } from '@lucide/astro';
 import { GITHUB_MARK } from '../data/brandIcons.js';
 
 interface Props {
@@ -293,6 +293,18 @@ const featuredImages = [
           <span>{tr.projects}</span>
         </a>
       </div>
+      {/* Writing is English only (#107), so this entry is absent from the
+          Norwegian home page rather than linking across to the other site.
+          The other three icons are Cloudinary SVGs; this one is drawn by
+          lucide because inventing an asset URL would 404. */}
+      {lang === 'en' && (
+        <div class="icon-link">
+          <a href="/writing">
+            <FileText class="icon-img" size={48} stroke-width={1.25} style="color: #b08bd9;" />
+            <span>Writing</span>
+          </a>
+        </div>
+      )}
     </div>
   </section>
 

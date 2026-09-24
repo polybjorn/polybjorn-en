@@ -26,4 +26,18 @@ const projects = defineCollection({
   }),
 });
 
-export const collections = { projects };
+// Writing is English only, by decision 2026-09-25 (polybjorn-en #107), so its
+// pages pass `enOnly` and there is no /no mirror. It carries no cover or thumb:
+// the projects card makes its image conditional already, and leaving the fields
+// out means this route needs no Cloudinary helper and no lightbox.
+const writing = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/writing' }),
+  schema: z.object({
+    title: z.string(),
+    description: z.string(),
+    date: z.date(),
+    draft: z.boolean().default(false),
+  }),
+});
+
+export const collections = { projects, writing };

@@ -1,0 +1,108 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import { ArrowLeft, ArrowUp, Rss } from '@lucide/astro';
+
+const entries = (await getCollection('writing', ({ data }) => !data.draft))
+  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+
+const fmt = (d: Date) => d.toISOString().slice(0, 10);
+// English only, so the strings are here rather than in translations.js: adding
+// `writing*` keys to the `en` block alone would leave the `no` block able to
+// resolve them as undefined, and there is no Norwegian page to need them.
+---
+
+<Layout lang="en" title="Writing - Bjørn A. Andersen" description="Articles by Bjørn A. Andersen on software, measurement and running a small fleet." enOnly>
+  <style>
+    body {
+      background: #1e2228;
+      color: #dde1e7;
+      font-family: 'Piazzolla', serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+    }
+    main { width: 100%; max-width: 720px; padding: 3rem 1.5rem 4rem; }
+    .back-home {
+      position: fixed;
+      top: calc(1rem - 4px);
+      left: max(1rem, env(safe-area-inset-left, 0px) + 0.5rem);
+      color: #ccc;
+      text-decoration: none;
+      z-index: 100;
+      opacity: 0.75;
+      transition: opacity 0.3s, transform 0.3s;
+      line-height: 1;
+    }
+    .back-home:hover { opacity: 1; color: #fff; }
+    .back-home.hidden { opacity: 0; pointer-events: none; transform: translateY(-0.5rem); }
+    .heading { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 2rem; }
+    h1 { font-size: 2rem; font-weight: 700; }
+    .rss { color: #8a8f99; transition: color 0.2s; display: inline-flex; }
+    .rss:hover { color: #6AAEEE; }
+    ul { list-style: none; }
+    li { margin-bottom: 2rem; }
+    a.card {
+      display: block;
+      color: inherit;
+      text-decoration: none;
+      padding: 1rem 0;
+      border-bottom: 1px solid #2a2f37;
+    }
+    a.card:hover h2 { color: #6AAEEE; }
+    h2 { font-size: 1.25rem; font-weight: 700; transition: color 0.2s; }
+    .meta { color: #8a8f99; font-size: 0.9rem; margin: 0.25rem 0 0.5rem; }
+    .desc { line-height: 1.6; }
+    .empty { color: #8a8f99; }
+    .to-top {
+      position: fixed;
+      bottom: 1rem;
+      left: 50%;
+      display: inline-flex;
+      transform: translateX(-50%) translateY(0.5rem);
+      color: #ccc;
+      text-decoration: none;
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s, transform 0.3s;
+      line-height: 1;
+    }
+    .to-top.visible { opacity: 0.75; pointer-events: auto; transform: translateX(-50%) translateY(0); }
+    .to-top:hover { opacity: 1; color: #fff; }
+  </style>
+
+  <a class="back-home" href="/" aria-label="Back home"><ArrowLeft size={28} stroke-width={1.5} /></a>
+  <main id="main">
+    <div class="heading">
+      <h1>Writing</h1>
+      <a class="rss" href="/writing/rss.xml" aria-label="RSS feed"><Rss size={20} stroke-width={2} /></a>
+    </div>
+    {entries.length === 0 ? (
+      <p class="empty">Nothing here yet.</p>
+    ) : (
+      <ul>
+        {entries.map(a => (
+          <li>
+            <a class="card" href={`/writing/${a.id}`}>
+              <h2>{a.data.title}</h2>
+              <div class="meta">{fmt(a.data.date)}</div>
+              <div class="desc">{a.data.description}</div>
+            </a>
+          </li>
+        ))}
+      </ul>
+    )}
+  </main>
+  <a class="to-top" href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});this.classList.remove('visible');return false;" aria-label="To top"><ArrowUp size={28} stroke-width={1.5} /></a>
+  <script>
+    const backHome = document.querySelector('.back-home')!;
+    const scrollTop = document.querySelector('.to-top')!;
+    window.addEventListener('scroll', () => {
+      backHome.classList.toggle('hidden', window.scrollY > 60);
+      scrollTop.classList.toggle('visible', window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 20);
+    }, { passive: true });
+  </script>
+</Layout>

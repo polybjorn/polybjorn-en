@@ -1,0 +1,134 @@
+---
+import { getCollection, render } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import { ArrowLeft, ArrowUp } from '@lucide/astro';
+
+export async function getStaticPaths() {
+  // Same rule as the projects route: drafts stay reachable in dev so they can
+  // be previewed, and are not built at all under PROD.
+  const entries = await getCollection('writing', ({ data }) =>
+    import.meta.env.PROD ? !data.draft : true);
+  return entries.map(entry => ({
+    params: { slug: entry.id },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+const fmt = (d: Date) => d.toISOString().slice(0, 10);
+---
+
+<Layout lang="en" title={`${entry.data.title} - Bjørn A. Andersen`} description={entry.data.description} enOnly>
+  <style>
+    body {
+      background: #1e2228;
+      color: #dde1e7;
+      font-family: 'Piazzolla', serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+    }
+    main { width: 100%; max-width: 720px; padding: 3rem 1.5rem 7rem; }
+    .back-home {
+      position: fixed;
+      top: calc(1rem - 4px);
+      left: max(1rem, env(safe-area-inset-left, 0px) + 0.5rem);
+      color: #ccc;
+      text-decoration: none;
+      z-index: 100;
+      opacity: 0.75;
+      transition: opacity 0.3s, transform 0.3s;
+      line-height: 1;
+    }
+    .back-home:hover { opacity: 1; color: #fff; }
+    .back-home.hidden { opacity: 0; pointer-events: none; transform: translateY(-0.5rem); }
+    h1 { font-size: 2.2rem; margin-bottom: 0.5rem; font-weight: 700; line-height: 1.2; text-align: center; }
+    .meta { color: #8a8f99; font-size: 0.95rem; margin-bottom: 2.5rem; text-align: center; }
+
+    /* The prose rules are the projects route's, minus everything about images:
+       this collection declares no cover or thumb, so the gallery, the caption
+       and the lightbox have nothing to act on. Worth extracting into one shared
+       component if a third route ever wants them - see the PR follow-ups. */
+    article :global(h2) { font-size: 1.5rem; margin: 2rem 0 0.75rem; font-weight: 700; }
+    article :global(h3) { font-size: 1.2rem; margin: 1.5rem 0 0.5rem; font-weight: 700; }
+    article :global(p) { margin-bottom: 1.1rem; line-height: 1.65; }
+    article :global(a) { color: #6AAEEE; text-decoration: underline; }
+    article :global(ul), article :global(ol) { margin: 0 0 1.1rem 1.5rem; }
+    article :global(li) { margin-bottom: 0.35rem; line-height: 1.6; }
+    article :global(strong) { font-weight: 700; }
+    article :global(em) { font-style: italic; }
+    article :global(blockquote) {
+      border-left: 3px solid #6AAEEE;
+      padding: 0.25rem 0 0.25rem 1rem;
+      margin: 1.25rem 0;
+      color: #b5bac3;
+      font-style: italic;
+    }
+    article :global(code) {
+      background: #2a2f37;
+      padding: 0.1rem 0.35rem;
+      border-radius: 3px;
+      font-size: 0.9em;
+    }
+    article :global(pre) {
+      background: #15181d;
+      padding: 1rem;
+      border-radius: 6px;
+      overflow-x: auto;
+      margin: 1.25rem 0;
+    }
+    /* Shiki sets its theme background inline, so it needs overriding to match */
+    article :global(pre.astro-code) { background: #15181d !important; }
+    article :global(pre code) { background: transparent; padding: 0; }
+    article :global(hr) { border: none; border-top: 1px solid #2a2f37; margin: 2rem 0; }
+    article :global(table) {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.25rem 0;
+      font-size: 0.95rem;
+    }
+    article :global(th), article :global(td) {
+      border-bottom: 1px solid #2a2f37;
+      padding: 0.45rem 0.6rem;
+      text-align: left;
+    }
+    article :global(th) { font-weight: 700; color: #b5bac3; }
+    .to-top {
+      position: fixed;
+      bottom: 1rem;
+      left: 50%;
+      display: inline-flex;
+      transform: translateX(-50%) translateY(0.5rem);
+      color: #ccc;
+      text-decoration: none;
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s, transform 0.3s;
+      line-height: 1;
+    }
+    .to-top.visible { opacity: 0.75; pointer-events: auto; transform: translateX(-50%) translateY(0); }
+    .to-top:hover { opacity: 1; color: #fff; }
+  </style>
+
+  <a class="back-home" href="/writing" aria-label="Back to writing"><ArrowLeft size={28} stroke-width={1.5} /></a>
+  <main id="main">
+    <h1>{entry.data.title}</h1>
+    <div class="meta">{fmt(entry.data.date)}</div>
+    <article>
+      <Content />
+    </article>
+  </main>
+  <a class="to-top" href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});this.classList.remove('visible');return false;" aria-label="To top"><ArrowUp size={28} stroke-width={1.5} /></a>
+  <script>
+    const backHome = document.querySelector('.back-home')!;
+    const scrollTop = document.querySelector('.to-top')!;
+    window.addEventListener('scroll', () => {
+      backHome.classList.toggle('hidden', window.scrollY > 60);
+      scrollTop.classList.toggle('visible', window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 20);
+    }, { passive: true });
+  </script>
+</Layout>
