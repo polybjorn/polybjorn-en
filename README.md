@@ -165,15 +165,22 @@ end state is the only thing worth asserting.
 npm run check:branches   # the same question, against this clone's remote
 ```
 
-Both jobs fetch the remote's branch refs in a step of their own before selecting
-anything. That is not decoration: `actions/checkout` here leaves no
-remote-tracking refs at all, not even `origin/main`. The sweep selected over
-refs that were never present from the day it was added until the day it was
-fixed, printing "no merged herd/ branches" - which is also what a working sweep
-prints on a clean remote, which is why two runs went by without anyone noticing.
-`tests/branch-jobs-fetch.test.mjs` asserts the fetch step is still there, because
-no behaviour test can catch its absence: a job selecting over refs that do not
-exist reports an empty remote and exits 0.
+Both jobs have the remote's branch refs before selecting anything, and since
+bjorn/nixfleet#1000 they get them differently. That is not decoration: a default
+`actions/checkout` leaves no remote-tracking refs at all, not even
+`origin/main`. The sweep selected over refs that were never present from the day
+it was added until the day it was fixed, printing "no merged herd/ branches" -
+which is also what a working sweep prints on a clean remote, which is why two
+runs went by without anyone noticing.
+
+The sweep keeps the explicit fetch step, because it stays on `actions/checkout`:
+`persist-credentials` is what authenticates its delete push. The stuck-branches
+check takes `bjorn/ci-actions/checkout@v1` at `depth: "0"`, whose fetch IS
+`+refs/heads/*:refs/remotes/origin/*`, so a step beside it would be a second copy
+of the same fetch. `tests/branch-jobs-fetch.test.mjs` holds each job to its own
+shape rather than to a rule either could satisfy, because no behaviour test can
+catch the absence: a job selecting over refs that do not exist reports an empty
+remote and exits 0.
 
 ## CV generation
 
