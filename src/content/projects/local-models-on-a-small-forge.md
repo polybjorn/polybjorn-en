@@ -6,7 +6,7 @@ wip: true
 thumb: /images/local-models-thumb.svg
 thumbAlt: An unlabelled bar chart, one long blue bar above four shorter amber ones and a short grey one
 draft: false
-unlisted: true
+unlisted: false
 ---
 
 I run my own Git forge for my infrastructure - repositories, CI, pull requests, and the issue tracker this is about. Its issues have developed a habit I've grown to dislike. I decide something, write it down carefully, and then rediscover the same question six weeks later, because I'd forgotten the answer was already there.
