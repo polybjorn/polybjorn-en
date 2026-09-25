@@ -31,7 +31,7 @@ The method underneath is older than I am. Count the words in every document, wei
 
 Any of this is worthless without an answer key, and this is the part I'd repeat anywhere.
 
-> Every time someone writes `#123` in an issue, they're asserting that two issues are related. A human judgement, already recorded, free.
+> Every time someone writes `#123` in an issue, they're asserting that two issues are related. A judgement someone already made, recorded and free.
 
 My forge had hundreds of them sitting there already. So the test writes itself: hide the reference, show the system only the new issue's text, and ask whether it finds the issue the author actually linked. Only against issues that existed at the time, so nothing borrows from the future.
 
@@ -111,7 +111,7 @@ Which makes them good at exactly one job: *find me the things like this one*. Th
     <div class="mchart-track"><div class="mchart-bar mchart-ctl" style="width:3.7%"></div></div>
     <div class="mchart-val">2.6%</div>
   </div>
-  <figcaption class="mchart-cap">How often the issue a person actually linked turns up in the first five suggestions, out of hundreds of candidates.</figcaption>
+  <figcaption class="mchart-cap">How often the issue someone actually linked turns up in the first five suggestions, out of hundreds of candidates.</figcaption>
 </figure>
 
 Every one lost, and not narrowly. I'd written down the opposite prediction beforehand, which is the only reason I can honestly call it a surprise. The obvious escapes didn't help either: chunking the documents so nothing was truncated made every model *worse*, and blending a model with the word counting - the way these systems are normally deployed - came out below the word counting alone.
@@ -150,7 +150,7 @@ Training helped and it didn't matter. Three points is five links out of the hund
 
 ## What this doesn't show
 
-The answer key only credits links somebody bothered to type. One issue about journal entries failing to arrive carried no reference at all, so every suggestion for it scored as a miss - including the obviously correct earlier issue about the same subsystem, which came first. The numbers are a floor on usefulness, not a measure of precision.
+The answer key only credits links someone bothered to type. One issue about journal entries failing to arrive carried no reference at all, so every suggestion for it scored as a miss - including the obviously correct earlier issue about the same subsystem, which came first. The numbers are a floor on usefulness, not a measure of precision.
 
 The corpus is small - hundreds of issues, not thousands - and the largest models were never tried, so nothing here says a big one would fail. Nor were the code-trained retrieval models, now the ones I'd most want to see: the two I could run are code-trained *encoders* rather than retrieval models, and one scored barely above random, which is a fact about output never built to be compared this way rather than anything about code. Untested, not answered.
 
