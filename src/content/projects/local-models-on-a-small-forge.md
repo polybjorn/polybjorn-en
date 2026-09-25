@@ -1,39 +1,31 @@
 ---
-title: "Finding what I already wrote"
-description: "A lookup that suggests which existing issues to read before filing a new one, and a test of whether a small local AI model does the job better than counting words."
+title: "Embeddings lost to counting words"
+description: "I wanted a model that makes small decisions on my issue tracker. Five embedding models later, a fifty-year-old way of counting words was still winning."
 date: 2026-09-25
 draft: true
 ---
 
 I run a self-hosted issue tracker for my own infrastructure. A few hundred issues sit on it, most of them written by me or by an agent working on my behalf, and they have a habit I have grown to dislike: I decide something, write it down carefully, and then rediscover the same question six weeks later because I did not remember that the answer was already there.
 
-<!-- TRIGGER: one sentence about Jev goes here if we keep it - what it is and
-     what it does, in your words. It was never tested, so it can only be what
-     made me curious, never a comparison. The piece reads fine without it. -->
+What set this off was reading about [Jev](https://typesafe.ai/), a model built to return typed decisions rather than prose - the pitch being that software can act on its answer when its confidence is high and escalate when it is not. I have not used it. It is hosted, and everything here runs on my own hardware. But the shape of it stuck: a small, narrow model that decides one thing and knows when it is unsure. My tracker is full of small decisions. I wanted to know whether something like that, running locally on a machine I already own, could take some of them.
 
-So I wanted to know whether a small model, running locally on a machine I already own, could do something about that. Not a chatbot. Something narrow, cheap and specific.
+So the first thing I built was that shape, aimed at the most obvious decision I had.
 
-*Does a small local model do useful work here* is a question with a shelf life, though. The models keep improving, my tracker keeps accumulating issues, and any answer is a reading taken on one particular day with one particular pile of text. The question underneath it does not expire: **how do you find out, on your own data, instead of trusting a benchmark built on somebody else's?** That is the part worth writing down, and everything below is a first reading rather than a verdict.
+*Does a small local model do useful work here* is a question with a shelf life, though. The models keep improving, my tracker keeps accumulating issues, and any answer is a reading taken on one particular day with one particular pile of text. The question underneath does not expire: **how do you find out, on your own data, instead of trusting a benchmark built on somebody else's?** That is the part worth writing down, and everything below is a first reading rather than a verdict.
 
-## What these models actually do
+## There was no decision to automate
 
-This is not the kind of model most people mean by AI, and the difference is the whole point.
+The decision I picked was the label every issue carries saying who should act on it: an agent may take this one, this one needs me, this one is blocked. Predict that, confidently enough to act above a threshold and escalate below it, and I would have the thing I had just read about.
 
-A large language model writes. You give it words and it gives you new words back, which is why it can answer a question, draft a paragraph, or be confidently wrong in fluent prose. An embedding model does not write anything. It turns a piece of text into a list of numbers - a position in space - arranged so that texts about similar things land near each other. That is the entire output. The only operation you can perform on it is measuring distance.
+It is not a decision anything can take, and it took counting rather than a model to find out. **Four issues in five are labelled within a minute of being filed, and more than half in the same second.** Whoever writes an issue labels it in the same breath. There is no interval between the filing and the deciding for anything to stand in.
 
-They are relatives: both are trained on large amounts of text and both are built on the same underlying machinery. But they differ in every way that matters in practice. The ones I used are small enough to sit in a couple of hundred megabytes, run on an ordinary processor with no graphics card, and take about twenty milliseconds per document. They cannot hallucinate, because they cannot assert anything - the worst a bad result can do is rank an irrelevant issue highly, which you notice immediately, rather than tell you something false in a convincing sentence.
+That is worth separating from the question of whether a model is good enough, because it is not that kind of failure. Automating a decision requires the decision to be *separable* - made later, deliberately, from something written down. Where it is not, no model fills the gap, however fast or well calibrated, hosted or local. I never tested Jev and this says nothing about it; it says something about my data, which is the only thing I could have found out by testing anything.
 
-If you have heard of retrieval-augmented generation, this is the retrieval half of it on its own: the embedding model finds the relevant documents, and a language model writes the answer from them. I was only ever interested in the first half. I already have language models writing issues on this tracker; what I wanted was something to find the ones that already existed.
+## The question I could answer
 
-That makes them good at exactly one class of job: *find me the things like this one*. Search that tolerates different wording, grouping, spotting duplicates. They run on a laptop, they cost nothing per query, and the text never leaves the machine. That combination is why they are interesting for a private pile of notes or issues.
+So I asked a smaller question instead, and it turned out to be the one I actually wanted: **when I start writing a new issue, which existing ones should I read first?**
 
 The competing method is much older and has no model in it at all. Count the words in every document, weight the rare ones more heavily than the common ones, and call two documents similar when they share unusual vocabulary. It is called TF-IDF, it is about fifty years old, and it will matter later.
-
-## The question worth asking
-
-My first instinct was to have it predict something - which of my labels a new issue should get. That turned out not to be a job at all: four issues in five are labelled within a minute of being filed, most in the same second, because whoever writes one labels it in the same breath. Automating a decision needs the decision to be *separable*, made later and deliberately from something written down. Worth checking before building anything, and it took counting rather than a model to find out.
-
-The version that worked was the thing I actually wanted: **when I start writing a new issue, which existing ones should I read first?**
 
 Grading that needs an answer key, and this is the part I would repeat anywhere. **Every time someone writes `#123` in an issue, they are asserting that two issues are related.** That is a human judgement, already recorded, free. My tracker had 616 of them.
 
@@ -42,6 +34,20 @@ So the test writes itself. Hide the reference, show the system only the new issu
 Counting words found the right issue in its top five **63.8%** of the time. Showing the five most recent issues instead - the obvious cheap alternative - managed 23.1%. Picking at random managed 2.6%.
 
 That is a working tool, and it is the one I kept. The largest single improvement came from something with no cleverness in it at all: **indexing the comments as well as the issue text, worth about five points.** The comments were two and a bit times the volume of the issue bodies and I had simply not been using them.
+
+## What an embedding model actually is
+
+The obvious next move was to put a model against that same test. Not the kind most people mean by AI, though, and the difference matters before any of the numbers do.
+
+A large language model writes. You give it words and it gives you new words back, which is why it can answer a question, draft a paragraph, or be confidently wrong in fluent prose. An embedding model does not write anything. It turns a piece of text into a list of numbers - a position in space - arranged so that texts about similar things land near each other. That is the entire output. The only operation you can perform on it is measuring distance.
+
+They are relatives: both are trained on large amounts of text and both are built on the same underlying machinery. But they differ in every way that matters in practice. The ones I used are small enough to sit in a couple of hundred megabytes, run on an ordinary processor with no graphics card, and take about twenty milliseconds per document. They cannot hallucinate, because they cannot assert anything - the worst a bad result can do is rank an irrelevant issue highly, which you notice immediately, rather than tell you something false in a convincing sentence.
+
+If you have heard of retrieval-augmented generation, this is the retrieval half of it on its own: the embedding model finds the relevant documents, and a language model writes the answer from them. I was only ever interested in the first half. I already have language models writing issues on this tracker; what I wanted was something to find the ones that already existed.
+
+Jev, the thing that started this, is neither - it returns a typed decision, which is a third category again. That is part of why the first attempt was the wrong shape: I went looking for something that decides, and what my tracker turned out to need was something that finds.
+
+That makes them good at exactly one class of job: *find me the things like this one*. Search that tolerates different wording, grouping, spotting duplicates. They run on a laptop, they cost nothing per query, and the text never leaves the machine. That combination is why they are interesting for a private pile of notes or issues.
 
 ## The models lost
 
