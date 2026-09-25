@@ -47,7 +47,7 @@ A language model writes: words in, new words out. An embedding model writes noth
 Which makes them good at exactly one job: *find me the things like this one*. They're a couple of hundred megabytes, need no graphics card, and the text never leaves the machine. Four of them went against the same links, each with the prompt format its authors specify.
 
 <figure class="mchart" role="group" aria-label="Recall at 5 by method. Term weighting with comments reaches 63.8 percent; the best embedding model, gte-small, reaches 46.0 percent; a recency control reaches 23.1 percent and a random control 2.6 percent.">
-  <figcaption class="mchart-cap">Finding the issue a person actually linked, top five of hundreds. Higher is better.</figcaption>
+  <figcaption class="mchart-cap">Finding the issue a person actually linked, top five of hundreds. Higher is better. Measured 2026-09-25; see Readings.</figcaption>
   <div class="mchart-key">
     <span><i class="mchart-sw mchart-lex"></i>counting words</span>
     <span><i class="mchart-sw mchart-emb"></i>embedding model</span>
@@ -156,22 +156,8 @@ The last limit matters most, because this kind of tool introduces it rather than
 
 ## Readings
 
-Every number here comes from one run against a frozen copy of the forge, so each is a measurement with a date on it rather than a standing fact. A growing forge changes every row, not just the new one, so a reading is a full re-run rather than a new line appended - which is also why I'd expect counting words to pull further ahead rather than closer, since its statistics improve with more documents while an off-the-shelf model learns nothing from mine.
+**2026-09-25.** 489 issues, 616 cross-references, 1060 comments, frozen with a checksum so the run can be repeated against exactly this text.
 
-I haven't committed to a schedule and won't pretend to one. The table grows a column when I run it again.
+Every number above comes from that single run, so each is a measurement with a date on it rather than a standing fact. A growing forge changes every figure rather than just adding one, so a second reading means re-running everything, not appending a row - and I'd expect the gap to widen rather than close, since counting words gets better statistics from more documents while an off-the-shelf model learns nothing from mine.
 
-| | 2026-09-25 |
-| --- | --- |
-| issues / cross-references / comments | 489 / 616 / 1060 |
-| counting words, comments indexed | **63.8%** |
-| best of four embedding models | 46.0% |
-| five most recent issues instead | 23.1% |
-| picking at random | 2.6% |
-
-On the held-out quarter, a harder test and not comparable to the rows above:
-
-| | 2026-09-25 |
-| --- | --- |
-| counting words | 48.7% |
-| a model trained on my own pairs | 40.9% (37.7% untrained) |
-| counting words, then a reranker | 35.7% |
+I haven't committed to a schedule and won't pretend to one. When there is a second reading, the comparison goes here.
