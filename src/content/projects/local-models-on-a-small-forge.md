@@ -21,8 +21,8 @@ Before filing a new issue, it tells me which existing ones to read first.
   #956   0.14  hypervisor: no journal entries reached VictoriaLogs in 15m
   #968   0.10  checks: service-state cannot see a StateDirectory from a packaged unit
 <span style="color:#8b949e">
-ranked by term overlap; it misses about a third of real links, so an
-absent issue here is not a clearance</span></code></pre>
+ranked by term overlap, up to five of them above a score cut-off; it misses
+about a third of real links, so an absent issue here is not a clearance</span></code></pre>
 
 Both were the right things to read and I'd forgotten both. It finds the right issue in its top five 63.8% of the time. Showing the five most recent issues instead - the obvious cheap alternative - manages 23.1%, and picking at random 2.6%.
 
@@ -34,7 +34,7 @@ Any of this is worthless without an answer key.
 
 > Every time someone writes `#123` in an issue, they're asserting that two issues are related. A judgement someone already made, recorded and free.
 
-My forge had hundreds of them sitting there already. So the test writes itself: hide the reference, show the system only the new issue's text, and ask whether it finds the issue the author actually linked. Only against issues that existed at the time, so nothing borrows from the future.
+My forge had 617 of them sitting there already, spread across 489 issues. So the test writes itself: hide the reference, show the system only the new issue's text, and ask whether it finds the issue the author actually linked. Only against issues that existed at the time, so nothing borrows from the future.
 
 ## Then the models lost
 
@@ -112,7 +112,7 @@ The ones I tried are a couple of hundred megabytes each, need no graphics card, 
     <div class="mchart-track"><div class="mchart-bar mchart-ctl" style="width:3.7%"></div></div>
     <div class="mchart-val">2.6%</div>
   </div>
-  <figcaption class="mchart-cap">How often the issue someone actually linked turns up in the first five suggestions, out of hundreds of candidates.</figcaption>
+  <figcaption class="mchart-cap">How often the issue someone actually linked turns up in the first five suggestions, out of hundreds of candidates. Every bar uses all 617 links and queries with the new issue's title and body. The table further down is a smaller and harder slice, so its numbers are lower.</figcaption>
 </figure>
 
 Every one lost, and not narrowly. I'd written down the opposite prediction beforehand, which is the only reason I can honestly call it a surprise. The obvious escapes didn't help either: chunking the documents so nothing was truncated made every model *worse*, and blending a model with the word counting - the way these systems are normally deployed - came out below the word counting alone.
@@ -155,6 +155,6 @@ Training helped and it didn't matter. Three points is five links out of the hund
 
 The answer key only credits links someone bothered to type. One issue about journal entries failing to arrive carried no reference at all, so every suggestion for it scored as a miss - including the obviously correct earlier issue about the same subsystem. The numbers are a floor on usefulness, not a measure of precision.
 
-The corpus is small - hundreds of issues, not thousands - and the largest models were never tried, so nothing here says a big one would fail. Nor were the code-trained retrieval models, now the ones I'd most want to see: the two I could run are code-trained *encoders* rather than retrieval models, and one scored barely above random. Their vectors were never built to be compared by distance, so that number says nothing about code training.
+The corpus is small, and the largest models were never tried, so nothing here says a big one would fail. Nor were the code-trained retrieval models, now the ones I'd most want to see: the two I could run are code-trained *encoders* rather than retrieval models, and one scored barely above random. Their vectors were never built to be compared by distance, so that number says nothing about code training.
 
 The last limit is the tool's own doing. Something that finds a genuinely related issue about two thirds of the time **cannot be read as a clearance.** Checking it, seeing nothing, and concluding the question is new converts *I didn't look* into *I looked and it was clear*, which is worse than never having looked. So it says so on every run.
