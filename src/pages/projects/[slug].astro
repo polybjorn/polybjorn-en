@@ -115,7 +115,15 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
     /* Shiki sets its theme background inline, so it needs overriding to match */
     article :global(pre.astro-code) { background: #15181d !important; }
     article :global(pre code) { background: transparent; padding: 0; }
-    article :global(img) { max-width: 100%; height: auto; border-radius: 4px; margin: 1.25rem 0; }
+    article :global(img) {
+      max-width: 100%;
+      height: auto;
+      border-radius: 4px;
+      /* Centred rather than flush left, so an image narrower than the 720px
+         column does not sit off to one side. */
+      display: block;
+      margin: 1.25rem auto;
+    }
     article :global(.img-zoom) {
       display: block;
       width: 100%;
@@ -140,9 +148,13 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
        no project page had used one, so the gap was invisible. Borders and
        muted head follow the rest of this sheet. */
     article :global(table) {
-      width: 100%;
+      /* fit-content centres a narrow table instead of stretching two columns
+         across the whole measure; max-width plus the overflow below still lets
+         a wide one scroll on a phone. */
+      width: fit-content;
+      max-width: 100%;
       border-collapse: collapse;
-      margin: 1.25rem 0;
+      margin: 1.25rem auto;
       font-size: 0.95rem;
       line-height: 1.5;
       font-variant-numeric: tabular-nums;
@@ -170,8 +182,6 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
        aligned right. Revisit if one ever ends in prose. */
     article :global(thead th:not(:first-child)),
     article :global(tbody td:not(:first-child)) { text-align: right; }
-    article :global(thead th:first-child),
-    article :global(tbody td:first-child) { padding-left: 0; }
     article :global(hr) { border: none; border-top: 1px solid #2a2f37; margin: 2rem 0; }
     article :global(.article-gallery) {
       display: grid;
