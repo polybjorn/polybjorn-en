@@ -2,7 +2,8 @@
 title: "Embeddings lost to counting words"
 description: "I wanted a model that could make small decisions on my Git forge. Several embedding models later, a fifty-year-old way of counting words was still winning."
 date: 2026-09-25
-draft: true
+draft: false
+unlisted: true
 ---
 
 I run my own Git forge for my infrastructure - repositories, CI, pull requests, and the issue tracker this is about. Its issues have developed a habit I've grown to dislike. I decide something, write it down carefully, and then rediscover the same question six weeks later, because I'd forgotten the answer was already there.

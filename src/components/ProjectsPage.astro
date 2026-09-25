@@ -15,7 +15,7 @@ const tr = t[lang];
 // Listed wherever the route is emitted - see [slug].astro. The RSS channel
 // stays strict, because a feed is not what anyone previews.
 const projects = (await getCollection('projects', ({ data }) =>
-  import.meta.env.DEV || process.env.PREVIEW === '1' || !data.draft))
+  import.meta.env.DEV || process.env.PREVIEW === '1' || (!data.draft && !data.unlisted)))
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 
 const fmt = (d: Date) => d.toISOString().slice(0, 10);

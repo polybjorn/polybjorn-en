@@ -5,7 +5,7 @@ import MarkdownIt from 'markdown-it';
 const parser = new MarkdownIt();
 
 export async function GET(context) {
-  const projects = (await getCollection('projects', ({ data }) => !data.draft))
+  const projects = (await getCollection('projects', ({ data }) => !data.draft && !data.unlisted))
     .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 
   return rss({

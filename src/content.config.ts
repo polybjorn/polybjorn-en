@@ -26,6 +26,10 @@ const projects = defineCollection({
       icon: z.enum(['github', 'obsidian']),
     })).default([]),
     draft: z.boolean().default(false),
+    // Published and reachable at its own URL, but kept off the projects
+    // listing, the feed and the sitemap. For something shareable by link
+    // before it is announced.
+    unlisted: z.boolean().default(false),
   }),
 });
 
