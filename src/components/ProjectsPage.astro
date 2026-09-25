@@ -102,9 +102,10 @@ const altLangPath = lang === 'no' ? '/projects' : '/prosjekter';
     }
     h2 { font-size: 1.35rem; margin-bottom: 0.35rem; transition: color 0.2s; }
     .meta { color: #8a8f99; font-size: 0.9rem; margin-bottom: 0.5rem; }
-    /* Matches the article header: warm accent on the status, grey middot. */
+    /* Matches the article header: warm accent on the status, grey middot, and
+       the gap as a margin because the build strips spaces out of content. */
     .meta-wip { color: #e8b775; }
-    .meta-wip::before { content: " \00b7 "; color: #8a8f99; }
+    .meta-wip::before { content: "\00b7"; color: #8a8f99; margin: 0 0.45em; }
     .desc {
       color: #b5bac3;
       line-height: 1.5;

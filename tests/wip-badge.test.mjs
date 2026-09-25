@@ -80,3 +80,33 @@ test('the listing card carries the same status, when the piece is listed', () =>
     assert.equal(badge.textContent.trim(), 'work in progress');
   }
 });
+
+/**
+ * The separator's spacing has to survive the build.
+ *
+ * It was first written as `content: " \00b7 "`, which the minifier rewrote to
+ * `content:" \00b7"`. The trailing space is not required to round-trip, so the
+ * dot came out welded to the word after it and floating away from the one
+ * before. Spacing on generated content belongs in a margin, where nothing is
+ * entitled to drop it. This checks every middot separator in the build, not
+ * just the two that exist now.
+ */
+test('every middot separator spaces itself with a margin', () => {
+  const css = [
+    ...readdirSync(join(ROOT, 'dist', '_astro'))
+      .filter(f => f.endsWith('.css'))
+      .map(f => readFileSync(join(ROOT, 'dist', '_astro', f), 'utf8')),
+    ...['projects/index.html', 'projects/local-models-on-a-small-forge/index.html']
+      .map(p => readFileSync(join(ROOT, 'dist', p), 'utf8')),
+  ].join('\n');
+
+  const blocks = css.match(/[^{}]*:before\{[^}]*\}/g) ?? [];
+  const separators = blocks.filter(b => /content:\s*"[^"]*·/.test(b));
+  assert.ok(separators.length, 'no middot separator in the build, so this proves nothing');
+
+  for (const block of separators) {
+    assert.match(block, /margin/, `separator relies on whitespace in content: ${block}`);
+    assert.doesNotMatch(block, /content:\s*"\s+·|·\s+"/,
+      `separator still pads inside content, which the minifier may strip: ${block}`);
+  }
+});
