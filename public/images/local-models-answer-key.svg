@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="380" viewBox="0 0 720 190" role="img" aria-labelledby="t d">
+  <title id="t">How the answer key works</title>
+  <desc id="d">Three steps. One: issue 968 cites issue 956, so someone has already said the two are related. Two: strip the reference, so the tool sees the text and never the link. Three: search only the issues that existed when 968 was filed, and count it a hit if 956 comes back in the first five.</desc>
+  <style>
+    .s { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 12px; fill: #b5bac3; }
+    .h { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; fill: #dde1e7; }
+    .n { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 11px; fill: #6b7681; }
+    .a { fill: #6aaeee; }
+  </style>
+  <rect width="720" height="190" rx="6" fill="#15181d"/>
+
+  <text x="26" y="30" class="n">1</text>
+  <rect x="26" y="40" width="200" height="98" rx="5" fill="#1e2228" stroke="#2a2e35"/>
+  <text x="42" y="70" class="h">#968 cites <tspan class="a">#956</tspan></text>
+  <text x="42" y="96" class="s">someone already said</text>
+  <text x="42" y="114" class="s">these two are related</text>
+
+  <text x="260" y="30" class="n">2</text>
+  <rect x="260" y="40" width="200" height="98" rx="5" fill="#1e2228" stroke="#2a2e35"/>
+  <text x="276" y="70" class="h">strip the number</text>
+  <text x="276" y="96" class="s">the tool sees the text,</text>
+  <text x="276" y="114" class="s">never the link</text>
+
+  <text x="494" y="30" class="n">3</text>
+  <rect x="494" y="40" width="200" height="98" rx="5" fill="#1e2228" stroke="#2a2e35"/>
+  <text x="510" y="70" class="h">search what existed</text>
+  <text x="510" y="96" class="s">a hit is <tspan class="a">#956</tspan> in the</text>
+  <text x="510" y="114" class="s">first five results</text>
+
+  <g stroke="#4a5058" stroke-width="1.5" fill="none">
+    <path d="M232,89 L252,89"/>
+    <path d="M466,89 L486,89"/>
+  </g>
+  <g fill="#4a5058">
+    <path d="M252,85 L259,89 L252,93 Z"/>
+    <path d="M486,85 L493,89 L486,93 Z"/>
+  </g>
+
+  <text x="26" y="168" class="s">Repeat for all 617 links. The answer is yes <tspan fill="#6aaeee">63.8%</tspan> of the time.</text>
+</svg>

@@ -1,0 +1,23 @@
+<!-- Generated, not drawn. Every word is shaded by how many of the 489 issues
+     in the frozen 2026-09-24 corpus contain it, counted over title plus body.
+     If the corpus is re-frozen, re-cut this and the caption together. -->
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="434" viewBox="0 0 720 217" role="img" aria-labelledby="t d">
+  <title id="t">One issue, its words shaded by how rare they are</title>
+  <desc id="d">An issue from the forge. The rarest words are the identifiers: checks/service-state.nix appears in 14 of the 489 issues, StateDirectory in 13, census in 5, packaged in 2 and rowless-unit in 1. The ordinary English words around them appear in hundreds.</desc>
+  <style>
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 13px; }
+    .big { font-size: 14px; }
+    .r { fill: #6aaeee; font-weight: 600; }
+    .m { fill: #b5bac3; }
+    .c { fill: #6b7681; }
+    .x { fill: #4a5058; }
+    .k { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 11.5px; fill: #8a8f99; }
+  </style>
+  <rect width="720" height="217" rx="6" fill="#15181d"/>
+  <text x="26" y="62" class="mono big" xml:space="preserve"><tspan class="m">checks:</tspan><tspan class="r"> service-state</tspan><tspan class="c"> cannot</tspan><tspan class="m"> see</tspan><tspan class="c"> a</tspan><tspan class="r"> StateDirectory</tspan><tspan class="c"> from</tspan><tspan class="c"> a</tspan><tspan class="r"> packaged</tspan><tspan class="m"> unit</tspan></text>
+  <text x="26" y="96" class="mono " xml:space="preserve"><tspan class="r">checks/service-state.nix</tspan><tspan class="c"> cannot</tspan><tspan class="m"> see</tspan><tspan class="c"> a</tspan><tspan class="r"> StateDirectory=</tspan><tspan class="c"> that</tspan><tspan class="m"> comes</tspan><tspan class="c"> from</tspan><tspan class="c"> a</tspan></text>
+  <text x="26" y="117" class="mono " xml:space="preserve"><tspan class="r">PACKAGED</tspan><tspan class="m"> unit</tspan><tspan class="c"> file,</tspan><tspan class="c"> so</tspan><tspan class="c"> the</tspan><tspan class="r"> rowless-unit</tspan><tspan class="r"> census</tspan><tspan class="x"> #849</tspan><tspan class="m"> added</tspan><tspan class="m"> asks</tspan><tspan class="c"> its</tspan><tspan class="m"> question</tspan></text>
+  <text x="26" y="138" class="mono " xml:space="preserve"><tspan class="c">of</tspan><tspan class="r"> fewer</tspan><tspan class="m"> units</tspan><tspan class="c"> than</tspan><tspan class="c"> the</tspan><tspan class="c"> host</tspan><tspan class="c"> has.</tspan></text>
+  <line x1="26" y1="173" x2="694" y2="173" stroke="#23272e" stroke-width="1"/>
+  <text x="26" y="197" class="k" xml:space="preserve"><tspan fill="#6aaeee">■</tspan> in 20 or fewer of the 489 issues    <tspan fill="#b5bac3">■</tspan> 21 to 150    <tspan fill="#6b7681">■</tspan> more than 150    <tspan fill="#4a5058">■</tspan> stripped</text>
+</svg>
