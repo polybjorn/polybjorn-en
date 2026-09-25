@@ -111,7 +111,7 @@ Which makes them good at exactly one job: *find me the things like this one*. Th
     <div class="mchart-track"><div class="mchart-bar mchart-ctl" style="width:3.7%"></div></div>
     <div class="mchart-val">2.6%</div>
   </div>
-  <figcaption class="mchart-cap">Found in the top five. Higher is better. Measured 2026-09-25.</figcaption>
+  <figcaption class="mchart-cap">Found in the top five. Higher is better.</figcaption>
 </figure>
 
 Every one lost, and not narrowly. I'd written down the opposite prediction beforehand, which is the only reason I can honestly call it a surprise. The obvious escapes didn't help either: chunking the documents so nothing was truncated made every model *worse*, and blending a model with the word counting - the way these systems are normally deployed - came out below the word counting alone.
@@ -158,6 +158,6 @@ The last limit matters most, because this kind of tool introduces it rather than
 
 ## One reading, not a verdict
 
-Every number here comes from a single run against a frozen copy of the forge on one day, so each is a measurement with a date on it rather than a fact about the world. A growing pile of issues changes every figure rather than just adding one, so checking again means re-running all of it - and I'd expect the gap to widen rather than close, since counting words gets better statistics from more documents while an off-the-shelf model learns nothing from mine.
+Every number here comes from a single run against a frozen copy of the forge, on the date at the top of this page, so each is a measurement with a date on it rather than a fact about the world. A growing pile of issues changes every figure rather than just adding one, so checking again means re-running all of it - and I'd expect the gap to widen rather than close, since counting words gets better statistics from more documents while an off-the-shelf model learns nothing from mine.
 
 I haven't committed to a schedule and won't pretend to one. The setup is frozen with a checksum and the tool carries its own benchmark, so the point is that a second reading is cheap, not that it is promised.

@@ -11,6 +11,9 @@ const projects = defineCollection({
     title: z.string(),
     description: z.string(),
     date: z.date(),
+    // Set when a piece is revised after publishing. `date` stays the
+    // publication date, so ordering and the RSS pubDate do not move.
+    updated: z.date().optional(),
     cover: z.string().optional(),
     coverAlt: z.string().optional(),
     thumb: z.string().optional(),

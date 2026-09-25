@@ -83,6 +83,9 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
     }
     h1 { font-size: 2.2rem; margin-bottom: 0.5rem; font-weight: 700; line-height: 1.2; text-align: center; }
     .meta { color: #8a8f99; font-size: 0.95rem; margin-bottom: 2.5rem; text-align: center; }
+    /* Separated by a middot rather than a second line, so the header keeps
+       its shape whether or not a piece has been revised. */
+    .meta-upd::before { content: " \00b7 "; }
 
     article :global(h2) { font-size: 1.5rem; margin: 2rem 0 0.75rem; font-weight: 700; }
     article :global(h3) { font-size: 1.2rem; margin: 1.5rem 0 0.5rem; font-weight: 700; }
@@ -355,7 +358,10 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
       </button>
     )}
     <h1>{project.data.title}</h1>
-    <div class="meta">{fmt(project.data.date)}</div>
+    <div class="meta">
+      {fmt(project.data.date)}
+      {project.data.updated && <span class="meta-upd">updated {fmt(project.data.updated)}</span>}
+    </div>
     <article>
       <Content />
     </article>
