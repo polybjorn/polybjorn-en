@@ -29,17 +29,11 @@ That makes them good at exactly one class of job: *find me the things like this 
 
 The competing method is much older and has no model in it at all. Count the words in every document, weight the rare ones more heavily than the common ones, and call two documents similar when they share unusual vocabulary. It is called TF-IDF, it is about fifty years old, and it will matter later.
 
-## The first idea was the wrong one
+## The question worth asking
 
-My tracker labels issues by who should act: an agent may take this one, this one needs a decision from me, this one is blocked. Predicting that label looked like the obvious first job.
+My first instinct was to have it predict something - which of my labels a new issue should get. That turned out not to be a job at all: four issues in five are labelled within a minute of being filed, most in the same second, because whoever writes one labels it in the same breath. Automating a decision needs the decision to be *separable*, made later and deliberately from something written down. Worth checking before building anything, and it took counting rather than a model to find out.
 
-It is not a job at all, and the data said so immediately. **Four issues in five get their label within sixty seconds of being filed, and more than half in the same second.** Whoever writes the issue labels it in the same breath. There is no gap between filing and deciding for a model to stand in.
-
-That generalises past this one tracker. Automating a judgement requires that the judgement be *separable* - that somebody makes it later, deliberately, from information that is written down. If the decision happens at the same instant as the thing it is about, there is nothing to predict. Worth checking before building anything.
-
-## The question that did have an answer
-
-The useful version turned out to be the thing I actually wanted: **when I start writing a new issue, which existing ones should I read first?**
+The version that worked was the thing I actually wanted: **when I start writing a new issue, which existing ones should I read first?**
 
 Grading that needs an answer key, and this is the part I would repeat anywhere. **Every time someone writes `#123` in an issue, they are asserting that two issues are related.** That is a human judgement, already recorded, free. My tracker had 616 of them.
 
@@ -49,7 +43,7 @@ Counting words found the right issue in its top five **63.8%** of the time. Show
 
 That is a working tool, and it is the one I kept. The largest single improvement came from something with no cleverness in it at all: **indexing the comments as well as the issue text, worth about five points.** The comments were two and a bit times the volume of the issue bodies and I had simply not been using them.
 
-## Then the models lost
+## The models lost
 
 At this point I had used no model. Four small embedding models went in next, each with the prompt format its authors specify, all scored on the same links.
 
@@ -61,7 +55,7 @@ I had written down the opposite prediction before running it, which is the only 
 
 The reason is visible once you look at what my issues are made of. They are full of identifiers: `StateDirectory`, `checks/service-state.nix`, machine names. Exact matching on a rare string is precisely what counting words is best at, and it is what a model trained on ordinary prose is worst at. The model is better at language. My text is barely language.
 
-## So I trained one on my own data
+## Training one on my own data did not rescue it
 
 The obvious objection is that the models were strangers. Train one on my own material and the objection goes away.
 
@@ -77,7 +71,7 @@ Training helped, and it did not matter. Three points here is five links out of 1
 
 So the comfortable explanation - *it only lost because it did not know my vocabulary* - survives in a much weaker form. I taught it the vocabulary. It stayed behind.
 
-## What I would tell anyone doing this with their own pile of text
+## What I would tell anyone trying this
 
 **Count your data before you run anything.** I had three candidate jobs and only checked the size of one. The other two turned out to have four usable examples each - not four hundred, four - which five minutes of counting would have shown before any of the work. Nothing rescues a task with no data in it.
 
@@ -93,8 +87,6 @@ So the comfortable explanation - *it only lost because it did not know my vocabu
 
 The answer key only credits links somebody bothered to type. One issue about journal entries failing to arrive carried no reference at all, so every suggestion for it scored as a miss - including the obviously correct earlier issue about the same subsystem, which came first. The numbers are a floor on usefulness, not a measure of precision.
 
-The corpus is under 500 issues. The biggest models were never tried, so nothing here says a large one would fail. Neither were the code-trained retrieval models: the two I did try are code-trained *encoders* rather than retrieval models, and one scored barely above random, which says its output was never built to be compared this way rather than anything about code. That question is untested, not answered.
+The corpus is under 500 issues, and the largest models were never tried, so nothing here says a big one would fail. Nor were the code-trained retrieval models, which are the ones I would most want to see: the two I could run are code-trained *encoders* rather than retrieval models, and one scored barely above random - a fact about output never built to be compared this way, not about code. Untested, not answered.
 
-And the tool has no way to appear at the moment an issue is filed, because the forge will not give the account a webhook. It is a command someone has to remember to run, which is the weakest thing about it.
-
-One last limit is the one that matters most, because it is the failure this kind of tool introduces rather than the ones it inherits. Something that finds a genuinely related issue about two thirds of the time **cannot be read as a clearance.** Checking it, seeing nothing, and concluding the question is new converts *I did not look* into *I looked and it was clear*, which is worse than never having looked. So it says so on every run.
+The last limit matters most, because this kind of tool introduces it rather than inheriting it. Something that finds a genuinely related issue about two thirds of the time **cannot be read as a clearance.** Checking it, seeing nothing, and concluding the question is new converts *I did not look* into *I looked and it was clear*, which is worse than never having looked. So it says so on every run.
