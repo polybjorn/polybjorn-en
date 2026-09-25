@@ -9,7 +9,12 @@ export async function getStaticPaths() {
   // built for them and listed in the sitemap - unlisted, not unpublished.
   // Keep them reachable in dev so they can be previewed.
   const projects = await getCollection('projects', ({ data }) =>
-    import.meta.env.PROD ? !data.draft : true);
+    // A preview build is a PRODUCTION build, so gating on PROD alone hid a
+    // draft from site-preview: an empty listing and a 404 for the one page the
+    // preview existed to show. PREVIEW is the same flag src/pages/dev/[view].astro
+    // already gates on. A plain `npm run build`, which is what deploys, still
+    // emits no draft route.
+    import.meta.env.DEV || process.env.PREVIEW === '1' || !data.draft);
   return projects.map(project => ({
     params: { slug: project.id },
     props: { project },
@@ -78,6 +83,9 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
     }
     h1 { font-size: 2.2rem; margin-bottom: 0.5rem; font-weight: 700; line-height: 1.2; text-align: center; }
     .meta { color: #8a8f99; font-size: 0.95rem; margin-bottom: 2.5rem; text-align: center; }
+    /* Separated by a middot rather than a second line, so the header keeps
+       its shape whether or not a piece has been revised. */
+    .meta-upd::before { content: " \00b7 "; }
 
     article :global(h2) { font-size: 1.5rem; margin: 2rem 0 0.75rem; font-weight: 700; }
     article :global(h3) { font-size: 1.2rem; margin: 1.5rem 0 0.5rem; font-weight: 700; }
@@ -110,7 +118,15 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
     /* Shiki sets its theme background inline, so it needs overriding to match */
     article :global(pre.astro-code) { background: #15181d !important; }
     article :global(pre code) { background: transparent; padding: 0; }
-    article :global(img) { max-width: 100%; height: auto; border-radius: 4px; margin: 1.25rem 0; }
+    article :global(img) {
+      max-width: 100%;
+      height: auto;
+      border-radius: 4px;
+      /* Centred rather than flush left, so an image narrower than the 720px
+         column does not sit off to one side. */
+      display: block;
+      margin: 1.25rem auto;
+    }
     article :global(.img-zoom) {
       display: block;
       width: 100%;
@@ -130,6 +146,116 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
       margin: -0.35rem 0 1.25rem;
       padding: 0.2rem 1.4rem 1rem;
       line-height: 1.5;
+    }
+    /* Markdown tables rendered to nothing but browser defaults until now -
+       no project page had used one, so the gap was invisible. Borders and
+       muted head follow the rest of this sheet. */
+    article :global(table) {
+      /* fit-content centres a narrow table instead of stretching two columns
+         across the whole measure; max-width plus the overflow below still lets
+         a wide one scroll on a phone. */
+      width: fit-content;
+      max-width: 100%;
+      border-collapse: collapse;
+      margin: 1.25rem auto;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      font-variant-numeric: tabular-nums;
+      display: block;
+      overflow-x: auto;
+    }
+    article :global(thead th) {
+      text-align: left;
+      font-weight: 600;
+      color: #8a8f99;
+      font-size: 0.85rem;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      padding: 0 0.85rem 0.5rem;
+      border-bottom: 1px solid #2a2f37;
+      white-space: nowrap;
+    }
+    article :global(tbody td) {
+      padding: 0.55rem 0.85rem;
+      border-bottom: 1px solid #22262d;
+      vertical-align: baseline;
+      /* A wrapped cell in a two-column table reads as two rows. The table
+         already scrolls sideways when it has to, so let it. */
+      white-space: nowrap;
+    }
+    @media (max-width: 560px) {
+      /* Below this the nowrap would push a wide table into a scrollbar for
+         every reader, which is worse than a wrapped line. */
+      article :global(tbody td) { white-space: normal; }
+    }
+    article :global(tbody tr:last-child td) { border-bottom: none; }
+    /* The tables here are label-then-number, so the measure reads better
+       aligned right. Revisit if one ever ends in prose. */
+    article :global(thead th:not(:first-child)),
+    article :global(tbody td:not(:first-child)) { text-align: right; }
+    /* Bar chart in markup rather than an image. A 748px SVG scaled into a
+       327px phone rendered its axis text at under 5px; this reflows, the
+       labels stay real text at real size, and updating a number is an edit
+       rather than regenerating a file. Colours validated for colour-blind
+       separation before use. */
+    article :global(.mchart) { margin: 1.5rem 0; }
+    /* Sits below the bars, so the spacing goes above it. */
+    article :global(.mchart-cap) {
+      color: #8a8f99; font-size: 0.85rem; margin-top: 0.7rem; line-height: 1.5;
+      text-align: center;
+    }
+    article :global(.mchart-key) {
+      display: flex; flex-wrap: wrap; gap: 0.35rem 1rem;
+      color: #b5bac3; font-size: 0.85rem; margin-bottom: 0.9rem;
+      /* Centred over the whole figure rather than left-aligned against the
+         label column, which put it above the labels instead of the bars. */
+      justify-content: center;
+    }
+    article :global(.mchart-key span) { display: inline-flex; align-items: center; gap: 0.4rem; }
+    article :global(.mchart-sw) { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+    article :global(.mchart-row) {
+      display: grid;
+      /* 12rem holds the longest label - "Counting words + comments", 25
+         characters - on one line at this size. */
+      grid-template-columns: minmax(6.5rem, 12rem) 1fr 3.1rem;
+      align-items: center; gap: 0.6rem; margin-bottom: 0.4rem;
+    }
+    /* No underline: four of them stacked in a column is noisier than the data.
+       The links still have to be findable, so they carry the brighter body ink
+       against the muted label grey, and the underline comes back on hover and
+       keyboard focus. Accent blue is avoided deliberately - it sits right next
+       to a coloured bar and the two compete. */
+    article :global(.mchart-label a) {
+      color: #dde1e7;
+      text-decoration: none;
+    }
+    article :global(.mchart-label a:hover),
+    article :global(.mchart-label a:focus-visible) { text-decoration: underline; }
+    /* Same reasoning inside tables, where a link would otherwise underline a
+       whole row of cells. */
+    article :global(table a) { color: #dde1e7; text-decoration: none; }
+    article :global(table a:hover),
+    article :global(table a:focus-visible) { text-decoration: underline; }
+    article :global(.mchart-label) {
+      font-size: 0.85rem; color: #b5bac3; text-align: right;
+      line-height: 1.35;
+      white-space: nowrap;
+    }
+    article :global(.mchart-track) { background: #22262d; border-radius: 3px; height: 1.15rem; }
+    article :global(.mchart-bar) { height: 100%; border-radius: 3px; min-width: 2px; }
+    article :global(.mchart-val) {
+      font-size: 0.85rem; font-variant-numeric: tabular-nums; color: #dde1e7;
+    }
+    article :global(.mchart-lex) { background: #3987e5; }
+    article :global(.mchart-emb) { background: #d95926; }
+    article :global(.mchart-ctl) { background: #8a8f99; }
+    @media (max-width: 480px) {
+      article :global(.mchart-row) { grid-template-columns: 1fr 2.9rem; gap: 0.35rem 0.5rem; }
+      /* label moves above its own bar rather than squeezing a third column */
+      article :global(.mchart-label) {
+        grid-column: 1 / -1; text-align: left; margin-top: 0.4rem;
+        white-space: normal;
+      }
     }
     article :global(hr) { border: none; border-top: 1px solid #2a2f37; margin: 2rem 0; }
     article :global(.article-gallery) {
@@ -232,7 +358,10 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
       </button>
     )}
     <h1>{project.data.title}</h1>
-    <div class="meta">{fmt(project.data.date)}</div>
+    <div class="meta">
+      {fmt(project.data.date)}
+      {project.data.updated && <span class="meta-upd">updated {fmt(project.data.updated)}</span>}
+    </div>
     <article>
       <Content />
     </article>

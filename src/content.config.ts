@@ -11,6 +11,9 @@ const projects = defineCollection({
     title: z.string(),
     description: z.string(),
     date: z.date(),
+    // Set when a piece is revised after publishing. `date` stays the
+    // publication date, so ordering and the RSS pubDate do not move.
+    updated: z.date().optional(),
     cover: z.string().optional(),
     coverAlt: z.string().optional(),
     thumb: z.string().optional(),
@@ -23,6 +26,10 @@ const projects = defineCollection({
       icon: z.enum(['github', 'obsidian']),
     })).default([]),
     draft: z.boolean().default(false),
+    // Published and reachable at its own URL, but kept off the projects
+    // listing, the feed and the sitemap. For something shareable by link
+    // before it is announced.
+    unlisted: z.boolean().default(false),
   }),
 });
 

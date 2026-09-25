@@ -16,8 +16,14 @@ export default defineConfig({
   // behaviour; the same change closed the gaps around a separator in rovar-no
   // without failing the build.
   compressHTML: true,
+  // Unlisted entries are named here rather than read from the content, because
+  // the sitemap filter runs on URLs and has no access to frontmatter. One line
+  // per unlisted slug; without it 'unlisted' would only mean 'not linked from
+  // my own pages' while still being handed to search engines.
   integrations: [sitemap({
-    filter: (page) => !page.includes('/gallery/') && !page.includes('/galleri/'),
+    filter: (page) => !page.includes('/gallery/')
+      && !page.includes('/galleri/')
+      && !page.includes('/projects/local-models-on-a-small-forge'),
   })],
   vite: {
     plugins: [yaml()],
