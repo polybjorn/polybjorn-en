@@ -1,6 +1,6 @@
 ---
 title: "Embeddings lost to counting words"
-description: "Local AI models against plain word counting, graded on the cross-references I had already typed."
+description: "Local AI models against plain word counting on a Git forge, graded on cross-references already there."
 date: 2026-09-25
 thumb: /images/local-models-thumb.svg
 thumbAlt: An unlabelled bar chart, one long blue bar above four shorter amber ones and a short grey one
