@@ -1,141 +1,90 @@
 ---
-title: "Four embedding models lost to counting words"
-description: "A local-model experiment on a 489-issue forge, and the five times the result reversed. The useful finding was not about models."
+title: "The model was the least important part"
+description: "I wanted to know whether a small model running on my own machine could do useful work on my own data. It could. Four of them then lost to counting words."
 date: 2026-09-25
 draft: true
 ---
 
-The question was narrow: does a small embedding model, running locally, do useful work on a self-hosted forge with a few hundred issues on it? No use case was committed in advance. The first run was chosen because it had an answer key.
+I run a self-hosted issue tracker for my own infrastructure. A few hundred issues sit on it, most of them written by me or by an agent working on my behalf, and they have a habit I have grown to dislike: I decide something, write it down carefully, and then rediscover the same question six weeks later because I did not remember that the answer was already there.
 
-It reversed five times. The leaderboard at the end is the least interesting part.
+<!-- TRIGGER: one sentence about Jev goes here if we keep it - what it is and
+     what it does, in your words. It was never tested, so it can only be what
+     made me curious, never a comparison. The piece reads fine without it. -->
 
-## First reversal: the task had no gap in it
+So I wanted to know whether a small model, running locally on a machine I already own, could do something about that. Not a chatbot. Something narrow, cheap and specific.
 
-The plan was to predict the triage label a new issue gets - whether it is safe for an unattended agent, whether it needs a decision from a person, whether it is blocked - with a confidence honest enough to act on above a threshold and escalate below it. The pass bar was fixed in writing before anything ran: at 0.9 or better confidence, 90% correct, covering at least 30% of held-out issues.
+## What these models actually do
 
-Term counting plus a calibrated logistic regression reached **2.4% coverage** at that confidence. Precision inside the band was fine. The model was simply almost never confident.
+An embedding model turns a piece of text into a list of numbers - a position in space - arranged so that texts about similar things land near each other. Nothing is generated and nothing is written. The only thing you can do with the output is measure distance.
 
-The reason turned out to be structural rather than a matter of model size. Timestamps on 333 labelled issues:
+That makes them good at exactly one class of job: *find me the things like this one*. Search that tolerates different wording, grouping, spotting duplicates. They run on a laptop, they cost nothing per query, and the text never leaves the machine. That combination is why they are interesting for a private pile of notes or issues.
 
-```
-delay from issue creation to first triage label
-  same second      56.5%
-  under 60s        23.4%    -> 79.9% within a minute
-  over 1 day        5.1%
-```
+The competing method is much older and has no model in it at all. Count the words in every document, weight the rare ones more heavily than the common ones, and call two documents similar when they share unusual vocabulary. It is called TF-IDF, it is about fifty years old, and it will matter later.
 
-Four issues in five were labelled by whoever filed them, in the same breath as filing. Predicting that label from the text means predicting the filer's own intent at a moment when the filer already holds it. There was no decision sitting there waiting to be automated, so there was nothing for a larger model to recover. Only 46 issues of 333 were labelled more than an hour after filing, and that is the entire population where a second party ever triaged anything.
+## The first idea was the wrong one
 
-## Second reversal: two of the three candidates could not be scored at all
+My tracker labels issues by who should act: an agent may take this one, this one needs a decision from me, this one is blocked. Predicting that label looked like the obvious first job.
 
-The original plan listed three tasks. Sizing the other two took about five minutes and should have happened before any model ran:
+It is not a job at all, and the data said so immediately. **Four issues in five get their label within sixty seconds of being filed, and more than half in the same second.** Whoever writes the issue labels it in the same breath. There is no gap between filing and deciding for a model to stand in.
 
-```
-triage label       333 examples
-duplicate check      4 genuine pairs
-alert noise          4 machine-filed issues
-```
+That generalises past this one tracker. Automating a judgement requires that the judgement be *separable* - that somebody makes it later, deliberately, from information that is written down. If the decision happens at the same instant as the thing it is about, there is nothing to predict. Worth checking before building anything.
 
-Fifty-six comments in the repo carried duplicate or supersede language, which made duplicate detection look viable. Reading them, almost all were one *finding* superseding another rather than one issue duplicating another, and several referenced an upstream project's issue numbers rather than this forge's. Four pairs cannot score a retrieval system.
+## The question that did have an answer
 
-That is a fact about the corpus, not about embeddings: under 500 issues, written carefully, with few duplicates because the filing convention works. The only task with enough data was the one with the least signal in its text.
+The useful version turned out to be the thing I actually wanted: **when I start writing a new issue, which existing ones should I read first?**
 
-An answer key is what proves a duplicate finder works. It is not what makes one useful. Those are different verdicts and merging them was a mistake worth naming.
+Grading that needs an answer key, and this is the part I would repeat anywhere. **Every time someone writes `#123` in an issue, they are asserting that two issues are related.** That is a human judgement, already recorded, free. My tracker had 616 of them.
 
-## Third reversal: the task that worked was not on the list
+So the test writes itself. Hide the reference, show the system only the new issue's text, and ask whether it finds the issue the author actually linked. Do it only against issues that existed at the time, so nothing borrows from the future.
 
-Every `#N` that someone types in an issue body is a human assertion that two issues are related. There were **616** of them.
+Counting words found the right issue in its top five **63.8%** of the time. Showing the five most recent issues instead - the obvious cheap alternative - managed 23.1%. Picking at random managed 2.6%.
 
-That is a free answer key for a different question: given a new issue, retrieve the earlier issues a person would have linked. Hide the references, show the tool only the new text, and ask whether the issue that was actually cited comes back in the top five.
+That is a working tool, and it is the one I kept. The largest single improvement came from something with no cleverness in it at all: **indexing the comments as well as the issue text, worth about five points.** The comments were two and a bit times the volume of the issue bodies and I had simply not been using them.
 
-It worked immediately, with no model involved:
+## Then the models lost
 
-```
-                            recall@5
-tfidf + comments             63.8%
-LSA-200 + comments           53.2%   (title-only query)
-recency baseline             23.1%
-random                        2.6%
-```
-
-Recency is the control that matters. References skew recent, so beating random proves nothing and beating "show the five newest issues" proves something.
-
-The single largest improvement came from text that was already there. Comments on this forge are **2.18 times** the volume of the issue bodies, and nothing had been indexing them. Adding them moved a title-only query from 48.3% to 53.2%.
-
-## Fourth reversal: the models lost, against a written prediction
-
-Four local embedding models were then measured on the same links, with each model's required prompt format applied, because a model used wrongly reads as a weak model:
+At this point I had used no model. Four small embedding models went in next, each with the prompt format its authors specify, all scored on the same links.
 
 ![Horizontal bar chart of recall@5 by method. The five term-weighting methods run from 63.8% down to 47.6%; the four embedding models sit below them from 46.0% to 41.0%; a recency control reaches 23.1% and a random control 2.6%.](/images/local-models-methods.svg)
 
-```
-                            recall@5
-tfidf + comments             63.8%
-tfidf, body only             57.0%
-LSA-200 + comments           53.2%
-gte-small                    37.7%
-bge-small-en-v1.5            36.1%
-multilingual-e5-small        34.3%
-all-MiniLM-L6-v2             31.6%
-```
+Every one of them lost, and not narrowly. The best reached 46.0% against 63.8%.
 
-The prediction on record before that run was that the models would win. They lost by roughly ten points, and the obvious objections do not rescue them. Truncation was not the handicap: chunking each candidate and taking the best-matching chunk made every model worse, gte-small from 37.7% to 34.8%. Fusion did not rescue it either, which is how dense retrieval is normally deployed - combining gte-small with LSA by reciprocal rank fusion scored 46.3%, below LSA's own 48.3% on that query form.
+I had written down the opposite prediction before running it, which is the only reason I can say honestly that it was a surprise rather than something I expected all along. I also checked the obvious escapes and none of them helped: chunking the documents so nothing was truncated made every model *worse*, and blending a model with the word counting - the way these systems are normally deployed - came out below the word counting alone.
 
-In hindsight the reason is plain. The signal in these issues is identifiers: metric names, file paths under `checks/`, hostnames. Exact matching finds those, and exact matching is the thing term weighting does optimally and dense retrievers do worst. A model trained on ordinary prose has never seen the identifier and maps it to nothing in particular.
+The reason is visible once you look at what my issues are made of. They are full of identifiers: `StateDirectory`, `checks/service-state.nix`, machine names. Exact matching on a rare string is precisely what counting words is best at, and it is what a model trained on ordinary prose is worst at. The model is better at language. My text is barely language.
 
-There is a second point hiding in that table. Both winning methods are fitted on this corpus - term weights computed from these issues, and in the LSA case a decomposition learned from them. The bought models were trained on the internet. The homemade statistical model beat the general-purpose neural ones because it had seen the vocabulary, which is a more useful lesson than the ranking.
+## So I trained one on my own data
 
-## Making the next number mean something
+The obvious objection is that the models were strangers. Train one on my own material and the objection goes away.
 
-The 616 references are both the obvious training signal and the scoring key, so any future model has to be trained and scored on different halves or the result is worthless. The corpus was frozen and the links split before any model touched them:
+That is testable, and it has to be done carefully or the answer is meaningless: train on some of the links, hold the rest back, and never let the training see what it will be graded on. 462 links trained a small model in 95 seconds on a CPU. 154 were kept back to score it.
 
-```
-snapshot  489 issues, 1060 issue comments, 616 links
-split     time-based on the citing issue's date
-train     462 links       test  154 links
-```
+| on the held-out links | found it in the top five |
+| --- | --- |
+| the model, untrained | 37.7% |
+| the model, trained on my own pairs | 40.9% |
+| counting words | 48.7% |
 
-Time-based rather than random, because the real task predicts forward and because two references from one issue would otherwise straddle the split.
+Training helped, and it did not matter. Three points here is five links out of 154, against a natural variation of about six. It is inside the noise; I cannot tell it from luck. The distance to counting words is twelve links, which is outside the noise and is real.
 
-On the held-out quarter alone the same method scores **56.5%**, and that is the number any future model has to beat. It is not a worse result, it is a harder slice: the recency control falls from 23.1% to 18.2% over the same change, and the ratio between method and control holds steady. Both moving together is what a harder test set looks like. The method falling on its own would have meant a broken measurement.
+So the comfortable explanation - *it only lost because it did not know my vocabulary* - survives in a much weaker form. I taught it the vocabulary. It stayed behind.
 
-## Fifth reversal: teaching it the vocabulary did not rescue it
+## What I would tell anyone doing this with their own pile of text
 
-The obvious objection to all of this is that the models were strangers. They had
-never seen `nixfleet_unit_tier` or `checks/service-state.nix`, so of course
-counting words beat them. Train one on the forge's own pairs and the objection
-goes away.
+**Count your data before you run anything.** I had three candidate jobs and only checked the size of one. The other two turned out to have four usable examples each - not four hundred, four - which five minutes of counting would have shown before any of the work. Nothing rescues a task with no data in it.
 
-That is testable, and the split above is what makes it honest: 462 of the links
-train, the held-out 154 score, and the test half is never seen during training.
-A small model was fine-tuned on those pairs with in-batch negatives, one epoch,
-95 seconds on a CPU.
+**Look for an answer key you already have.** Cross-references, stars, what you archived versus deleted, what you clicked. If your own past behaviour is written down somewhere, you can grade a system honestly instead of eyeballing it and hoping.
 
-| on the held-out 154 links, body text only | recall@5 | MRR |
-| --- | --- | --- |
-| the model, untrained | 37.7% | 0.287 |
-| the model, trained on this forge's pairs | 40.9% | 0.297 |
-| counting words | 48.7% | 0.366 |
+**The angle matters more than the model.** Same text, same machine, no model in either case: one framing failed completely and another produced something I use. That difference was worth roughly twenty times what any model choice was worth.
 
-Training helped. It also did not matter: 3.2 points is five links out of 154,
-and one standard deviation of a coin weighted to that rate is six links. The
-gain is 0.83 of a standard deviation, which is another way of saying the sample
-cannot tell it apart from luck. The distance to counting words is twelve links,
-about two standard deviations, and that one is real.
+**Write the bar down before you run the test.** Mine was fixed in advance, and it is the only reason the first failure was a clear no rather than a negotiation with myself about whether 2.4% was encouraging.
 
-So the vocabulary explanation, which is the one I had been giving, survives only
-in a weakened form. The model was taught the vocabulary and stayed behind.
+## What this does not show
 
-## What the limits actually are
+The answer key only credits links somebody bothered to type. One issue about journal entries failing to arrive carried no reference at all, so every suggestion for it scored as a miss - including the obviously correct earlier issue about the same subsystem, which came first. The numbers are a floor on usefulness, not a measure of precision.
 
-The answer key credits only references that somebody bothered to type. One issue about journal entries failing to arrive carried no reference at all, so every result for it counted as a miss - including the one obviously correct earlier issue about the same subsystem, which ranked first. The figures are therefore a floor on usefulness rather than a precision measurement, and a hand check of the output is the only thing that answers whether it helps.
+The corpus is under 500 issues. The biggest models were never tried, so nothing here says a large one would fail. Neither were the code-trained retrieval models: the two I did try are code-trained *encoders* rather than retrieval models, and one scored barely above random, which says its output was never built to be compared this way rather than anything about code. That question is untested, not answered.
 
-The corpus is under 500 issues. The largest models were never tried, so nothing here says a much bigger embedding model would fail, only that four small ones did. Nor were the code-trained retrieval models: the two that were tried are code-trained encoders rather than retrieval models, and one of them scored barely above the random control, which says its vectors were never built to be compared this way rather than anything about code. The two that would settle it need either a larger machine or permission to execute a model repository's own code on this one. So that question is untested rather than answered. And the tool that came out of this has no way to appear at the moment an issue is filed, because the forge refuses webhook registration to the account that would need it. It is a command someone has to remember to run, which is the weakest thing about it.
+And the tool has no way to appear at the moment an issue is filed, because the forge will not give the account a webhook. It is a command someone has to remember to run, which is the weakest thing about it.
 
-One more limit deserves stating plainly, because it is the failure this kind of tool introduces. A lookup that finds a genuinely related issue about two thirds of the time cannot be read as a clearance. Checking it, seeing nothing and concluding the question is new converts "I did not look" into "I looked and it was clear", which is worse than not having looked. The tool prints that warning on every run.
-
-## The through-line
-
-The angle mattered roughly twenty times more than the model. The same corpus, the same machine and no model at all produced a failure and then a success, purely by changing what was being asked. The largest single gain came from indexing text that had been sitting there the whole time.
-
-The cheapest thing that was skipped was counting the rows in each candidate task before running any of them.
+One last limit is the one that matters most, because it is the failure this kind of tool introduces rather than the ones it inherits. Something that finds a genuinely related issue about two thirds of the time **cannot be read as a clearance.** Checking it, seeing nothing, and concluding the question is new converts *I did not look* into *I looked and it was clear*, which is worse than never having looked. So it says so on every run.
