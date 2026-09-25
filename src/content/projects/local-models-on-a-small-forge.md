@@ -1,6 +1,6 @@
 ---
-title: "The model was the least important part"
-description: "How to find out whether a tool helps on your own data, without trusting someone else's benchmark. A first reading: four embedding models lost to counting words."
+title: "Finding what I already wrote"
+description: "A lookup that suggests which existing issues to read before filing a new one, and a test of whether a small local AI model does the job better than counting words."
 date: 2026-09-25
 draft: true
 ---
