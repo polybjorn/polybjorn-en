@@ -136,6 +136,42 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
       padding: 0.2rem 1.4rem 1rem;
       line-height: 1.5;
     }
+    /* Markdown tables rendered to nothing but browser defaults until now -
+       no project page had used one, so the gap was invisible. Borders and
+       muted head follow the rest of this sheet. */
+    article :global(table) {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.25rem 0;
+      font-size: 0.95rem;
+      line-height: 1.5;
+      font-variant-numeric: tabular-nums;
+      display: block;
+      overflow-x: auto;
+    }
+    article :global(thead th) {
+      text-align: left;
+      font-weight: 600;
+      color: #8a8f99;
+      font-size: 0.85rem;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      padding: 0 0.85rem 0.5rem;
+      border-bottom: 1px solid #2a2f37;
+      white-space: nowrap;
+    }
+    article :global(tbody td) {
+      padding: 0.55rem 0.85rem;
+      border-bottom: 1px solid #22262d;
+      vertical-align: baseline;
+    }
+    article :global(tbody tr:last-child td) { border-bottom: none; }
+    /* The tables here are label-then-number, so the measure reads better
+       aligned right. Revisit if one ever ends in prose. */
+    article :global(thead th:not(:first-child)),
+    article :global(tbody td:not(:first-child)) { text-align: right; }
+    article :global(thead th:first-child),
+    article :global(tbody td:first-child) { padding-left: 0; }
     article :global(hr) { border: none; border-top: 1px solid #2a2f37; margin: 2rem 0; }
     article :global(.article-gallery) {
       display: grid;
