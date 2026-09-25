@@ -111,7 +111,7 @@ Which makes them good at exactly one job: *find me the things like this one*. Th
     <div class="mchart-track"><div class="mchart-bar mchart-ctl" style="width:3.7%"></div></div>
     <div class="mchart-val">2.6%</div>
   </div>
-  <figcaption class="mchart-cap">Found in the top five. Higher is better.</figcaption>
+  <figcaption class="mchart-cap">How often the issue a person actually linked turns up in the first five suggestions, out of hundreds of candidates.</figcaption>
 </figure>
 
 Every one lost, and not narrowly. I'd written down the opposite prediction beforehand, which is the only reason I can honestly call it a surprise. The obvious escapes didn't help either: chunking the documents so nothing was truncated made every model *worse*, and blending a model with the word counting - the way these systems are normally deployed - came out below the word counting alone.
@@ -124,7 +124,7 @@ The reason is visible once you look at what my issues are made of. They're full 
 
 One of them can't go in the chart above. A model trained on my own links has to be judged on links it never saw, so it needs a quarter of them held back - and once you hold data back, every figure has to be recomputed on that smaller, harder set. That's why counting words is 48.7% here and 63.8% there. Same method, different question.
 
-| held back from the start | found it in the top five |
+| held back from the start | linked issue in the first five |
 | --- | --- |
 | counting words | **48.7%** |
 | a model trained on my own pairs | 40.9% |
