@@ -17,7 +17,13 @@ So I wanted to know whether a small model, running locally on a machine I alread
 
 ## What these models actually do
 
-An embedding model turns a piece of text into a list of numbers - a position in space - arranged so that texts about similar things land near each other. Nothing is generated and nothing is written. The only thing you can do with the output is measure distance.
+This is not the kind of model most people mean by AI, and the difference is the whole point.
+
+A large language model writes. You give it words and it gives you new words back, which is why it can answer a question, draft a paragraph, or be confidently wrong in fluent prose. An embedding model does not write anything. It turns a piece of text into a list of numbers - a position in space - arranged so that texts about similar things land near each other. That is the entire output. The only operation you can perform on it is measuring distance.
+
+They are relatives: both are trained on large amounts of text and both are built on the same underlying machinery. But they differ in every way that matters in practice. The ones I used are small enough to sit in a couple of hundred megabytes, run on an ordinary processor with no graphics card, and take about twenty milliseconds per document. They cannot hallucinate, because they cannot assert anything - the worst a bad result can do is rank an irrelevant issue highly, which you notice immediately, rather than tell you something false in a convincing sentence.
+
+If you have heard of retrieval-augmented generation, this is the retrieval half of it on its own: the embedding model finds the relevant documents, and a language model writes the answer from them. I was only ever interested in the first half. I already have language models writing issues on this tracker; what I wanted was something to find the ones that already existed.
 
 That makes them good at exactly one class of job: *find me the things like this one*. Search that tolerates different wording, grouping, spotting duplicates. They run on a laptop, they cost nothing per query, and the text never leaves the machine. That combination is why they are interesting for a private pile of notes or issues.
 
