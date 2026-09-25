@@ -1,13 +1,13 @@
 ---
 title: "Four embedding models lost to counting words"
-description: "A local-model experiment on a 489-issue forge, and the four times the result reversed. The useful finding was not about models."
+description: "A local-model experiment on a 489-issue forge, and the five times the result reversed. The useful finding was not about models."
 date: 2026-09-25
 draft: true
 ---
 
 The question was narrow: does a small embedding model, running locally, do useful work on a self-hosted forge with a few hundred issues on it? No use case was committed in advance. The first run was chosen because it had an answer key.
 
-It reversed four times. The leaderboard at the end is the least interesting part.
+It reversed five times. The leaderboard at the end is the least interesting part.
 
 ## First reversal: the task had no gap in it
 
@@ -99,11 +99,38 @@ Time-based rather than random, because the real task predicts forward and becaus
 
 On the held-out quarter alone the same method scores **56.5%**, and that is the number any future model has to beat. It is not a worse result, it is a harder slice: the recency control falls from 23.1% to 18.2% over the same change, and the ratio between method and control holds steady. Both moving together is what a harder test set looks like. The method falling on its own would have meant a broken measurement.
 
+## Fifth reversal: teaching it the vocabulary did not rescue it
+
+The obvious objection to all of this is that the models were strangers. They had
+never seen `nixfleet_unit_tier` or `checks/service-state.nix`, so of course
+counting words beat them. Train one on the forge's own pairs and the objection
+goes away.
+
+That is testable, and the split above is what makes it honest: 462 of the links
+train, the held-out 154 score, and the test half is never seen during training.
+A small model was fine-tuned on those pairs with in-batch negatives, one epoch,
+95 seconds on a CPU.
+
+| on the held-out 154 links, body text only | recall@5 | MRR |
+| --- | --- | --- |
+| the model, untrained | 37.7% | 0.287 |
+| the model, trained on this forge's pairs | 40.9% | 0.297 |
+| counting words | 48.7% | 0.366 |
+
+Training helped. It also did not matter: 3.2 points is five links out of 154,
+and one standard deviation of a coin weighted to that rate is six links. The
+gain is 0.83 of a standard deviation, which is another way of saying the sample
+cannot tell it apart from luck. The distance to counting words is twelve links,
+about two standard deviations, and that one is real.
+
+So the vocabulary explanation, which is the one I had been giving, survives only
+in a weakened form. The model was taught the vocabulary and stayed behind.
+
 ## What the limits actually are
 
 The answer key credits only references that somebody bothered to type. One issue about journal entries failing to arrive carried no reference at all, so every result for it counted as a miss - including the one obviously correct earlier issue about the same subsystem, which ranked first. The figures are therefore a floor on usefulness rather than a precision measurement, and a hand check of the output is the only thing that answers whether it helps.
 
-The corpus is under 500 issues. The largest models were never tried, so nothing here says a much bigger embedding model would fail, only that four small ones did and that vocabulary rather than capacity was the reason. And the tool that came out of this has no way to appear at the moment an issue is filed, because the forge refuses webhook registration to the account that would need it. It is a command someone has to remember to run, which is the weakest thing about it.
+The corpus is under 500 issues. The largest models were never tried, so nothing here says a much bigger embedding model would fail, only that four small ones did. Nor were the code-trained retrieval models: the two that were tried are code-trained encoders rather than retrieval models, and one of them scored barely above the random control, which says its vectors were never built to be compared this way rather than anything about code. The two that would settle it need either a larger machine or permission to execute a model repository's own code on this one. So that question is untested rather than answered. And the tool that came out of this has no way to appear at the moment an issue is filed, because the forge refuses webhook registration to the account that would need it. It is a command someone has to remember to run, which is the weakest thing about it.
 
 One more limit deserves stating plainly, because it is the failure this kind of tool introduces. A lookup that finds a genuinely related issue about two thirds of the time cannot be read as a clearance. Checking it, seeing nothing and concluding the question is new converts "I did not look" into "I looked and it was clear", which is worse than not having looked. The tool prints that warning on every run.
 
