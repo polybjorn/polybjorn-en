@@ -1,3 +1,6 @@
+<!-- Generated, not drawn. Every word is shaded by how many of the 489 issues
+     in the frozen 2026-09-24 corpus contain it, counted over title plus body.
+     If the corpus is re-frozen, re-cut this and the caption together. -->
 <svg xmlns="http://www.w3.org/2000/svg" width="1440" height="434" viewBox="0 0 720 217" role="img" aria-labelledby="t d">
   <title id="t">One issue, its words shaded by how rare they are</title>
   <desc id="d">An issue from the forge. The rarest words are the identifiers: checks/service-state.nix appears in 14 of the 489 issues, StateDirectory in 13, census in 5, packaged in 2 and rowless-unit in 1. The ordinary English words around them appear in hundreds.</desc>

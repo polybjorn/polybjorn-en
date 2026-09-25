@@ -1,6 +1,6 @@
 ---
 title: "Embeddings lost to counting words"
-description: "Ten local AI models against plain word counting, graded on 617 cross-references I had already typed."
+description: "Local AI models against plain word counting, graded on the cross-references I had already typed."
 date: 2026-09-25
 thumb: /images/local-models-thumb.svg
 thumbAlt: An unlabelled bar chart, one long blue bar above four shorter amber ones and a short grey one
@@ -51,7 +51,7 @@ Language models and embedding models get confused with each other. They do diffe
 
 **An embedding model** gives back a position in space, arranged so similar things land near each other. Measuring distance is the only thing you can do with it, which makes it good at exactly one job: *find me the things like this one*. It goes wrong by ranking something irrelevant near the top, which you notice immediately, because it can't assert anything.
 
-The ones I tried are a couple of hundred megabytes each, need no graphics card, and the text never leaves the machine. All four went against the same links, each with the prompt format its authors specify.
+The ones I tried are a couple of hundred megabytes each, need no graphics card, and the text never leaves the machine. Each went against the same links, with the prompt format its authors specify.
 
 <figure class="mchart" role="group" aria-label="Recall at 5 by method. Term weighting with comments reaches 63.8 percent; the best embedding model, gte-small, reaches 46.0 percent; a recency control reaches 23.1 percent and a random control 2.6 percent.">
   <div class="mchart-key">
