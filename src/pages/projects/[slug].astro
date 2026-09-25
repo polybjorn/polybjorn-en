@@ -86,6 +86,10 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
     /* Separated by a middot rather than a second line, so the header keeps
        its shape whether or not a piece has been revised. */
     .meta-upd::before { content: " \00b7 "; }
+    /* Same middot, kept grey, so only the status itself takes the warm accent
+       and does not read as more date. */
+    .meta-wip { color: #e8b775; }
+    .meta-wip::before { content: " \00b7 "; color: #8a8f99; }
 
     article :global(h2) { font-size: 1.5rem; margin: 2rem 0 0.75rem; font-weight: 700; }
     article :global(h3) { font-size: 1.2rem; margin: 1.5rem 0 0.5rem; font-weight: 700; }
@@ -367,6 +371,7 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
     <div class="meta">
       {fmt(project.data.date)}
       {project.data.updated && <span class="meta-upd">updated {fmt(project.data.updated)}</span>}
+      {project.data.wip && <span class="meta-wip">work in progress</span>}
     </div>
     <article>
       <Content />

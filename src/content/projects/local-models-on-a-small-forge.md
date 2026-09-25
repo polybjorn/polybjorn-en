@@ -2,6 +2,7 @@
 title: Finding what I wrote before
 description: "Local AI models against plain word counting on a Git forge, graded on cross-references already there."
 date: 2026-09-25
+wip: true
 thumb: /images/local-models-thumb.svg
 thumbAlt: An unlabelled bar chart, one long blue bar above four shorter amber ones and a short grey one
 draft: false

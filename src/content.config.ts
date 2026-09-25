@@ -30,6 +30,11 @@ const projects = defineCollection({
     // listing, the feed and the sitemap. For something shareable by link
     // before it is announced.
     unlisted: z.boolean().default(false),
+    // Listed and readable, but still being worked on. Orthogonal to the two
+    // above: `unlisted` decides who finds it, this decides what they are told
+    // when they do. A piece can be listed and unfinished, which is the case
+    // this exists for.
+    wip: z.boolean().default(false),
   }),
 });
 
