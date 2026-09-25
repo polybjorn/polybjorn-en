@@ -1,9 +1,9 @@
 ---
 title: "Embeddings lost to counting words"
-description: "I wanted a model that could make small decisions on my Git forge. Several embedding models later, a fifty-year-old way of counting words was still winning."
+description: "Ten local AI models against plain word counting, graded on 617 cross-references I had already typed."
 date: 2026-09-25
-cover: /images/local-models-cover.svg
-coverAlt: An unlabelled bar chart, one long blue bar above four shorter amber ones and a short grey one
+thumb: /images/local-models-thumb.svg
+thumbAlt: An unlabelled bar chart, one long blue bar above four shorter amber ones and a short grey one
 draft: false
 unlisted: true
 ---
