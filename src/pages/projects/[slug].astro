@@ -224,7 +224,8 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
        The links still have to be findable, so they carry the brighter body ink
        against the muted label grey, and the underline comes back on hover and
        keyboard focus. Accent blue is avoided deliberately - it sits right next
-       to a coloured bar and the two compete. */
+       to a coloured bar and the two compete, and the bars now carry that
+       exact blue. */
     article :global(.mchart-label a) {
       color: #dde1e7;
       text-decoration: none;
@@ -241,13 +242,18 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
       line-height: 1.35;
       white-space: nowrap;
     }
-    article :global(.mchart-track) { background: #22262d; border-radius: 3px; height: 1.15rem; }
+    article :global(.mchart-track) { background: #23272e; border-radius: 3px; height: 1.15rem; }
     article :global(.mchart-bar) { height: 100%; border-radius: 3px; min-width: 2px; }
     article :global(.mchart-val) {
       font-size: 0.85rem; font-variant-numeric: tabular-nums; color: #dde1e7;
     }
-    article :global(.mchart-lex) { background: #3987e5; }
-    article :global(.mchart-emb) { background: #d95926; }
+    /* The site's own three: accent blue for the method that won, the warm
+       accent for every neural arm, and the muted grey the page already uses
+       for secondary text on the two controls. Blue against warm also keeps
+       the two series apart under red-green colour blindness, which blue
+       against orange did less well. */
+    article :global(.mchart-lex) { background: #6aaeee; }
+    article :global(.mchart-emb) { background: #e8b775; }
     article :global(.mchart-ctl) { background: #8a8f99; }
     @media (max-width: 480px) {
       article :global(.mchart-row) { grid-template-columns: 1fr 2.9rem; gap: 0.35rem 0.5rem; }
