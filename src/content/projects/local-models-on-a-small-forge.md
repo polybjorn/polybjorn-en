@@ -1,15 +1,15 @@
 ---
 title: "Embeddings lost to counting words"
-description: "I wanted a model that makes small decisions on my issue tracker. Five embedding models later, a fifty-year-old way of counting words was still winning."
+description: "I wanted a model that could make small decisions on my Git forge. Several embedding models later, a fifty-year-old way of counting words was still winning."
 date: 2026-09-25
 draft: true
 ---
 
-I run a self-hosted issue tracker for my own infrastructure. A few hundred issues sit on it, and they've developed a habit I've grown to dislike. I decide something, write it down carefully, and then rediscover the same question six weeks later, because I'd forgotten the answer was already there.
+I run my own Git forge for my infrastructure - repositories, CI, pull requests, and the issue tracker this is about. Its issues have developed a habit I've grown to dislike. I decide something, write it down carefully, and then rediscover the same question six weeks later, because I'd forgotten the answer was already there.
 
 What set this off was reading about [Jev](https://typesafe.ai/), a model built to return typed decisions rather than prose - the pitch being that software can act on its answer when its confidence is high and escalate when it's not. I haven't used it. It's hosted, and everything here runs on my own hardware. But the shape of it stuck: a small, narrow model that decides one thing and knows when it's unsure. My tracker is full of small decisions. I wanted to know whether something like that, running locally on a machine I already own, could take some of them.
 
-So the first thing I built was that shape, aimed at the most obvious decision I had.
+So the first thing I built was that shape, aimed at the most obvious decision I had. No embedding model in it at all - just a classifier that had to say how sure it was. Embedding models come later, and only because that first attempt failed for a reason that had nothing to do with models.
 
 *Does a small local model do useful work here* is a question with a shelf life, though. The models keep improving, my tracker keeps accumulating issues, and any answer is a reading taken on one particular day with one particular pile of text. The question underneath doesn't expire: **how do you find out, on your own data, instead of trusting a benchmark built on somebody else's?** That is the part worth writing down, and everything below is a first reading rather than a verdict.
 
@@ -31,7 +31,7 @@ Grading that needs an answer key, and this is the part I'd repeat anywhere.
 
 > Every time someone writes `#123` in an issue, they're asserting that two issues are related. A human judgement, already recorded, free.
 
-My tracker had 616 of them.
+My forge had hundreds of them sitting there already.
 
 So the test writes itself. Hide the reference, show the system only the new issue's text, and ask whether it finds the issue the author actually linked. Do it only against issues that existed at the time, so nothing borrows from the future.
 
@@ -51,23 +51,16 @@ Both are the right things to read, and I'd forgotten both. That's the tool I kep
 
 ## What an embedding model actually is
 
-The obvious next move was to put a model against that same test. Not the kind most people mean by AI, though, and the difference matters before any of the numbers do.
+With the deciding question closed, the obvious next move was to put a model against the finding question. Not the kind most people mean by AI, though.
 
-A large language model writes. You give it words and it gives you new words back, which is why it can answer a question, draft a paragraph, or be confidently wrong in fluent prose. An embedding model doesn't write anything. It turns a piece of text into a list of numbers - a position in space - arranged so that texts about similar things land near each other. That's the entire output. The only operation you can perform on it's measuring distance.
+A language model writes: words in, new words out. An embedding model writes nothing. It turns a piece of text into a position in space, arranged so that texts about similar things land near each other. That's the whole output, and the only thing you can do with it is measure distance.
 
-Three kinds of thing get called AI in a conversation like this one, and they're not interchangeable:
-
-| | what it gives back | what it's for | how it goes wrong |
+| | gives back | good at | goes wrong by |
 | --- | --- | --- | --- |
-| Language model | new text | writing, answering, summarising | fluent and wrong |
-| Embedding model | a position in space | finding similar things | ranks something irrelevant highly |
-| Typed-decision model | a typed answer plus a confidence | deciding, at machine speed | declines, or decides wrongly inside its stated confidence |
+| Language model | new text | writing, answering | being fluent and wrong |
+| Embedding model | a position in space | finding similar things | ranking something irrelevant highly |
 
-Jev is the third. I went looking for something that decides, and what my tracker turned out to need was something that finds.
-
-The embedding models I used are small enough to sit in a couple of hundred megabytes, run on an ordinary processor with no graphics card, and take about twenty milliseconds per document. They can't hallucinate, because they can't assert anything. If you have heard of retrieval-augmented generation, this is the retrieval half of it on its own - and I only ever wanted that half. I wasn't after something that writes. I needed something that finds.
-
-That makes them good at exactly one class of job: *find me the things like this one*. Search that tolerates different wording, grouping, spotting duplicates. They run on a laptop, they cost nothing per query, and the text never leaves the machine. That combination is why they're interesting for a private pile of notes or issues.
+Which makes them good at one job: *find me the things like this one*. They're a couple of hundred megabytes, need no graphics card, take about twenty milliseconds per document, and the text never leaves the machine. If you've heard of retrieval-augmented generation, this is its retrieval half on its own - and that half was all I wanted.
 
 ## The models lost
 
@@ -93,7 +86,7 @@ That's testable, and it has to be done carefully or the answer is meaningless: t
 | the model, trained on my own pairs | 40.9% |
 | counting words | 48.7% |
 
-Training helped, and it didn't matter. Three points here is five links out of 154, against a natural variation of about six. It is inside the noise; I can't tell it from luck. The distance to counting words is twelve links, which is outside the noise and is real.
+Training helped, and it didn't matter. Three points here is five links out of the hundred and fifty-four held back, against a natural variation of about six. It is inside the noise; I can't tell it from luck. The distance to counting words is twelve links, which is outside the noise and is real.
 
 So the comfortable explanation - *it only lost because it didn't know my vocabulary* - survives in a much weaker form. I taught it the vocabulary. It stayed behind.
 
@@ -115,12 +108,18 @@ Which is why the results sit in a dated list at the bottom rather than in the pr
 
 The answer key only credits links somebody bothered to type. One issue about journal entries failing to arrive carried no reference at all, so every suggestion for it scored as a miss - including the obviously correct earlier issue about the same subsystem, which came first. The numbers are a floor on usefulness, not a measure of precision.
 
-The corpus is under 500 issues, and the largest models were never tried, so nothing here says a big one would fail. Nor were the code-trained retrieval models, which are the ones I'd most want to see: the two I could run are code-trained *encoders* rather than retrieval models, and one scored barely above random - a fact about output never built to be compared this way, not about code. Untested, not answered.
+The corpus is small - hundreds of issues, not thousands - and the largest models were never tried, so nothing here says a big one would fail. Nor were the code-trained retrieval models, which are the ones I'd most want to see: the two I could run are code-trained *encoders* rather than retrieval models, and one scored barely above random - a fact about output never built to be compared this way, not about code. Untested, not answered.
 
 The last limit matters most, because this kind of tool introduces it rather than inheriting it. Something that finds a genuinely related issue about two thirds of the time **can't be read as a clearance.** Checking it, seeing nothing, and concluding the question is new converts *I didn't look* into *I looked and it was clear*, which is worse than never having looked. So it says so on every run.
 
 ## Readings
 
-Every number above comes from a single run against a frozen copy of the tracker, so it's a measurement with a date on it rather than a standing fact. I've not committed to a schedule and will not pretend to one; this list grows when I run it again.
+Every number here comes from one run against a frozen copy of the forge, so each is a measurement with a date on it rather than a standing fact. I haven't committed to a schedule and won't pretend to one. The table grows when I run it again.
 
-**2026-09-25 - 489 issues, 616 cross-references, 1060 comments.** Counting words with the comments indexed, 63.8% in the top five. Best of four small embedding models, 46.0%. A model fine-tuned on the tracker's own pairs, 40.9%, against 37.7% for the same model untrained - a difference too small to separate from luck. Showing the five most recent issues instead, 23.1%.
+| | 2026-09-25 |
+| --- | --- |
+| issues / cross-references / comments | 489 / 616 / 1060 |
+| counting words, comments indexed | **63.8%** |
+| best of four embedding models | 46.0% |
+| fine-tuned on the forge's own pairs | 40.9% (base 37.7%) |
+| five most recent issues instead | 23.1% |
