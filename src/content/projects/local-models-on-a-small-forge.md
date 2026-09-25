@@ -10,7 +10,7 @@ I run my own Git forge for my infrastructure - repositories, CI, pull requests, 
 
 What set this off was reading about [Jev](https://typesafe.ai/), a model built to return typed decisions rather than prose - the pitch being that software can act on its answer when its confidence is high and escalate when it's not. I haven't used it. It's hosted, and everything here runs on my own hardware. But the shape stuck: a small, narrow model that decides one thing and knows when it's unsure.
 
-What I ended up with decides nothing. It's a search box, it has no model in it, and it works. Getting there took two failures worth about a paragraph each, and one result I'd written down the opposite prediction for.
+What I ended up with decides nothing. It's a search box, it has no model in it, and it works. Getting there took three failures worth about a paragraph each, and one result I'd written down the opposite prediction for.
 
 ## What it does
 
@@ -26,7 +26,7 @@ absent issue here is not a clearance</span></code></pre>
 
 Both were the right things to read and I'd forgotten both. It finds the right issue in its top five **63.8%** of the time. Showing the five most recent issues instead - the obvious cheap alternative - manages 23.1%, and picking at random 2.6%.
 
-The method underneath is older than I am. Count the words in every document, weight the rare ones more heavily than the common ones, and call two documents similar when they share unusual vocabulary. It's called TF-IDF, it's about fifty years old, and the largest single improvement I made to it had no cleverness in it either: indexing the comments as well as the issue text, worth about five points. The comments were twice the volume of the issue bodies and I simply hadn't been using them.
+The method underneath is older than I am. Count the words in every document, weight the rare ones more heavily than the common ones, and call two documents similar when they share unusual vocabulary. It's called TF-IDF, it's about fifty years old, and the largest single improvement I made to it had no cleverness in it either: indexing the comments as well as the issue text, worth about seven points. The comments were twice the volume of the issue bodies and I simply hadn't been using them.
 
 ## How I know it works
 
@@ -38,7 +38,7 @@ My forge had hundreds of them sitting there already. So the test writes itself: 
 
 ## Then the models lost
 
-The two get confused, and the difference is the whole point. An embedding model writes nothing at all - it turns text into a position in space, arranged so similar things land near each other, and measuring distance is the only thing you can do with it.
+Language models and embedding models get confused, and the difference is the whole point. An embedding model writes nothing at all - it turns text into a position in space, arranged so similar things land near each other, and measuring distance is the only thing you can do with it.
 
 **A language model** gives back new text. It's good at writing and answering, and it goes wrong by being fluent and wrong at the same time.
 
@@ -49,7 +49,7 @@ Which makes them good at exactly one job: *find me the things like this one*. Th
 <figure class="mchart" role="group" aria-label="Recall at 5 by method. Term weighting with comments reaches 63.8 percent; the best embedding model, gte-small, reaches 46.0 percent; a recency control reaches 23.1 percent and a random control 2.6 percent.">
   <div class="mchart-key">
     <span><i class="mchart-sw mchart-lex"></i>counting words</span>
-    <span><i class="mchart-sw mchart-emb"></i>embedding model</span>
+    <span><i class="mchart-sw mchart-emb"></i>neural model</span>
     <span><i class="mchart-sw mchart-ctl"></i>baseline to beat</span>
   </div>
   <div class="mchart-row">
@@ -123,15 +123,15 @@ The reason is visible once you look at what my issues are made of. They're full 
 
 **A model that decides.** The first thing I built was Jev's shape aimed at my labels - predict who should act on an issue, act above a confidence threshold, escalate below it. It isn't a decision anything can take. **Four issues in five are labelled within a minute of being filed**, because whoever writes one labels it in the same breath. There's no interval between the filing and the deciding for anything to stand in. That's not a model being too weak; it's a job that doesn't exist, and counting found it in five minutes.
 
-One of them can't go in the chart above. A model trained on my own links has to be judged on links it never saw, so it needs a quarter of them held back - and once you hold data back, every figure has to be recomputed on that smaller, harder set. That's why counting words is 48.7% here and 63.8% there. Same method, different question.
+**Teaching a model my vocabulary.** The comfortable explanation for the results above is that the models were strangers to my identifiers. So I fine-tuned one on the forge's own pairs, training on some links and holding the rest back.
+
+This one can't go in the chart above. A model trained on my own links has to be judged on links it never saw, so it needs a quarter of them held back - and once you hold data back, every figure has to be recomputed on that smaller, harder set. That's why counting words is 48.7% here and 63.8% in the chart. Two differences, not one: these are scored on the held-out quarter, and every row reads issue bodies alone, which is what the fine-tuned model saw.
 
 | held back from the start | linked issue in the first five |
 | --- | --- |
 | counting words | **48.7%** |
 | a model trained on my own pairs | 40.9% |
 | the same model, untrained | 37.7% |
-
-**Teaching a model my vocabulary.** The comfortable explanation for the results above is that the models were strangers to my identifiers. So I fine-tuned one on the forge's own pairs, training on some links and holding the rest back.
 
 Training helped and it didn't matter. Three points is five links out of the hundred and fifty-four held back, against a natural variation of about six - inside the noise, indistinguishable from luck. The distance to counting words is twelve links, which is real. I taught it the vocabulary and it stayed behind.
 
@@ -151,7 +151,7 @@ Training helped and it didn't matter. Three points is five links out of the hund
 
 ## What this doesn't show
 
-The answer key only credits links someone bothered to type. One issue about journal entries failing to arrive carried no reference at all, so every suggestion for it scored as a miss - including the obviously correct earlier issue about the same subsystem, which came first. The numbers are a floor on usefulness, not a measure of precision.
+The answer key only credits links someone bothered to type. One issue about journal entries failing to arrive carried no reference at all, so every suggestion for it scored as a miss - including the obviously correct earlier issue about the same subsystem. The numbers are a floor on usefulness, not a measure of precision.
 
 The corpus is small - hundreds of issues, not thousands - and the largest models were never tried, so nothing here says a big one would fail. Nor were the code-trained retrieval models, now the ones I'd most want to see: the two I could run are code-trained *encoders* rather than retrieval models, and one scored barely above random, which is a fact about output never built to be compared this way rather than anything about code. Untested, not answered.
 
