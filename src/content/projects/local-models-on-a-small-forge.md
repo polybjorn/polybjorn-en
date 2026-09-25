@@ -66,6 +66,8 @@ The single largest improvement came from text that was already there. Comments o
 
 Four local embedding models were then measured on the same links, with each model's required prompt format applied, because a model used wrongly reads as a weak model:
 
+![Horizontal bar chart of recall@5 by method. The five term-weighting methods run from 63.8% down to 47.6%; the four embedding models sit below them from 46.0% to 41.0%; a recency control reaches 23.1% and a random control 2.6%.](/images/local-models-methods.svg)
+
 ```
                             recall@5
 tfidf + comments             63.8%
