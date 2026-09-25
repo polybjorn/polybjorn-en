@@ -176,6 +176,14 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
       padding: 0.55rem 0.85rem;
       border-bottom: 1px solid #22262d;
       vertical-align: baseline;
+      /* A wrapped cell in a two-column table reads as two rows. The table
+         already scrolls sideways when it has to, so let it. */
+      white-space: nowrap;
+    }
+    @media (max-width: 560px) {
+      /* Below this the nowrap would push a wide table into a scrollbar for
+         every reader, which is worse than a wrapped line. */
+      article :global(tbody td) { white-space: normal; }
     }
     article :global(tbody tr:last-child td) { border-bottom: none; }
     /* The tables here are label-then-number, so the measure reads better

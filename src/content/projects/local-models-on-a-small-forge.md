@@ -99,6 +99,11 @@ Which makes them good at exactly one job: *find me the things like this one*. Th
     <div class="mchart-val">41.0%</div>
   </div>
   <div class="mchart-row">
+    <div class="mchart-label">Counting words, then a reranker</div>
+    <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:56.1%"></div></div>
+    <div class="mchart-val">39.3%</div>
+  </div>
+  <div class="mchart-row">
     <div class="mchart-label">Five most recent issues</div>
     <div class="mchart-track"><div class="mchart-bar mchart-ctl" style="width:33.0%"></div></div>
     <div class="mchart-val">23.1%</div>
@@ -118,21 +123,19 @@ The reason is visible once you look at what my issues are made of. They're full 
 
 **A model that decides.** The first thing I built was Jev's shape aimed at my labels - predict who should act on an issue, act above a confidence threshold, escalate below it. It isn't a decision anything can take. **Four issues in five are labelled within a minute of being filed**, because whoever writes one labels it in the same breath. There's no interval between the filing and the deciding for anything to stand in. That's not a model being too weak; it's a job that doesn't exist, and counting found it in five minutes.
 
-The other two are the same job as the chart above, so they get a number - but measured on a quarter of the links held back from the start, and on issue text alone. That's a harder test, which is why counting words scores 48.7% here and 63.8% there. Same method, different question, not a contradiction.
+One of them can't go in the chart above. A model trained on my own links has to be judged on links it never saw, so it needs a quarter of them held back - and once you hold data back, every figure has to be recomputed on that smaller, harder set. That's why counting words is 48.7% here and 63.8% there. Same method, different question.
 
 | held back from the start | found it in the top five |
 | --- | --- |
 | counting words | **48.7%** |
 | a model trained on my own pairs | 40.9% |
 | the same model, untrained | 37.7% |
-| counting words, then a cross-encoder reranks | 35.7% |
-| counting words, then a stronger reranker | 22.1% |
 
 **Teaching a model my vocabulary.** The comfortable explanation for the results above is that the models were strangers to my identifiers. So I fine-tuned one on the forge's own pairs, training on some links and holding the rest back.
 
 Training helped and it didn't matter. Three points is five links out of the hundred and fifty-four held back, against a natural variation of about six - inside the noise, indistinguishable from luck. The distance to counting words is twelve links, which is real. I taught it the vocabulary and it stayed behind.
 
-**Scoring the pair instead of the documents.** Everything else here compares documents *apart* - each turned into a position, then measured. A cross-encoder reads the query and a candidate *together*, which is slower and usually much sharper, and is what a real search engine uses as a second pass over the first stage's top fifty. Anyone who works on search would ask, so I ran two. Both made it worse, and the stronger one is the interesting failure: it reordered a shortlist that held the right answer four times in five and still landed at 22.1%. It isn't failing to spot the answer. It's pushing it down.
+**Scoring the pair instead of the documents.** This one is in the chart above. Everything else there compares documents *apart* - each turned into a position, then measured. A cross-encoder reads the query and a candidate *together*, which is slower and usually much sharper, and is what a real search engine runs as a second pass over the first stage's top fifty. Anyone who works on search would ask, so I ran it, and it took 63.8% down to 39.3%. A second, stronger reranker was worse still: on the held-out set it reordered a shortlist that held the right answer four times in five and landed at 22.1%. It isn't failing to spot the answer. It's pushing it down.
 
 ## What I'd tell anyone trying this
 
@@ -156,8 +159,16 @@ The last limit matters most, because this kind of tool introduces it rather than
 
 ## Readings
 
-**2026-09-25.** 489 issues, 616 cross-references, 1060 comments, frozen with a checksum so the run can be repeated against exactly this text.
+Every number above comes from one run against a frozen copy of the forge, so each is a measurement with a date on it rather than a standing fact. A growing forge changes every figure rather than just adding one, so a second reading means re-running everything - and I'd expect the gap to widen rather than close, since counting words gets better statistics from more documents while an off-the-shelf model learns nothing from mine.
 
-Every number above comes from that single run, so each is a measurement with a date on it rather than a standing fact. A growing forge changes every figure rather than just adding one, so a second reading means re-running everything, not appending a row - and I'd expect the gap to widen rather than close, since counting words gets better statistics from more documents while an off-the-shelf model learns nothing from mine.
+I haven't committed to a schedule and won't pretend to one. The table grows a column when I run it again.
 
-I haven't committed to a schedule and won't pretend to one. When there is a second reading, the comparison goes here.
+| | 2026-09-25 |
+| --- | --- |
+| issues | 489 |
+| cross-references | 616 |
+| comments | 1060 |
+| counting words | 63.8% |
+| best embedding model | 46.0% |
+| best reranked | 35.7% |
+| five most recent issues | 23.1% |
