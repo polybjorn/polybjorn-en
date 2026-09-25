@@ -2,6 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import { t } from '../data/translations.js';
 import { cv } from '../data/cv.js';
+import { cloudinaryUrl } from '../data/made.js';
 import type { CvEntry, Localised, SoftwareGroup } from '../data/cv.js';
 import { ArrowUp, ArrowLeft } from '@lucide/astro';
 
@@ -9,6 +10,10 @@ interface Props {
   lang: 'en' | 'no';
 }
 
+// The original is 1988x1988 and 4.4 MB; this renders at 200px, 140px on
+// mobile. w_400 covers 2x at both and costs 22 KB, and it means the page
+// never links the full-resolution file.
+const cvAvatar = cloudinaryUrl('https://res.cloudinary.com/djpkffk5u/image/upload/v1772287930/profile-img_pr1q8o.png', { width: 400 });
 const { lang } = Astro.props;
 const tr = t[lang];
 
@@ -16,7 +21,7 @@ const backHref = lang === 'no' ? '/no' : '/';
 ---
 
 <Layout lang={lang} title="CV – Bjørn A. Andersen" description={tr.cvDescription}>
-  <link slot="head" rel="preload" as="image" href="https://res.cloudinary.com/djpkffk5u/image/upload/v1772287930/profile-img_pr1q8o.png" />
+  <link slot="head" rel="preload" as="image" href={cvAvatar} />
 
   <style>
     body {
@@ -351,7 +356,7 @@ const backHref = lang === 'no' ? '/no' : '/';
     <div class="cv-header">
       <img
         class="cv-avatar"
-        src="https://res.cloudinary.com/djpkffk5u/image/upload/v1772287930/profile-img_pr1q8o.png"
+        src={cvAvatar}
         alt="Bjørn A. Andersen"
       />
       <h1>Bjørn Andreas Andersen</h1>
