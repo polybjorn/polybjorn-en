@@ -112,23 +112,27 @@ Which makes them good at exactly one job: *find me the things like this one*. Th
 
 Every one lost, and not narrowly. I'd written down the opposite prediction beforehand, which is the only reason I can honestly call it a surprise. The obvious escapes didn't help either: chunking the documents so nothing was truncated made every model *worse*, and blending a model with the word counting - the way these systems are normally deployed - came out below the word counting alone.
 
-There's a second architecture I should say I tried, because anyone who works on search will ask. Everything above compares documents *apart* - each one turned into a position, then measured. A cross-encoder reads the query and a candidate *together* and scores the pair, which is slower and usually much sharper, so real search engines use it as a second pass over the first stage's top fifty. Two of those went against the same links and both made things worse: the best of them scored 35.7% where counting words alone scored 48.7%, and the stronger of the two managed 22.1% while reordering a shortlist that contained the right answer four times in five. It isn't failing to spot the answer. It's pushing it down.
-
 The reason is visible once you look at what my issues are made of. They're full of identifiers: `StateDirectory`, `checks/service-state.nix`, machine names. Exact matching on a rare string is precisely what counting words is best at, and what a model trained on ordinary prose is worst at. The model is better at language. My text is barely language.
 
-## The two things that didn't work
+## The things that didn't work
 
 **A model that decides.** The first thing I built was Jev's shape aimed at my labels - predict who should act on an issue, act above a confidence threshold, escalate below it. It isn't a decision anything can take. **Four issues in five are labelled within a minute of being filed**, because whoever writes one labels it in the same breath. There's no interval between the filing and the deciding for anything to stand in. That's not a model being too weak; it's a job that doesn't exist, and counting found it in five minutes.
 
+The other two are the same job as the chart above, so they get a number - but measured on a quarter of the links held back from the start, and on issue text alone. That's a harder test, which is why counting words scores 48.7% here and 63.8% there. Same method, different question, not a contradiction.
+
+| held back from the start | found it in the top five |
+| --- | --- |
+| counting words | **48.7%** |
+| a model trained on my own pairs | 40.9% |
+| the same model, untrained | 37.7% |
+| counting words, then a cross-encoder reranks | 35.7% |
+| counting words, then a stronger reranker | 22.1% |
+
 **Teaching a model my vocabulary.** The comfortable explanation for the results above is that the models were strangers to my identifiers. So I fine-tuned one on the forge's own pairs, training on some links and holding the rest back.
 
-| on the held-out links | found it in the top five |
-| --- | --- |
-| the model, untrained | 37.7% |
-| the model, trained on my own pairs | 40.9% |
-| counting words | 48.7% |
-
 Training helped and it didn't matter. Three points is five links out of the hundred and fifty-four held back, against a natural variation of about six - inside the noise, indistinguishable from luck. The distance to counting words is twelve links, which is real. I taught it the vocabulary and it stayed behind.
+
+**Scoring the pair instead of the documents.** Everything else here compares documents *apart* - each turned into a position, then measured. A cross-encoder reads the query and a candidate *together*, which is slower and usually much sharper, and is what a real search engine uses as a second pass over the first stage's top fifty. Anyone who works on search would ask, so I ran two. Both made it worse, and the stronger one is the interesting failure: it reordered a shortlist that held the right answer four times in five and still landed at 22.1%. It isn't failing to spot the answer. It's pushing it down.
 
 ## What I'd tell anyone trying this
 
@@ -161,5 +165,13 @@ I haven't committed to a schedule and won't pretend to one. The table grows a co
 | issues / cross-references / comments | 489 / 616 / 1060 |
 | counting words, comments indexed | **63.8%** |
 | best of four embedding models | 46.0% |
-| fine-tuned on the forge's own pairs | 40.9% (base 37.7%) |
 | five most recent issues instead | 23.1% |
+| picking at random | 2.6% |
+
+On the held-out quarter, a harder test and not comparable to the rows above:
+
+| | 2026-09-25 |
+| --- | --- |
+| counting words | 48.7% |
+| a model trained on my own pairs | 40.9% (37.7% untrained) |
+| counting words, then a reranker | 35.7% |
