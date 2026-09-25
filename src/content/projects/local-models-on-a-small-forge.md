@@ -1,6 +1,6 @@
 ---
 title: "The model was the least important part"
-description: "I wanted to know whether a small model running on my own machine could do useful work on my own data. It could. Four of them then lost to counting words."
+description: "How to find out whether a tool helps on your own data, without trusting someone else's benchmark. A first reading: four embedding models lost to counting words."
 date: 2026-09-25
 draft: true
 ---
@@ -12,6 +12,8 @@ I run a self-hosted issue tracker for my own infrastructure. A few hundred issue
      made me curious, never a comparison. The piece reads fine without it. -->
 
 So I wanted to know whether a small model, running locally on a machine I already own, could do something about that. Not a chatbot. Something narrow, cheap and specific.
+
+*Does a small local model do useful work here* is a question with a shelf life, though. The models keep improving, my tracker keeps accumulating issues, and any answer is a reading taken on one particular day with one particular pile of text. The question underneath it does not expire: **how do you find out, on your own data, instead of trusting a benchmark built on somebody else's?** That is the part worth writing down, and everything below is a first reading rather than a verdict.
 
 ## What these models actually do
 
@@ -78,6 +80,8 @@ So the comfortable explanation - *it only lost because it did not know my vocabu
 **The angle matters more than the model.** Same text, same machine, no model in either case: one framing failed completely and another produced something I use. That difference was worth roughly twenty times what any model choice was worth.
 
 **Write the bar down before you run the test.** Mine was fixed in advance, and it is the only reason the first failure was a clear no rather than a negotiation with myself about whether 2.4% was encouraging.
+
+**Build it so you can run it again.** This is the one I would have skipped. The corpus is frozen with a checksum, the split between what trains and what scores is written down, and the tool itself carries the benchmark, so re-measuring against the live tracker is a few seconds rather than a reconstruction. None of the numbers above are meant to be permanent - the models get better, my pile of issues gets bigger, and the honest expectation is that this flips at some point. What I want when it does is to notice, not to re-derive the whole thing from memory.
 
 ## What this does not show
 
