@@ -49,32 +49,32 @@ Which makes them good at exactly one job: *find me the things like this one*. Th
 <figure class="mchart" role="group" aria-label="Recall at 5 by method. Term weighting with comments reaches 63.8 percent; the best embedding model, gte-small, reaches 46.0 percent; a recency control reaches 23.1 percent and a random control 2.6 percent.">
   <figcaption class="mchart-cap">Finding the issue a person actually linked, top five of hundreds. Higher is better.</figcaption>
   <div class="mchart-key">
-    <span><i class="mchart-sw mchart-lex"></i>term weighting</span>
+    <span><i class="mchart-sw mchart-lex"></i>counting words</span>
     <span><i class="mchart-sw mchart-emb"></i>embedding model</span>
-    <span><i class="mchart-sw mchart-ctl"></i>control</span>
+    <span><i class="mchart-sw mchart-ctl"></i>baseline to beat</span>
   </div>
   <div class="mchart-row">
-    <div class="mchart-label">tfidf + comments</div>
+    <div class="mchart-label">Counting words, comments indexed</div>
     <div class="mchart-track"><div class="mchart-bar mchart-lex" style="width:91.1%"></div></div>
     <div class="mchart-val">63.8%</div>
   </div>
   <div class="mchart-row">
-    <div class="mchart-label">tfidf word 1-2</div>
+    <div class="mchart-label">Counting words</div>
     <div class="mchart-track"><div class="mchart-bar mchart-lex" style="width:81.4%"></div></div>
     <div class="mchart-val">57.0%</div>
   </div>
   <div class="mchart-row">
-    <div class="mchart-label">LSA-200</div>
+    <div class="mchart-label">Counting words, grouped by topic</div>
     <div class="mchart-track"><div class="mchart-bar mchart-lex" style="width:80.4%"></div></div>
     <div class="mchart-val">56.3%</div>
   </div>
   <div class="mchart-row">
-    <div class="mchart-label">tfidf char 3-5</div>
+    <div class="mchart-label">Counting character patterns</div>
     <div class="mchart-track"><div class="mchart-bar mchart-lex" style="width:78.6%"></div></div>
     <div class="mchart-val">55.0%</div>
   </div>
   <div class="mchart-row">
-    <div class="mchart-label">BM25</div>
+    <div class="mchart-label">BM25, a tuned word count</div>
     <div class="mchart-track"><div class="mchart-bar mchart-lex" style="width:68.0%"></div></div>
     <div class="mchart-val">47.6%</div>
   </div>
@@ -99,12 +99,12 @@ Which makes them good at exactly one job: *find me the things like this one*. Th
     <div class="mchart-val">41.0%</div>
   </div>
   <div class="mchart-row">
-    <div class="mchart-label">recency (control)</div>
+    <div class="mchart-label">Five most recent issues</div>
     <div class="mchart-track"><div class="mchart-bar mchart-ctl" style="width:33.0%"></div></div>
     <div class="mchart-val">23.1%</div>
   </div>
   <div class="mchart-row">
-    <div class="mchart-label">random (control)</div>
+    <div class="mchart-label">Picking at random</div>
     <div class="mchart-track"><div class="mchart-bar mchart-ctl" style="width:3.7%"></div></div>
     <div class="mchart-val">2.6%</div>
   </div>
