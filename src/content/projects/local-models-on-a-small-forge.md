@@ -50,7 +50,7 @@ A language model writes: words in, new words out. An embedding model writes noth
 Which makes them good at exactly one job: *find me the things like this one*. They're a couple of hundred megabytes, need no graphics card, and the text never leaves the machine. Four of them went against the same links, each with the prompt format its authors specify.
 
 <figure class="mchart" role="group" aria-label="Recall at 5 by method. Term weighting with comments reaches 63.8 percent; the best embedding model, gte-small, reaches 46.0 percent; a recency control reaches 23.1 percent and a random control 2.6 percent.">
-  <figcaption class="mchart-cap">Finding the issue a person actually linked, top five of hundreds. Higher is better. Measured 2026-09-25; see Readings.</figcaption>
+  <figcaption class="mchart-cap">Finding the issue a person actually linked, top five of hundreds. Higher is better. Measured 2026-09-25.</figcaption>
   <div class="mchart-key">
     <span><i class="mchart-sw mchart-lex"></i>counting words</span>
     <span><i class="mchart-sw mchart-emb"></i>embedding model</span>
@@ -160,18 +160,8 @@ The corpus is small - hundreds of issues, not thousands - and the largest models
 
 The last limit matters most, because this kind of tool introduces it rather than inheriting it. Something that finds a genuinely related issue about two thirds of the time **cannot be read as a clearance.** Checking it, seeing nothing, and concluding the question is new converts *I didn't look* into *I looked and it was clear*, which is worse than never having looked. So it says so on every run.
 
-## Readings
+## One reading, not a verdict
 
-Every number above comes from one run against a frozen copy of the forge, so each is a measurement with a date on it rather than a standing fact. A growing forge changes every figure rather than just adding one, so a second reading means re-running everything - and I'd expect the gap to widen rather than close, since counting words gets better statistics from more documents while an off-the-shelf model learns nothing from mine.
+Every number here comes from a single run against a frozen copy of the forge on one day, so each is a measurement with a date on it rather than a fact about the world. A growing pile of issues changes every figure rather than just adding one, so checking again means re-running all of it - and I'd expect the gap to widen rather than close, since counting words gets better statistics from more documents while an off-the-shelf model learns nothing from mine.
 
-I haven't committed to a schedule and won't pretend to one. The table grows a column when I run it again.
-
-| | 2026-09-25 |
-| --- | --- |
-| issues | 489 |
-| cross-references | 616 |
-| comments | 1060 |
-| counting words | 63.8% |
-| best embedding model | 46.0% |
-| best reranked | 35.7% |
-| five most recent issues | 23.1% |
+I haven't committed to a schedule and won't pretend to one. The setup is frozen with a checksum and the tool carries its own benchmark, so the point is that a second reading is cheap, not that it is promised.
