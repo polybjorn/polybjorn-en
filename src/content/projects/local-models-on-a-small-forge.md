@@ -81,7 +81,9 @@ So the comfortable explanation - *it only lost because it did not know my vocabu
 
 **Write the bar down before you run the test.** Mine was fixed in advance, and it is the only reason the first failure was a clear no rather than a negotiation with myself about whether 2.4% was encouraging.
 
-**Build it so you can run it again.** This is the one I would have skipped. The corpus is frozen with a checksum, the split between what trains and what scores is written down, and the tool itself carries the benchmark, so re-measuring against the live tracker is a few seconds rather than a reconstruction. None of the numbers above are meant to be permanent - the models get better, my pile of issues gets bigger, and the honest expectation is that this flips at some point. What I want when it does is to notice, not to re-derive the whole thing from memory.
+**Build it so you can run it again.** This is the one I would have skipped. The corpus is frozen with a checksum, the split between what trains and what scores is written down, and the tool itself carries the benchmark, so re-measuring is seconds rather than a reconstruction. None of the numbers here are permanent - the models get better, my pile of issues gets bigger, and the honest expectation is that this flips at some point. What I want when it does is to notice, not to re-derive the whole thing from memory.
+
+Which is why the results sit in a dated list at the bottom rather than in the prose as though they were facts about the world. Adding a second reading should cost one line, not a rewrite.
 
 ## What this does not show
 
@@ -90,3 +92,9 @@ The answer key only credits links somebody bothered to type. One issue about jou
 The corpus is under 500 issues, and the largest models were never tried, so nothing here says a big one would fail. Nor were the code-trained retrieval models, which are the ones I would most want to see: the two I could run are code-trained *encoders* rather than retrieval models, and one scored barely above random - a fact about output never built to be compared this way, not about code. Untested, not answered.
 
 The last limit matters most, because this kind of tool introduces it rather than inheriting it. Something that finds a genuinely related issue about two thirds of the time **cannot be read as a clearance.** Checking it, seeing nothing, and concluding the question is new converts *I did not look* into *I looked and it was clear*, which is worse than never having looked. So it says so on every run.
+
+## Readings
+
+Every number above comes from a single run against a frozen copy of the tracker, so it is a measurement with a date on it rather than a standing fact. I have not committed to a schedule and will not pretend to one; this list grows when I run it again.
+
+**2026-09-25 - 489 issues, 616 cross-references, 1060 comments.** Counting words with the comments indexed, 63.8% in the top five. Best of four small embedding models, 46.0%. A model fine-tuned on the tracker's own pairs, 40.9%, against 37.7% for the same model untrained - a difference too small to separate from luck. Showing the five most recent issues instead, 23.1%.
