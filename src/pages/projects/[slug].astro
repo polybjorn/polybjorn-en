@@ -185,11 +185,6 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
          every reader, which is worse than a wrapped line. */
       article :global(tbody td) { white-space: normal; }
     }
-    /* A table whose cells are phrases rather than labels and numbers. Holding
-       those on one line only trades a wrapped line for a sidescroll. */
-    article :global(table.prose-cells) { width: 100%; }
-    article :global(table.prose-cells td),
-    article :global(table.prose-cells th) { white-space: normal; }
     article :global(tbody tr:last-child td) { border-bottom: none; }
     /* The tables here are label-then-number, so the measure reads better
        aligned right. Revisit if one ever ends in prose. */
@@ -201,12 +196,17 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
        rather than regenerating a file. Colours validated for colour-blind
        separation before use. */
     article :global(.mchart) { margin: 1.5rem 0; }
+    /* Sits below the bars, so the spacing goes above it. */
     article :global(.mchart-cap) {
-      color: #8a8f99; font-size: 0.9rem; margin-bottom: 0.75rem; line-height: 1.5;
+      color: #8a8f99; font-size: 0.85rem; margin-top: 0.7rem; line-height: 1.5;
+      text-align: center;
     }
     article :global(.mchart-key) {
       display: flex; flex-wrap: wrap; gap: 0.35rem 1rem;
       color: #b5bac3; font-size: 0.85rem; margin-bottom: 0.9rem;
+      /* Centred over the whole figure rather than left-aligned against the
+         label column, which put it above the labels instead of the bars. */
+      justify-content: center;
     }
     article :global(.mchart-key span) { display: inline-flex; align-items: center; gap: 0.4rem; }
     article :global(.mchart-sw) { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }

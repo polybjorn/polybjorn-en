@@ -37,20 +37,15 @@ My forge had hundreds of them sitting there already. So the test writes itself: 
 
 ## Then the models lost
 
-A language model writes: words in, new words out. An embedding model writes nothing. It turns text into a position in space, arranged so that similar things land near each other. That's the whole output, and the only thing you can do with it is measure distance.
+The two get confused, and the difference is the whole point. An embedding model writes nothing at all - it turns text into a position in space, arranged so similar things land near each other, and measuring distance is the only thing you can do with it.
 
-<table class="prose-cells">
-<thead><tr><th></th><th>gives back</th><th>good at</th><th>goes wrong by</th></tr></thead>
-<tbody>
-<tr><td>Language model</td><td>new text</td><td>writing, answering</td><td>being fluent and wrong</td></tr>
-<tr><td>Embedding model</td><td>a position in space</td><td>finding similar things</td><td>ranking something irrelevant</td></tr>
-</tbody>
-</table>
+**A language model** gives back new text. It's good at writing and answering, and it goes wrong by being fluent and wrong at the same time.
+
+**An embedding model** gives back a position in space. It's good at finding similar things, and it goes wrong by ranking something irrelevant near the top - which you notice immediately, because it can't assert anything.
 
 Which makes them good at exactly one job: *find me the things like this one*. They're a couple of hundred megabytes, need no graphics card, and the text never leaves the machine. Four of them went against the same links, each with the prompt format its authors specify.
 
 <figure class="mchart" role="group" aria-label="Recall at 5 by method. Term weighting with comments reaches 63.8 percent; the best embedding model, gte-small, reaches 46.0 percent; a recency control reaches 23.1 percent and a random control 2.6 percent.">
-  <figcaption class="mchart-cap">Finding the issue a person actually linked, top five of hundreds. Higher is better. Measured 2026-09-25.</figcaption>
   <div class="mchart-key">
     <span><i class="mchart-sw mchart-lex"></i>counting words</span>
     <span><i class="mchart-sw mchart-emb"></i>embedding model</span>
@@ -116,6 +111,7 @@ Which makes them good at exactly one job: *find me the things like this one*. Th
     <div class="mchart-track"><div class="mchart-bar mchart-ctl" style="width:3.7%"></div></div>
     <div class="mchart-val">2.6%</div>
   </div>
+  <figcaption class="mchart-cap">Found in the top five. Higher is better. Measured 2026-09-25.</figcaption>
 </figure>
 
 Every one lost, and not narrowly. I'd written down the opposite prediction beforehand, which is the only reason I can honestly call it a surprise. The obvious escapes didn't help either: chunking the documents so nothing was truncated made every model *worse*, and blending a model with the word counting - the way these systems are normally deployed - came out below the word counting alone.
