@@ -185,6 +185,11 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
          every reader, which is worse than a wrapped line. */
       article :global(tbody td) { white-space: normal; }
     }
+    /* A table whose cells are phrases rather than labels and numbers. Holding
+       those on one line only trades a wrapped line for a sidescroll. */
+    article :global(table.prose-cells) { width: 100%; }
+    article :global(table.prose-cells td),
+    article :global(table.prose-cells th) { white-space: normal; }
     article :global(tbody tr:last-child td) { border-bottom: none; }
     /* The tables here are label-then-number, so the measure reads better
        aligned right. Revisit if one ever ends in prose. */
@@ -207,7 +212,9 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
     article :global(.mchart-sw) { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
     article :global(.mchart-row) {
       display: grid;
-      grid-template-columns: minmax(6.5rem, 11rem) 1fr 3.1rem;
+      /* 12rem holds the longest label - "Counting words + comments", 25
+         characters - on one line at this size. */
+      grid-template-columns: minmax(6.5rem, 12rem) 1fr 3.1rem;
       align-items: center; gap: 0.6rem; margin-bottom: 0.4rem;
     }
     /* No underline: four of them stacked in a column is noisier than the data.
@@ -228,7 +235,8 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
     article :global(table a:focus-visible) { text-decoration: underline; }
     article :global(.mchart-label) {
       font-size: 0.85rem; color: #b5bac3; text-align: right;
-      overflow-wrap: anywhere; line-height: 1.35;
+      line-height: 1.35;
+      white-space: nowrap;
     }
     article :global(.mchart-track) { background: #22262d; border-radius: 3px; height: 1.15rem; }
     article :global(.mchart-bar) { height: 100%; border-radius: 3px; min-width: 2px; }
@@ -241,7 +249,10 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
     @media (max-width: 480px) {
       article :global(.mchart-row) { grid-template-columns: 1fr 2.9rem; gap: 0.35rem 0.5rem; }
       /* label moves above its own bar rather than squeezing a third column */
-      article :global(.mchart-label) { grid-column: 1 / -1; text-align: left; margin-top: 0.4rem; }
+      article :global(.mchart-label) {
+        grid-column: 1 / -1; text-align: left; margin-top: 0.4rem;
+        white-space: normal;
+      }
     }
     article :global(hr) { border: none; border-top: 1px solid #2a2f37; margin: 2rem 0; }
     article :global(.article-gallery) {

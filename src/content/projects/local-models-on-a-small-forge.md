@@ -39,10 +39,13 @@ My forge had hundreds of them sitting there already. So the test writes itself: 
 
 A language model writes: words in, new words out. An embedding model writes nothing. It turns text into a position in space, arranged so that similar things land near each other. That's the whole output, and the only thing you can do with it is measure distance.
 
-| | gives back | good at | goes wrong by |
-| --- | --- | --- | --- |
-| Language model | new text | writing, answering | being fluent and wrong |
-| Embedding model | a position in space | finding similar things | ranking something irrelevant highly |
+<table class="prose-cells">
+<thead><tr><th></th><th>gives back</th><th>good at</th><th>goes wrong by</th></tr></thead>
+<tbody>
+<tr><td>Language model</td><td>new text</td><td>writing, answering</td><td>being fluent and wrong</td></tr>
+<tr><td>Embedding model</td><td>a position in space</td><td>finding similar things</td><td>ranking something irrelevant</td></tr>
+</tbody>
+</table>
 
 Which makes them good at exactly one job: *find me the things like this one*. They're a couple of hundred megabytes, need no graphics card, and the text never leaves the machine. Four of them went against the same links, each with the prompt format its authors specify.
 
@@ -54,7 +57,7 @@ Which makes them good at exactly one job: *find me the things like this one*. Th
     <span><i class="mchart-sw mchart-ctl"></i>baseline to beat</span>
   </div>
   <div class="mchart-row">
-    <div class="mchart-label">Counting words, comments indexed</div>
+    <div class="mchart-label">Counting words + comments</div>
     <div class="mchart-track"><div class="mchart-bar mchart-lex" style="width:91.1%"></div></div>
     <div class="mchart-val">63.8%</div>
   </div>
@@ -64,17 +67,17 @@ Which makes them good at exactly one job: *find me the things like this one*. Th
     <div class="mchart-val">57.0%</div>
   </div>
   <div class="mchart-row">
-    <div class="mchart-label">Counting words, grouped by topic</div>
+    <div class="mchart-label">Counting words + topics</div>
     <div class="mchart-track"><div class="mchart-bar mchart-lex" style="width:80.4%"></div></div>
     <div class="mchart-val">56.3%</div>
   </div>
   <div class="mchart-row">
-    <div class="mchart-label">Counting character patterns</div>
+    <div class="mchart-label">Character patterns</div>
     <div class="mchart-track"><div class="mchart-bar mchart-lex" style="width:78.6%"></div></div>
     <div class="mchart-val">55.0%</div>
   </div>
   <div class="mchart-row">
-    <div class="mchart-label">BM25, a tuned word count</div>
+    <div class="mchart-label">BM25</div>
     <div class="mchart-track"><div class="mchart-bar mchart-lex" style="width:68.0%"></div></div>
     <div class="mchart-val">47.6%</div>
   </div>
@@ -99,17 +102,17 @@ Which makes them good at exactly one job: *find me the things like this one*. Th
     <div class="mchart-val">41.0%</div>
   </div>
   <div class="mchart-row">
-    <div class="mchart-label">Counting words, then a reranker</div>
+    <div class="mchart-label">Counting words + reranker</div>
     <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:56.1%"></div></div>
     <div class="mchart-val">39.3%</div>
   </div>
   <div class="mchart-row">
-    <div class="mchart-label">Five most recent issues</div>
+    <div class="mchart-label">Five most recent</div>
     <div class="mchart-track"><div class="mchart-bar mchart-ctl" style="width:33.0%"></div></div>
     <div class="mchart-val">23.1%</div>
   </div>
   <div class="mchart-row">
-    <div class="mchart-label">Picking at random</div>
+    <div class="mchart-label">Random</div>
     <div class="mchart-track"><div class="mchart-bar mchart-ctl" style="width:3.7%"></div></div>
     <div class="mchart-val">2.6%</div>
   </div>
