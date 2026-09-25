@@ -10,7 +10,7 @@ I run my own Git forge for my infrastructure - repositories, CI, pull requests, 
 
 What set this off was reading about [Jev](https://typesafe.ai/), a model built to return typed decisions rather than prose - the pitch being that software can act on its answer when its confidence is high and escalate when it's not. I haven't used it. It's hosted, and everything here runs on my own hardware. But the shape stuck: a small, narrow model that decides one thing and knows when it's unsure.
 
-What I ended up with decides nothing. It's a search box, it has no model in it, and it works. Getting there took three failures worth about a paragraph each, and one result I'd written down the opposite prediction for.
+What I ended up with decides nothing. It's a search box, it has no model in it, and it works. Getting there took four failures worth about a paragraph each, and one result I'd written down the opposite prediction for.
 
 ## What it does
 
@@ -121,7 +121,7 @@ The reason is visible once you look at what my issues are made of. They're full 
 
 ## The things that didn't work
 
-**A model that decides.** The first thing I built was Jev's shape aimed at my labels - predict who should act on an issue, act above a confidence threshold, escalate below it. It isn't a decision anything can take. **Four issues in five are labelled within a minute of being filed**, because whoever writes one labels it in the same breath. There's no interval between the filing and the deciding for anything to stand in. That's not a model being too weak; it's a job that doesn't exist, and counting found it in five minutes.
+**A model that decides.** The first thing I built was Jev's shape aimed at my labels - predict who should act on an issue, act above a confidence threshold, escalate below it. It isn't a decision anything can take. **Four issues in five are labelled within a minute of being filed**, because whoever writes one labels it in the same breath. There's no interval between the filing and the deciding for anything to stand in. That's not a model being too weak; it's a job that doesn't exist, and one query against the timestamps found it.
 
 **Teaching a model my vocabulary.** The comfortable explanation for the results above is that the models were strangers to my identifiers. So I fine-tuned one on the forge's own pairs, training on some links and holding the rest back.
 
@@ -137,13 +137,15 @@ Training helped and it didn't matter. Three points is five links out of the hund
 
 **Scoring the pair instead of the documents.** This one is in the chart above. Everything else there compares documents *apart* - each turned into a position, then measured. A cross-encoder reads the query and a candidate *together*, which is slower and usually much sharper, and is what a real search engine runs as a second pass over the first stage's top fifty. Anyone who works on search would ask, so I ran it, and it took 63.8% down to 39.3%. A second, stronger reranker was worse still: on the held-out set it reordered a shortlist that held the right answer four times in five and landed at 22.1%. It isn't failing to spot the answer. It's pushing it down.
 
+**The labels I already had.** Every issue carries a `host/*` label and often a milestone, none of it text, so nothing above reads any of it. The signal is real: two issues that link to each other share a host label 75% of the time, against 41% for any two drawn from the pool. Adding it to the ranking moved nothing, and the reason is the thing I hadn't checked - 73% of bodies name their own host in words, so counting words had already counted it. It even read today's labels rather than the ones an issue carried when it was filed, which is free hindsight, and it still didn't help.
+
 ## What I'd tell anyone trying this
 
 **Count your data before you run anything.** I had three candidate jobs and checked the size of one. The other two turned out to have four usable examples each - four, not four hundred - which five minutes of counting would have shown. Nothing rescues a task with no data in it.
 
 **Look for an answer key you already have.** Cross-references, stars, what you archived rather than deleted, what you clicked. If your own past behaviour is written down somewhere, you can grade a system honestly instead of eyeballing it and hoping.
 
-**The angle matters more than the model.** Same text, same machine, no model in either case: one framing failed completely and another produced something I use daily. That difference was worth roughly twenty times what any model choice was worth.
+**The angle matters more than the model.** Same text, same machine, no model in either case: one framing failed completely and another produced something I use daily. That difference was worth more than any model choice was.
 
 **Write the bar down before you run the test.** Mine was fixed in advance, and it's the only reason the first failure was a clear no rather than a negotiation with myself about whether 2.4% was encouraging.
 
@@ -160,5 +162,3 @@ The last limit matters most, because this kind of tool introduces it rather than
 ## One reading, not a verdict
 
 Every number here comes from a single run against a frozen copy of the forge, on the date at the top of this page, so each is a measurement with a date on it rather than a fact about the world. A growing pile of issues changes every figure rather than just adding one, so checking again means re-running all of it - and I'd expect the gap to widen rather than close, since counting words gets better statistics from more documents while an off-the-shelf model learns nothing from mine.
-
-I haven't committed to a schedule and won't pretend to one. The setup is frozen with a checksum and the tool carries its own benchmark, so the point is that a second reading is cheap, not that it is promised.
