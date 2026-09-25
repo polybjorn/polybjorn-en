@@ -22,8 +22,7 @@ export default defineConfig({
   // my own pages' while still being handed to search engines.
   integrations: [sitemap({
     filter: (page) => !page.includes('/gallery/')
-      && !page.includes('/galleri/')
-      && !page.includes('/projects/local-models-on-a-small-forge'),
+      && !page.includes('/galleri/'),
   })],
   vite: {
     plugins: [yaml()],
