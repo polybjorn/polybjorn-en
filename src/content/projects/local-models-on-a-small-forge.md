@@ -112,6 +112,8 @@ Which makes them good at exactly one job: *find me the things like this one*. Th
 
 Every one lost, and not narrowly. I'd written down the opposite prediction beforehand, which is the only reason I can honestly call it a surprise. The obvious escapes didn't help either: chunking the documents so nothing was truncated made every model *worse*, and blending a model with the word counting - the way these systems are normally deployed - came out below the word counting alone.
 
+There's a second architecture I should say I tried, because anyone who works on search will ask. Everything above compares documents *apart* - each one turned into a position, then measured. A cross-encoder reads the query and a candidate *together* and scores the pair, which is slower and usually much sharper, so real search engines use it as a second pass over the first stage's top fifty. Two of those went against the same links and both made things worse: the best of them scored 35.7% where counting words alone scored 48.7%, and the stronger of the two managed 22.1% while reordering a shortlist that contained the right answer four times in five. It isn't failing to spot the answer. It's pushing it down.
+
 The reason is visible once you look at what my issues are made of. They're full of identifiers: `StateDirectory`, `checks/service-state.nix`, machine names. Exact matching on a rare string is precisely what counting words is best at, and what a model trained on ordinary prose is worst at. The model is better at language. My text is barely language.
 
 ## The two things that didn't work
@@ -144,7 +146,7 @@ Training helped and it didn't matter. Three points is five links out of the hund
 
 The answer key only credits links somebody bothered to type. One issue about journal entries failing to arrive carried no reference at all, so every suggestion for it scored as a miss - including the obviously correct earlier issue about the same subsystem, which came first. The numbers are a floor on usefulness, not a measure of precision.
 
-The corpus is small - hundreds of issues, not thousands - and the largest models were never tried, so nothing here says a big one would fail. Nor were the code-trained retrieval models, which are the ones I'd most want to see: the two I could run are code-trained *encoders* rather than retrieval models, and one scored barely above random, which is a fact about output never built to be compared this way rather than anything about code. Untested, not answered.
+The corpus is small - hundreds of issues, not thousands - and the largest models were never tried, so nothing here says a big one would fail. Nor were the code-trained retrieval models, now the ones I'd most want to see: the two I could run are code-trained *encoders* rather than retrieval models, and one scored barely above random, which is a fact about output never built to be compared this way rather than anything about code. Untested, not answered.
 
 The last limit matters most, because this kind of tool introduces it rather than inheriting it. Something that finds a genuinely related issue about two thirds of the time **cannot be read as a clearance.** Checking it, seeing nothing, and concluding the question is new converts *I didn't look* into *I looked and it was clear*, which is worse than never having looked. So it says so on every run.
 
