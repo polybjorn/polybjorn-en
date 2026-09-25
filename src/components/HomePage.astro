@@ -37,7 +37,7 @@ const featuredImages = [
 ---
 
 <Layout lang={lang} title={tr.homeTitle} description={tr.homeDescription}>
-  <link slot="head" rel="preload" as="image" href="/images/polybjorn-mark.svg" />
+  <link slot="head" rel="preload" as="image" type="image/webp" href="/images/polybjorn-mark.webp" />
 
   <style>
     body {
@@ -62,11 +62,19 @@ const featuredImages = [
       padding: 3rem 2rem 1rem;
     }
 
-    .hero img.avatar {
+    /* A background rather than an <img> because "Save image as" is only offered
+       for an <img>. It is not protection: the file is still at a public URL and
+       one devtools pane away, and a screenshot always works. It removes the
+       one-click path and nothing more. role/aria-label carry the name an alt
+       attribute used to. */
+    .hero .avatar {
       width: 200px;
       height: 200px;
-      object-fit: contain;
       margin-bottom: 1.5rem;
+      background-image: url("/images/polybjorn-mark.webp");
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: contain;
     }
 
     h1 {
@@ -252,7 +260,7 @@ const featuredImages = [
       body { height: auto; }
       h1 { font-size: 1.8rem; }
       .hero { min-height: auto; padding: 2rem 1rem 0.5rem; }
-      .hero img.avatar { width: 140px; height: 140px; }
+      .hero .avatar { width: 140px; height: 140px; }
       .content { padding: 0 1.5rem 2rem; }
       .bio p { font-size: 1rem; line-height: 1.7; }
       .bio p:first-child { margin-top: 0; }
@@ -268,11 +276,7 @@ const featuredImages = [
 
 <main id="main">
   <section class="hero">
-    <img
-      class="avatar"
-      src="/images/polybjorn-mark.svg"
-      alt="Bjørn A. Andersen"
-    />
+    <div class="avatar" role="img" aria-label="Bjørn A. Andersen"></div>
     <h1>Bjørn A. Andersen</h1>
     <div class="icons">
       <div class="icon-link">
