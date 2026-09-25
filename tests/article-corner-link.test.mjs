@@ -6,6 +6,12 @@
  * too - pointing at a polybjorn.no path that is never built, so the flag took
  * the reader to a 404. Articles are English only, so the corner holds the
  * repository link instead, and the head no longer claims a Norwegian version.
+ *
+ * NOT EVERY ARTICLE HAS A REPOSITORY. A write-up about work on a private forge
+ * has nothing public to point at, and an empty corner is the correct result -
+ * the thing being prevented is a flag that 404s, not an absent link. So the
+ * link-shape assertions run only where there are links, and the flag assertion
+ * runs for every article either way.
  */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
@@ -52,8 +58,8 @@ for (const slug of articles) {
     const doc = loadPage(page).window.document;
     const corner = [...doc.querySelectorAll('.corner-link')];
 
-    assert.ok(corner.length > 0, 'every article has at least its repository to link');
     assert.equal(doc.querySelectorAll('.lang-toggle').length, 0, 'the flag led to a page that is not built');
+    if (corner.length === 0) return;   // nothing public to link; the flag is still gone
     assert.match(corner[0].href, /^https:\/\/github\.com\//, 'the repository is the first row');
 
     for (const link of corner) {
@@ -83,20 +89,27 @@ for (const slug of articles) {
   });
 
   test(`${slug}: the corner link does not fade out on scroll`, () => {
-    assert.equal(scrollPast(page).classList.contains('hidden'), false,
+    const link = scrollPast(page);
+    if (!link) return;               // no corner link on this article
+    assert.equal(link.classList.contains('hidden'), false,
       'the flag hides once you read on, the repository link stays');
   });
 
   test(`${slug}: the corner link sits where the flag sat`, () => {
     const { window } = loadPage(page, { styles: true });
-    const style = window.getComputedStyle(window.document.querySelector('.corner'));
+    const corner = window.document.querySelector('.corner');
+    // The whole corner is absent, not just empty, when an article has no links
+    // to put in it - so this has nothing to measure rather than something wrong.
+    if (!corner) return;
+    const style = window.getComputedStyle(corner);
 
     // The flag is 21px tall at top: 1rem, so its middle is 26.5px down. The
     // 28px-tall box centres a 24px icon on the same line.
     assert.equal(style.position, 'fixed');
     assert.equal(style.right, '16px');
     assert.equal(style.top, '12.5px');
-    assert.equal(window.getComputedStyle(window.document.querySelector('.corner-link')).height, '28px');
+    assert.equal(window.getComputedStyle(
+      window.document.querySelector('.corner-link')).height, '28px');
   });
 }
 
