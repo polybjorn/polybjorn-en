@@ -1,5 +1,5 @@
 ---
-title: "Embeddings lost to counting words"
+title: Finding what I wrote before
 description: "Local AI models against plain word counting on a Git forge, graded on cross-references already there."
 date: 2026-09-25
 thumb: /images/local-models-thumb.svg
@@ -168,5 +168,7 @@ Training helped and it didn't matter. Three points is five links out of the hund
 The answer key only credits links someone bothered to type. One issue about journal entries failing to arrive carried no reference at all, so every suggestion for it scored as a miss - including the obviously correct earlier issue about the same subsystem. The numbers are a floor on usefulness, not a measure of precision.
 
 The corpus is small, and the largest models were never tried, so nothing here says a big one would fail. Nor were the code-trained retrieval models, now the ones I'd most want to see: the two I could run are code-trained *encoders* rather than retrieval models, and one scored barely above random. Their vectors were never built to be compared by distance, so that number says nothing about code training.
+
+The result belongs to this kind of text. My issues are mostly identifiers, and a folder of prose notes is the opposite, so I would expect the ranking to flip there.
 
 The last limit is the tool's own doing. Something that finds a genuinely related issue about two thirds of the time **cannot be read as a clearance.** Checking it, seeing nothing, and concluding the question is new converts *I didn't look* into *I looked and it was clear*, which is worse than never having looked. So it says so on every run.
