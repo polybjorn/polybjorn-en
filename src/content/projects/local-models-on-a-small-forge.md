@@ -79,22 +79,22 @@ Which makes them good at exactly one job: *find me the things like this one*. Th
     <div class="mchart-val">47.6%</div>
   </div>
   <div class="mchart-row">
-    <div class="mchart-label">gte-small</div>
+    <div class="mchart-label"><a href="https://huggingface.co/thenlper/gte-small">gte-small</a></div>
     <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:65.7%"></div></div>
     <div class="mchart-val">46.0%</div>
   </div>
   <div class="mchart-row">
-    <div class="mchart-label">multilingual-e5-small</div>
+    <div class="mchart-label"><a href="https://huggingface.co/intfloat/multilingual-e5-small">multilingual-e5-small</a></div>
     <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:62.9%"></div></div>
     <div class="mchart-val">44.0%</div>
   </div>
   <div class="mchart-row">
-    <div class="mchart-label">bge-small-en-v1.5</div>
+    <div class="mchart-label"><a href="https://huggingface.co/BAAI/bge-small-en-v1.5">bge-small-en-v1.5</a></div>
     <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:62.4%"></div></div>
     <div class="mchart-val">43.7%</div>
   </div>
   <div class="mchart-row">
-    <div class="mchart-label">all-MiniLM-L6-v2</div>
+    <div class="mchart-label"><a href="https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2">all-MiniLM-L6-v2</a></div>
     <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:58.6%"></div></div>
     <div class="mchart-val">41.0%</div>
   </div>

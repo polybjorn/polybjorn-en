@@ -202,6 +202,9 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
       grid-template-columns: minmax(6.5rem, 11rem) 1fr 3.1rem;
       align-items: center; gap: 0.6rem; margin-bottom: 0.4rem;
     }
+    /* A linked model name keeps the label colour; the accent blue would
+       compete with the bar beside it, and the underline is enough. */
+    article :global(.mchart-label a) { color: inherit; text-decoration: underline; }
     article :global(.mchart-label) {
       font-size: 0.85rem; color: #b5bac3; text-align: right;
       overflow-wrap: anywhere; line-height: 1.35;
