@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 640 360" role="img" aria-label="A bar chart with no labels. The top bar is long and blue, four shorter bars below it are warm amber, and the shortest is grey.">
+  <rect width="640" height="360" fill="#15181d"/>
+  <g>
+    <rect x="90" y="55" width="460" height="24" rx="4" fill="#23272e"/>
+    <rect x="90" y="101" width="460" height="24" rx="4" fill="#23272e"/>
+    <rect x="90" y="147" width="460" height="24" rx="4" fill="#23272e"/>
+    <rect x="90" y="193" width="460" height="24" rx="4" fill="#23272e"/>
+    <rect x="90" y="239" width="460" height="24" rx="4" fill="#23272e"/>
+    <rect x="90" y="285" width="460" height="24" rx="4" fill="#23272e"/>
+  </g>
+  <g>
+    <rect x="90" y="55" width="419" height="24" rx="4" fill="#6aaeee"/>
+    <rect x="90" y="101" width="304" height="24" rx="4" fill="#e8b775"/>
+    <rect x="90" y="147" width="290" height="24" rx="4" fill="#e8b775"/>
+    <rect x="90" y="193" width="285" height="24" rx="4" fill="#e8b775"/>
+    <rect x="90" y="239" width="271" height="24" rx="4" fill="#e8b775"/>
+    <rect x="90" y="285" width="152" height="24" rx="4" fill="#8a8f99"/>
+  </g>
+</svg>

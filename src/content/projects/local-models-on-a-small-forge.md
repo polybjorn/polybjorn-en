@@ -2,6 +2,8 @@
 title: "Embeddings lost to counting words"
 description: "I wanted a model that could make small decisions on my Git forge. Several embedding models later, a fifty-year-old way of counting words was still winning."
 date: 2026-09-25
+cover: /images/local-models-cover.svg
+coverAlt: An unlabelled bar chart, one long blue bar above four shorter amber ones and a short grey one
 draft: false
 unlisted: true
 ---
@@ -35,6 +37,11 @@ Any of this is worthless without an answer key.
 > Every time someone writes `#123` in an issue, they're asserting that two issues are related. A judgement someone already made, recorded and free.
 
 My forge had 617 of them sitting there already, spread across 489 issues. So the test writes itself: hide the reference, show the system only the new issue's text, and ask whether it finds the issue the author actually linked. Only against issues that existed at the time, so nothing borrows from the future.
+
+<button class="img-zoom" type="button" data-full="/images/local-models-answer-key.svg">
+  <img src="/images/local-models-answer-key.svg" alt="Three steps. One, issue 968 cites issue 956, so someone has already said the two are related. Two, strip the reference, so the tool sees the text and never the link. Three, search only the issues that existed when 968 was filed, and count it a hit if 956 comes back in the first five." />
+</button>
+<p class="img-caption">#968 is a real one: it names #956 in its own body, so that pair is one of the 617.</p>
 
 ## Then the models lost
 
@@ -118,6 +125,11 @@ The ones I tried are a couple of hundred megabytes each, need no graphics card, 
 Every one lost, and not narrowly. I'd written down the opposite prediction beforehand, which is the only reason I can honestly call it a surprise. The obvious escapes didn't help either: chunking the documents so nothing was truncated made every model *worse*, and blending a model with the word counting - the way these systems are normally deployed - came out below the word counting alone.
 
 The reason is visible once you look at what my issues are made of. They're full of identifiers: `StateDirectory`, `checks/service-state.nix`, machine names. Exact matching on a rare string is precisely what counting words is best at, and what a model trained on ordinary prose is worst at. The model is better at language. My text is barely language.
+
+<button class="img-zoom" type="button" data-full="/images/local-models-vocabulary.svg">
+  <img src="/images/local-models-vocabulary.svg" alt="An issue from the forge with its words shaded by how many of the 489 issues contain them. The rarest are identifiers: checks/service-state.nix appears in 14, StateDirectory in 13, census in 5, packaged in 2 and rowless-unit in 1. The ordinary English words around them appear in hundreds." />
+</button>
+<p class="img-caption">One issue, shaded by how many of the 489 contain each word. <code>checks/service-state.nix</code> is in 14 of them, <code>StateDirectory</code> in 13, <code>rowless-unit</code> in exactly one. Those carry the sentence, and they are the strings a model trained on English has never seen. Rarity is measured against this forge rather than against English, which is why "fewer" is blue too.</p>
 
 ## The things that didn't work
 
