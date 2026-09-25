@@ -182,6 +182,43 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
        aligned right. Revisit if one ever ends in prose. */
     article :global(thead th:not(:first-child)),
     article :global(tbody td:not(:first-child)) { text-align: right; }
+    /* Bar chart in markup rather than an image. A 748px SVG scaled into a
+       327px phone rendered its axis text at under 5px; this reflows, the
+       labels stay real text at real size, and updating a number is an edit
+       rather than regenerating a file. Colours validated for colour-blind
+       separation before use. */
+    article :global(.mchart) { margin: 1.5rem 0; }
+    article :global(.mchart-cap) {
+      color: #8a8f99; font-size: 0.9rem; margin-bottom: 0.75rem; line-height: 1.5;
+    }
+    article :global(.mchart-key) {
+      display: flex; flex-wrap: wrap; gap: 0.35rem 1rem;
+      color: #b5bac3; font-size: 0.85rem; margin-bottom: 0.9rem;
+    }
+    article :global(.mchart-key span) { display: inline-flex; align-items: center; gap: 0.4rem; }
+    article :global(.mchart-sw) { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+    article :global(.mchart-row) {
+      display: grid;
+      grid-template-columns: minmax(6.5rem, 11rem) 1fr 3.1rem;
+      align-items: center; gap: 0.6rem; margin-bottom: 0.4rem;
+    }
+    article :global(.mchart-label) {
+      font-size: 0.85rem; color: #b5bac3; text-align: right;
+      overflow-wrap: anywhere; line-height: 1.35;
+    }
+    article :global(.mchart-track) { background: #22262d; border-radius: 3px; height: 1.15rem; }
+    article :global(.mchart-bar) { height: 100%; border-radius: 3px; min-width: 2px; }
+    article :global(.mchart-val) {
+      font-size: 0.85rem; font-variant-numeric: tabular-nums; color: #dde1e7;
+    }
+    article :global(.mchart-lex) { background: #3987e5; }
+    article :global(.mchart-emb) { background: #d95926; }
+    article :global(.mchart-ctl) { background: #8a8f99; }
+    @media (max-width: 480px) {
+      article :global(.mchart-row) { grid-template-columns: 1fr 2.9rem; gap: 0.35rem 0.5rem; }
+      /* label moves above its own bar rather than squeezing a third column */
+      article :global(.mchart-label) { grid-column: 1 / -1; text-align: left; margin-top: 0.4rem; }
+    }
     article :global(hr) { border: none; border-top: 1px solid #2a2f37; margin: 2rem 0; }
     article :global(.article-gallery) {
       display: grid;
