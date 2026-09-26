@@ -29,7 +29,7 @@ about a third of real links, so an absent issue here is not a clearance</span></
 
 Both were the right things to read and I'd forgotten both. It finds the right issue in its top five 63.8% of the time. Showing the five most recent issues instead - the obvious cheap alternative - manages 23.1%, and picking at random 2.6%.
 
-The method underneath is older than I am. Count the words in every document, weight the rare ones more heavily than the common ones, and call two documents similar when they share unusual vocabulary. It's called TF-IDF, it's about fifty years old, and the largest single improvement I made to it had no cleverness in it either: indexing the comments as well as the issue text, worth about seven points. The comments were twice the volume of the issue bodies and I simply hadn't been using them.
+Count the words in every document, weight the rare ones more heavily than the common ones, and call two documents similar when they share unusual vocabulary. It's called TF-IDF, it's about fifty years old, and the largest single improvement I made to it had no cleverness in it either: indexing the comments as well as the issue text, worth about seven points. The comments were twice the volume of the issue bodies and I simply hadn't been using them.
 
 ## How I know it works
 
