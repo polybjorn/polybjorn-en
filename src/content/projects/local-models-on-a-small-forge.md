@@ -159,7 +159,7 @@ The ones I tried are a couple of hundred megabytes each, need no graphics card, 
     <div class="mchart-track"><div class="mchart-bar mchart-ctl" style="width:2.6%"></div></div>
     <div class="mchart-val">2.6%</div>
   </div>
-  <figcaption class="mchart-cap">How often the issue someone actually linked shows up in the first five suggestions. * settings picked on the older three quarters of the links; newer rows read 616 of the 617.</figcaption>
+  <figcaption class="mchart-cap">How often the issue someone actually linked shows up in the first five suggestions. Measured on a copy of the forge frozen on 2026-09-24. * settings picked on the older three quarters of the links.</figcaption>
 </figure>
 
 Every model lost, and not narrowly. I'd written down the opposite prediction beforehand, which is the only reason I can honestly call it a surprise. The obvious escapes didn't help either. Chunking the documents so nothing was truncated made every model *worse*; only once each comment went in as a passage of its own, with an issue scored by its best passage, did gte-small climb, to 51.1% - still twelve points short. The two kinds of model built to keep exact matching, SPLADE with its learned word weights and ColBERT comparing word by word, came no closer than seven. And blending a model with the word counting - the way these systems are normally deployed - added nothing that held up on the held-out links.
@@ -205,7 +205,7 @@ Training helped and it didn't matter. Three points is five links out of the hund
 
 **Write the bar down before you run the test.** Mine was fixed in advance, and it's the only reason the first failure was a clear no rather than a negotiation with myself about whether 2.4% was encouraging.
 
-**Build it so you can run it again.** Every number here is one run against a frozen copy of the forge, on the date at the top of this page. The corpus has a checksum and the tool carries its own benchmark, so re-measuring takes seconds. None of these numbers are permanent, and I'd expect the gap to grow: counting words gets better statistics from more documents, while an off-the-shelf model learns nothing from mine.
+**Build it so you can run it again.** Every number here is one run against a frozen copy of the forge, on the date at the top of this page. The corpus has a checksum and the tool carries its own benchmark, so re-measuring takes seconds. None of these numbers are permanent, and I'd expect the gap to grow: counting words gets better statistics from more documents, while an off-the-shelf model learns nothing from mine. Two days after the snapshot the forge was 40% bigger, and on the links written since 2026-09-22 counting words had gone from 54.2% to 58.1% while the five-most-recent baseline fell - so far the direction I expected. I haven't re-run the models on it.
 
 ## What this doesn't show
 
