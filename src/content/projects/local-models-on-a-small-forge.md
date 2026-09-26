@@ -54,16 +54,27 @@ Language models and embedding models get confused with each other. They do diffe
 
 The ones I tried are a couple of hundred megabytes each, need no graphics card, and the text never leaves the machine. Each went against the same links, with the prompt format its authors specify.
 
-<figure class="mchart" role="group" aria-label="Recall at 5 by method. Term weighting with comments reaches 63.8 percent; the best embedding model, gte-small, reaches 46.0 percent; a recency control reaches 23.1 percent and a random control 2.6 percent.">
+<figure class="mchart" role="group" aria-label="Recall at 5 by method, in four groups. Counting words alone: term weighting with comments reaches 63.8 percent, tuned BM25 62.8. Embedding models: the best, gte-small, reaches 46.0 percent. Two stages: counting words plus the links already between issues reaches 67.2 percent, counting words plus a reranker 39.3. Controls: recency 23.1 percent, random 2.6.">
   <div class="mchart-key">
-    <span><i class="mchart-sw mchart-lex"></i>counting words</span>
+    <span><i class="mchart-sw mchart-lex"></i>no model</span>
     <span><i class="mchart-sw mchart-emb"></i>neural model</span>
     <span><i class="mchart-sw mchart-ctl"></i>baseline to beat</span>
   </div>
+  <div class="mchart-group">Counting words</div>
   <div class="mchart-row">
     <div class="mchart-label">Counting words + comments</div>
     <div class="mchart-track"><div class="mchart-bar mchart-lex" style="width:91.1%"></div></div>
     <div class="mchart-val">63.8%</div>
+  </div>
+  <div class="mchart-row">
+    <div class="mchart-label">BM25 + comments, tuned*</div>
+    <div class="mchart-track"><div class="mchart-bar mchart-lex" style="width:89.7%"></div></div>
+    <div class="mchart-val">62.8%</div>
+  </div>
+  <div class="mchart-row">
+    <div class="mchart-label">Identifiers kept whole</div>
+    <div class="mchart-track"><div class="mchart-bar mchart-lex" style="width:88.4%"></div></div>
+    <div class="mchart-val">61.9%</div>
   </div>
   <div class="mchart-row">
     <div class="mchart-label">Counting words</div>
@@ -81,10 +92,11 @@ The ones I tried are a couple of hundred megabytes each, need no graphics card, 
     <div class="mchart-val">55.0%</div>
   </div>
   <div class="mchart-row">
-    <div class="mchart-label">BM25</div>
+    <div class="mchart-label">BM25, untuned</div>
     <div class="mchart-track"><div class="mchart-bar mchart-lex" style="width:68.0%"></div></div>
     <div class="mchart-val">47.6%</div>
   </div>
+  <div class="mchart-group">One embedding per document</div>
   <div class="mchart-row">
     <div class="mchart-label"><a href="https://huggingface.co/thenlper/gte-small">gte-small</a></div>
     <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:65.7%"></div></div>
@@ -105,11 +117,18 @@ The ones I tried are a couple of hundred megabytes each, need no graphics card, 
     <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:58.6%"></div></div>
     <div class="mchart-val">41.0%</div>
   </div>
+  <div class="mchart-group">Counting words, then a second pass</div>
   <div class="mchart-row">
-    <div class="mchart-label">Counting words + reranker</div>
+    <div class="mchart-label">+ links already there*</div>
+    <div class="mchart-track"><div class="mchart-bar mchart-lex" style="width:96.0%"></div></div>
+    <div class="mchart-val">67.2%</div>
+  </div>
+  <div class="mchart-row">
+    <div class="mchart-label">+ reranker</div>
     <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:56.1%"></div></div>
     <div class="mchart-val">39.3%</div>
   </div>
+  <div class="mchart-group">Controls</div>
   <div class="mchart-row">
     <div class="mchart-label">Five most recent</div>
     <div class="mchart-track"><div class="mchart-bar mchart-ctl" style="width:33.0%"></div></div>
@@ -120,7 +139,7 @@ The ones I tried are a couple of hundred megabytes each, need no graphics card, 
     <div class="mchart-track"><div class="mchart-bar mchart-ctl" style="width:3.7%"></div></div>
     <div class="mchart-val">2.6%</div>
   </div>
-  <figcaption class="mchart-cap">How often the issue someone actually linked turns up in the first five suggestions, out of hundreds of candidates. Every bar uses all 617 links and queries with the new issue's title and body. The table further down is a smaller and harder slice, so its numbers are lower.</figcaption>
+  <figcaption class="mchart-cap">How often the issue someone actually linked turns up in the first five suggestions, out of hundreds of candidates. Every bar queries with the new issue's title and body over the 617 links; rows added on 2026-09-26 read 616, one body having been edited since, and the leader scores 63.6% on those. Rows marked * picked their settings on the oldest three quarters of the links. The table further down is a smaller and harder slice, so its numbers are lower.</figcaption>
 </figure>
 
 Every one lost, and not narrowly. I'd written down the opposite prediction beforehand, which is the only reason I can honestly call it a surprise. The obvious escapes didn't help either: chunking the documents so nothing was truncated made every model *worse*, and blending a model with the word counting - the way these systems are normally deployed - came out below the word counting alone.
@@ -152,6 +171,10 @@ Training helped and it didn't matter. Three points is five links out of the hund
 
 **The labels I already had.** Every issue carries a `host/*` label and often a milestone, none of it text, so nothing above reads any of it. The signal is real: two issues that link to each other share a host label 75% of the time, against 41% for any two drawn from the pool. Adding it to the ranking moved nothing, and the reason is the thing I hadn't checked - 73% of bodies name their own host in words, so counting words had already counted it. It also read the labels as they stand today, free hindsight over what an issue carried when it was filed.
 
+## What did beat it
+
+**The links themselves.** Everything above reads text. The one thing that finally beat counting words reads something else: the links already between issues. Take the top three hits counting words finds, and lift whatever those issues already link to. Related issues cluster - a decision, its follow-ups, the fix that later undid it - and they cite each other, so one good hit pulls in siblings that share few words with the new issue. It's worth about four points over all the links, to 67.2%, and comparing the two methods link by link puts that clear of luck. It counts only links that existed when the new issue was filed, and it still has no model in it.
+
 ## What I'd tell anyone trying this
 
 **Count your data before you run anything.** I had three candidate jobs and checked the size of one. The other two turned out to have four usable examples each - four, not four hundred - which five minutes of counting would have shown. Nothing rescues a task with no data in it.
@@ -170,6 +193,6 @@ The answer key only credits links someone bothered to type. One issue about jour
 
 The corpus is small, and the largest models were never tried, so nothing here says a big one would fail. Nor were the code-trained retrieval models, now the ones I'd most want to see: the two I could run are code-trained *encoders* rather than retrieval models, and one scored barely above random. Their vectors were never built to be compared by distance, so that number says nothing about code training.
 
-The result belongs to this kind of text. My issues are mostly identifiers, and a folder of prose notes is the opposite, so I would expect the ranking to flip there.
+I expected the result to belong to this kind of text, and wrote here that the ranking would flip on prose. So I ran the same test on my notes vault - 3,495 wikilinks between about 7,600 notes - and it didn't. Counting words beat all four models there too, in the same order. The one difference is that blending in the best model helps by about a point, which does not survive on the held-out half. My notes turn out to be short and full of names, which is closer to the forge than I'd assumed.
 
 The last limit is the tool's own doing. Something that finds a genuinely related issue about two thirds of the time **cannot be read as a clearance.** Checking it, seeing nothing, and concluding the question is new converts *I didn't look* into *I looked and it was clear*, which is worse than never having looked. So it says so on every run.
