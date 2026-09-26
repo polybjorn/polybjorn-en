@@ -246,6 +246,14 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
       line-height: 1.35;
       white-space: nowrap;
     }
+    /* Groups are by how a method works, not by whether it has a model in it:
+       a reranker sits beside past links as a second pass over the same
+       shortlist, and colour still says which ones carry a model. */
+    article :global(.mchart-group) {
+      color: #8a8f99; font-size: 0.75rem; text-transform: uppercase;
+      letter-spacing: 0.06em; margin: 1rem 0 0.4rem;
+    }
+    article :global(.mchart-key + .mchart-group) { margin-top: 0; }
     article :global(.mchart-track) { background: #23272e; border-radius: 3px; height: 1.15rem; }
     article :global(.mchart-bar) { height: 100%; border-radius: 3px; min-width: 2px; }
     article :global(.mchart-val) {
