@@ -54,7 +54,7 @@ Language models and embedding models get confused with each other. They do diffe
 
 The ones I tried are a couple of hundred megabytes each, need no graphics card, and the text never leaves the machine. Each went against the same links, with the prompt format its authors specify.
 
-<figure class="mchart" role="group" aria-label="Recall at 5 by method, in four groups. Two stages: counting words plus the links already between issues reaches 67.2 percent, counting words plus a reranker 49.4. Counting words alone: term weighting with comments reaches 63.8 percent, tuned BM25 62.8. Embedding models: the best, gte-small, reaches 46.0 percent. Controls: recency 23.1 percent, random 2.6.">
+<figure class="mchart" role="group" aria-label="Recall at 5 by method, in four groups. Two stages: counting words plus the links already between issues reaches 67.2 percent, counting words plus the ms-marco-MiniLM-L-6-v2 reranker 49.4. Counting words alone: term weighting with comments reaches 63.8 percent, tuned BM25 62.8. Embedding models: the best, gte-small, reaches 46.0 percent. Controls: recency 23.1 percent, random 2.6.">
   <div class="mchart-key">
     <span><i class="mchart-sw mchart-lex"></i>no model</span>
     <span><i class="mchart-sw mchart-emb"></i>neural model</span>
@@ -67,7 +67,7 @@ The ones I tried are a couple of hundred megabytes each, need no graphics card, 
     <div class="mchart-val">67.2%</div>
   </div>
   <div class="mchart-row">
-    <div class="mchart-label">+ reranker</div>
+    <div class="mchart-label">+ <a href="https://huggingface.co/cross-encoder/ms-marco-MiniLM-L-6-v2">ms-marco-MiniLM-L-6-v2</a></div>
     <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:49.4%"></div></div>
     <div class="mchart-val">49.4%</div>
   </div>
