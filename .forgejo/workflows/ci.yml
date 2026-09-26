@@ -55,6 +55,22 @@ jobs:
       - uses: https://git-ci.pebblecove.xyz:8447/bjorn/ci-actions/checkout@v1
         with:
           token: ${{ github.token }}
+      # Dependency CVEs, against the OSV databases the runner host caches at
+      # /osv and bind-mounts read-only into every job, so nothing about this
+      # repo's package list reaches osv.dev. It refuses rather than passing when
+      # the mount is absent or the newest database is over 7 days old: a stale
+      # database reports fewer findings while looking exactly like a clean run
+      # (bjorn/ci-actions#22).
+      #
+      # It reads the lockfile rather than an installed tree, and needs only bash
+      # and the mount, so it sits ahead of npm ci and still answers on a day the
+      # registry does not.
+      #
+      # A finding that has to be lived with goes in an osv-scanner.toml in the
+      # repo root as an [[IgnoredVulns]] entry carrying an id and a reason; the
+      # scanner reads that file natively and this action passes it nothing.
+      - name: Known vulnerabilities in dependencies
+        uses: https://git-ci.pebblecove.xyz:8447/bjorn/ci-actions/osv-scan@v1
       # The container image comes from the runner's docker label, configured in
       # nixfleet, so nothing in this repo makes it agree with .nvmrc - and for a
       # while it did not: the gate ran node 22 while the deploy ran 24, which is
