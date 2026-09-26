@@ -63,83 +63,83 @@ The ones I tried are a couple of hundred megabytes each, need no graphics card, 
   <div class="mchart-group">Counting words</div>
   <div class="mchart-row">
     <div class="mchart-label">Counting words + comments</div>
-    <div class="mchart-track"><div class="mchart-bar mchart-lex" style="width:91.1%"></div></div>
+    <div class="mchart-track"><div class="mchart-bar mchart-lex" style="width:63.8%"></div></div>
     <div class="mchart-val">63.8%</div>
   </div>
   <div class="mchart-row">
     <div class="mchart-label">BM25 + comments, tuned*</div>
-    <div class="mchart-track"><div class="mchart-bar mchart-lex" style="width:89.7%"></div></div>
+    <div class="mchart-track"><div class="mchart-bar mchart-lex" style="width:62.8%"></div></div>
     <div class="mchart-val">62.8%</div>
   </div>
   <div class="mchart-row">
     <div class="mchart-label">Identifiers kept whole</div>
-    <div class="mchart-track"><div class="mchart-bar mchart-lex" style="width:88.4%"></div></div>
+    <div class="mchart-track"><div class="mchart-bar mchart-lex" style="width:61.9%"></div></div>
     <div class="mchart-val">61.9%</div>
   </div>
   <div class="mchart-row">
     <div class="mchart-label">Counting words</div>
-    <div class="mchart-track"><div class="mchart-bar mchart-lex" style="width:81.4%"></div></div>
+    <div class="mchart-track"><div class="mchart-bar mchart-lex" style="width:57.0%"></div></div>
     <div class="mchart-val">57.0%</div>
   </div>
   <div class="mchart-row">
     <div class="mchart-label">Counting words + topics</div>
-    <div class="mchart-track"><div class="mchart-bar mchart-lex" style="width:80.4%"></div></div>
+    <div class="mchart-track"><div class="mchart-bar mchart-lex" style="width:56.3%"></div></div>
     <div class="mchart-val">56.3%</div>
   </div>
   <div class="mchart-row">
     <div class="mchart-label">Character patterns</div>
-    <div class="mchart-track"><div class="mchart-bar mchart-lex" style="width:78.6%"></div></div>
+    <div class="mchart-track"><div class="mchart-bar mchart-lex" style="width:55.0%"></div></div>
     <div class="mchart-val">55.0%</div>
   </div>
   <div class="mchart-row">
     <div class="mchart-label">BM25, untuned</div>
-    <div class="mchart-track"><div class="mchart-bar mchart-lex" style="width:68.0%"></div></div>
+    <div class="mchart-track"><div class="mchart-bar mchart-lex" style="width:47.6%"></div></div>
     <div class="mchart-val">47.6%</div>
   </div>
   <div class="mchart-group">One embedding per document</div>
   <div class="mchart-row">
     <div class="mchart-label"><a href="https://huggingface.co/thenlper/gte-small">gte-small</a></div>
-    <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:65.7%"></div></div>
+    <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:46.0%"></div></div>
     <div class="mchart-val">46.0%</div>
   </div>
   <div class="mchart-row">
     <div class="mchart-label"><a href="https://huggingface.co/intfloat/multilingual-e5-small">multilingual-e5-small</a></div>
-    <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:62.9%"></div></div>
+    <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:44.0%"></div></div>
     <div class="mchart-val">44.0%</div>
   </div>
   <div class="mchart-row">
     <div class="mchart-label"><a href="https://huggingface.co/BAAI/bge-small-en-v1.5">bge-small-en-v1.5</a></div>
-    <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:62.4%"></div></div>
+    <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:43.7%"></div></div>
     <div class="mchart-val">43.7%</div>
   </div>
   <div class="mchart-row">
     <div class="mchart-label"><a href="https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2">all-MiniLM-L6-v2</a></div>
-    <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:58.6%"></div></div>
+    <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:41.0%"></div></div>
     <div class="mchart-val">41.0%</div>
   </div>
   <div class="mchart-group">Counting words, then a second pass</div>
   <div class="mchart-row">
     <div class="mchart-label">+ links already there*</div>
-    <div class="mchart-track"><div class="mchart-bar mchart-lex" style="width:96.0%"></div></div>
+    <div class="mchart-track"><div class="mchart-bar mchart-lex" style="width:67.2%"></div></div>
     <div class="mchart-val">67.2%</div>
   </div>
   <div class="mchart-row">
     <div class="mchart-label">+ reranker</div>
-    <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:70.6%"></div></div>
+    <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:49.4%"></div></div>
     <div class="mchart-val">49.4%</div>
   </div>
   <div class="mchart-group">Controls</div>
   <div class="mchart-row">
     <div class="mchart-label">Five most recent</div>
-    <div class="mchart-track"><div class="mchart-bar mchart-ctl" style="width:33.0%"></div></div>
+    <div class="mchart-track"><div class="mchart-bar mchart-ctl" style="width:23.1%"></div></div>
     <div class="mchart-val">23.1%</div>
   </div>
   <div class="mchart-row">
     <div class="mchart-label">Random</div>
-    <div class="mchart-track"><div class="mchart-bar mchart-ctl" style="width:3.7%"></div></div>
+    <div class="mchart-track"><div class="mchart-bar mchart-ctl" style="width:2.6%"></div></div>
     <div class="mchart-val">2.6%</div>
   </div>
-  <figcaption class="mchart-cap">How often the issue someone actually linked turns up in the first five suggestions, out of hundreds of candidates. Every bar queries with the new issue's title and body over the 617 links; rows added on 2026-09-26 read 616, one body having been edited since, and the leader scores 63.6% on those. Rows marked * picked their settings on the oldest three quarters of the links. The table further down is a smaller and harder slice, so its numbers are lower.</figcaption>
+  <figcaption class="mchart-cap">How often the issue someone actually linked shows up in the first five suggestions. * settings picked on the older three quarters of the links; newer rows read 616 of the 617.</figcaption>
 </figure>
 
 Every one lost, and not narrowly. I'd written down the opposite prediction beforehand, which is the only reason I can honestly call it a surprise. The obvious escapes didn't help either: chunking the documents so nothing was truncated made every model *worse*, and blending a model with the word counting - the way these systems are normally deployed - came out below the word counting alone.
