@@ -54,7 +54,7 @@ Language models and embedding models get confused with each other. They do diffe
 
 The ones I tried are a couple of hundred megabytes each, need no graphics card, and the text never leaves the machine. Each went against the same links, with the prompt format its authors specify.
 
-<figure class="mchart" role="group" aria-label="Recall at 5 by method, in four groups. Two stages: counting words plus the links already between issues reaches 67.2 percent, counting words plus the ms-marco-MiniLM-L-6-v2 reranker 49.4. Counting words alone: term weighting with comments reaches 63.8 percent, tuned BM25 62.8. Embedding models: the best, gte-small, reaches 46.0 percent. Controls: recency 23.1 percent, random 2.6.">
+<figure class="mchart" role="group" aria-label="Recall at 5 by method, in four groups. Two stages: counting words plus the links already between issues reaches 67.2 percent, counting words plus the ms-marco-MiniLM-L-6-v2 reranker 49.4. Counting words alone: term weighting with comments reaches 63.8 percent, tuned BM25 62.8. Neural models on their own: the best, SPLADE, reaches 56.7 percent, and single-vector gte-small 46.0. Controls: recency 23.1 percent, random 2.6.">
   <div class="mchart-key">
     <span><i class="mchart-sw mchart-lex"></i>no model</span>
     <span><i class="mchart-sw mchart-emb"></i>neural model</span>
@@ -107,7 +107,27 @@ The ones I tried are a couple of hundred megabytes each, need no graphics card, 
     <div class="mchart-track"><div class="mchart-bar mchart-lex" style="width:47.6%"></div></div>
     <div class="mchart-val">47.6%</div>
   </div>
-  <div class="mchart-group">One embedding per document</div>
+  <div class="mchart-group">Neural models on their own</div>
+  <div class="mchart-row">
+    <div class="mchart-label"><a href="https://huggingface.co/naver/splade-cocondenser-ensembledistil">SPLADE</a></div>
+    <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:56.7%"></div></div>
+    <div class="mchart-val">56.7%</div>
+  </div>
+  <div class="mchart-row">
+    <div class="mchart-label"><a href="https://huggingface.co/answerdotai/answerai-colbert-small-v1">answerai-colbert-small</a></div>
+    <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:54.4%"></div></div>
+    <div class="mchart-val">54.4%</div>
+  </div>
+  <div class="mchart-row">
+    <div class="mchart-label"><a href="https://huggingface.co/lightonai/GTE-ModernColBERT-v1">GTE-ModernColBERT</a></div>
+    <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:52.6%"></div></div>
+    <div class="mchart-val">52.6%</div>
+  </div>
+  <div class="mchart-row">
+    <div class="mchart-label"><a href="https://huggingface.co/thenlper/gte-small">gte-small</a>, by passage</div>
+    <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:51.1%"></div></div>
+    <div class="mchart-val">51.1%</div>
+  </div>
   <div class="mchart-row">
     <div class="mchart-label"><a href="https://huggingface.co/thenlper/gte-small">gte-small</a></div>
     <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:46.0%"></div></div>
@@ -142,7 +162,7 @@ The ones I tried are a couple of hundred megabytes each, need no graphics card, 
   <figcaption class="mchart-cap">How often the issue someone actually linked shows up in the first five suggestions. * settings picked on the older three quarters of the links; newer rows read 616 of the 617.</figcaption>
 </figure>
 
-Every model lost, and not narrowly. I'd written down the opposite prediction beforehand, which is the only reason I can honestly call it a surprise. The obvious escapes didn't help either: chunking the documents so nothing was truncated made every model *worse*, and blending a model with the word counting - the way these systems are normally deployed - came out below the word counting alone.
+Every model lost, and not narrowly. I'd written down the opposite prediction beforehand, which is the only reason I can honestly call it a surprise. The obvious escapes didn't help either. Chunking the documents so nothing was truncated made every model *worse*; only once each comment went in as a passage of its own, with an issue scored by its best passage, did gte-small climb, to 51.1% - still twelve points short. The two kinds of model built to keep exact matching, SPLADE with its learned word weights and ColBERT comparing word by word, came no closer than seven. And blending a model with the word counting - the way these systems are normally deployed - added nothing that held up on the held-out links.
 
 The reason is visible once you look at what my issues are made of. They're full of identifiers: `StateDirectory`, `checks/service-state.nix`, machine names. Exact matching on a rare string is precisely what counting words is best at, and what a model trained on ordinary prose is worst at. The model is better at language. My text is barely language.
 
@@ -173,7 +193,7 @@ Training helped and it didn't matter. Three points is five links out of the hund
 
 ## What did beat it
 
-**The links themselves.** Everything above reads text. The one thing that finally beat counting words reads something else: the links already between issues. Take the top three hits counting words finds, and lift whatever those issues already link to. Related issues cluster - a decision, its follow-ups, the fix that later undid it - and they cite each other, so one good hit pulls in siblings that share few words with the new issue. It's worth about four points over all the links, to 67.2%, and comparing the two methods link by link puts that clear of luck. It counts only links that existed when the new issue was filed, and it still has no model in it.
+**The links themselves.** Everything above reads text. The one thing that finally beat counting words reads something else: the links already between issues. Take the top three hits counting words finds, and lift whatever those issues already link to. Related issues cluster - a decision, its follow-ups, the fix that later undid it - and they cite each other, so one good hit pulls in siblings that share few words with the new issue. It's worth about four points over all the links, to 67.2%, and comparing the two methods link by link puts that clear of luck. It counts only links that existed when the new issue was filed, and it still has no model in it. A learned ranker over every score on this page, the neural ones included, did no better than this two-number rule on the links it had not trained on.
 
 ## What I'd tell anyone trying this
 
