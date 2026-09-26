@@ -23,17 +23,34 @@ import { loadPage } from './helpers/page.mjs';
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const SRC = join(ROOT, 'src', 'content', 'projects');
 
-/** Slugs whose frontmatter sets wip, read from source rather than hardcoded. */
-const wipSlugs = readdirSync(SRC)
+const flag = (body, name) => new RegExp(`^${name}:\\s*true\\s*$`, 'm').test(body);
+
+/**
+ * Every article, with its flags read from source rather than hardcoded.
+ *
+ * Drafts are dropped here, the way tests/sitemap-unlisted.test.mjs drops them:
+ * a plain build emits no route for a draft, and `npm test` runs a plain build,
+ * so every assertion below would fail on the missing file instead of on the
+ * badge it is about. One draft in the repo would turn this whole file red.
+ */
+const articles = readdirSync(SRC)
   .filter(f => f.endsWith('.md'))
-  .filter(f => /^wip:\s*true\s*$/m.test(readFileSync(join(SRC, f), 'utf8')))
-  .map(f => f.replace(/\.md$/, ''));
+  .map(f => {
+    const body = readFileSync(join(SRC, f), 'utf8');
+    return {
+      slug: f.replace(/\.md$/, ''),
+      wip: flag(body, 'wip'),
+      unlisted: flag(body, 'unlisted'),
+      draft: flag(body, 'draft'),
+    };
+  })
+  .filter(a => !a.draft);
+
+/** Slugs whose frontmatter sets wip. */
+const wipSlugs = articles.filter(a => a.wip).map(a => a.slug);
 
 /** Slugs kept off the listing, which changes what the listing test can assert. */
-const unlisted = new Set(readdirSync(SRC)
-  .filter(f => f.endsWith('.md'))
-  .filter(f => /^unlisted:\s*true\s*$/m.test(readFileSync(join(SRC, f), 'utf8')))
-  .map(f => f.replace(/\.md$/, '')));
+const unlisted = new Set(articles.filter(a => a.unlisted).map(a => a.slug));
 
 test('a work-in-progress article says so under its title', () => {
   assert.ok(wipSlugs.length, 'no article sets wip, so this test proves nothing');
@@ -47,8 +64,7 @@ test('a work-in-progress article says so under its title', () => {
 });
 
 test('an article that is not marked carries no status', () => {
-  const all = readdirSync(SRC).filter(f => f.endsWith('.md')).map(f => f.replace(/\.md$/, ''));
-  const plain = all.filter(s => !wipSlugs.includes(s));
+  const plain = articles.filter(a => !a.wip).map(a => a.slug);
   assert.ok(plain.length, 'every article is a work in progress, so this proves nothing');
 
   for (const slug of plain) {
