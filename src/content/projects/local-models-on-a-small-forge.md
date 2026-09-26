@@ -54,7 +54,7 @@ Language models and embedding models get confused with each other. They do diffe
 
 The ones I tried are a couple of hundred megabytes each, need no graphics card, and the text never leaves the machine. Each went against the same links, with the prompt format its authors specify.
 
-<figure class="mchart" role="group" aria-label="Recall at 5 by method, in four groups. Counting words alone: term weighting with comments reaches 63.8 percent, tuned BM25 62.8. Embedding models: the best, gte-small, reaches 46.0 percent. Two stages: counting words plus the links already between issues reaches 67.2 percent, counting words plus a reranker 39.3. Controls: recency 23.1 percent, random 2.6.">
+<figure class="mchart" role="group" aria-label="Recall at 5 by method, in four groups. Counting words alone: term weighting with comments reaches 63.8 percent, tuned BM25 62.8. Embedding models: the best, gte-small, reaches 46.0 percent. Two stages: counting words plus the links already between issues reaches 67.2 percent, counting words plus a reranker 49.4. Controls: recency 23.1 percent, random 2.6.">
   <div class="mchart-key">
     <span><i class="mchart-sw mchart-lex"></i>no model</span>
     <span><i class="mchart-sw mchart-emb"></i>neural model</span>
@@ -125,8 +125,8 @@ The ones I tried are a couple of hundred megabytes each, need no graphics card, 
   </div>
   <div class="mchart-row">
     <div class="mchart-label">+ reranker</div>
-    <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:56.1%"></div></div>
-    <div class="mchart-val">39.3%</div>
+    <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:70.6%"></div></div>
+    <div class="mchart-val">49.4%</div>
   </div>
   <div class="mchart-group">Controls</div>
   <div class="mchart-row">
@@ -167,7 +167,7 @@ This one can't go in the chart above. A model trained on my own links has to be 
 
 Training helped and it didn't matter. Three points is five links out of the hundred and fifty-four held back, against a natural variation of about six - inside the noise, indistinguishable from luck. The distance to counting words is twelve links, which is real. I taught it the vocabulary and it stayed behind.
 
-**Scoring the pair instead of the documents.** This one is in the chart above. Everything else there compares documents *apart* - each turned into a position, then measured. A cross-encoder reads the query and a candidate *together*, which is slower and usually much sharper, and is what a real search engine runs as a second pass over the first stage's top fifty. So I ran it, and it took 63.8% down to 39.3%. A second, stronger reranker was worse still: on the held-out set it reordered a shortlist that held the right answer four times in five and landed at 22.1%. It isn't failing to spot the answer. It's pushing it down.
+**Scoring the pair instead of the documents.** This one is in the chart above. Everything else there compares documents *apart* - each turned into a position, then measured. A cross-encoder reads the query and a candidate *together*, which is slower and usually much sharper, and is what a real search engine runs as a second pass over the first stage's top fifty. So I ran it, and it took 63.8% down to 39.3%. That first run was unfair to it: it read only the opening lines of each candidate, while counting words had read the comments too. Given the whole issue - body and every earlier comment, each candidate scored by its best-matching passage - it did better, 49.4% where the same shortlist read the old way gave 45.6%, and still lost by fourteen points. Letting it merely nudge the word-counting order didn't help either: the best mix, picked on the older links, gave it a twentieth of the weight and changed nothing. A second, stronger reranker was worse still: on the held-out set it reordered a shortlist that held the right answer four times in five and landed at 22.1%. It isn't failing to spot the answer. It's pushing it down.
 
 **The labels I already had.** Every issue carries a `host/*` label and often a milestone, none of it text, so nothing above reads any of it. The signal is real: two issues that link to each other share a host label 75% of the time, against 41% for any two drawn from the pool. Adding it to the ranking moved nothing, and the reason is the thing I hadn't checked - 73% of bodies name their own host in words, so counting words had already counted it. It also read the labels as they stand today, free hindsight over what an issue carried when it was filed.
 
