@@ -37,12 +37,12 @@ Any of this is worthless without an answer key.
 
 > Every time someone writes `#123` in an issue, they're asserting that two issues are related. A judgement someone already made, recorded and free.
 
-My forge had 617 of them sitting there already, spread across 489 issues. So the test writes itself: hide the reference, show the system only the new issue's text, and ask whether it finds the issue the author actually linked. Only against issues that existed at the time, so nothing borrows from the future.
+My forge already had hundreds of them. So the test writes itself: hide the reference, show the system only the new issue's text, and ask whether it finds the issue the author actually linked. Only against issues that existed at the time, so nothing borrows from the future.
 
 <button class="img-zoom" type="button" data-full="/images/local-models-answer-key.svg">
   <img src="/images/local-models-answer-key.svg" alt="Three steps. One, issue 968 cites issue 956, so someone has already said the two are related. Two, strip the reference, so the tool sees the text and never the link. Three, search only the issues that existed when 968 was filed, and count it a hit if 956 comes back in the first five." />
 </button>
-<p class="img-caption">#968 is a real one: it names #956 in its own body, so that pair is one of the 617.</p>
+<p class="img-caption">#968 is a real one: it names #956 in its own body, so that pair is one of them.</p>
 
 ## Then the models lost
 
@@ -167,9 +167,9 @@ Every model lost, and not narrowly. I'd written down the opposite prediction bef
 The reason is visible once you look at what my issues are made of. They're full of identifiers: `StateDirectory`, `checks/service-state.nix`, machine names. Exact matching on a rare string is precisely what counting words is best at, and what a model trained on ordinary prose is worst at. The model is better at language. My text is barely language.
 
 <button class="img-zoom" type="button" data-full="/images/local-models-vocabulary.svg">
-  <img src="/images/local-models-vocabulary.svg" alt="An issue from the forge with its words shaded by how many of the 489 issues contain them. The rarest are identifiers: checks/service-state.nix appears in 14, StateDirectory in 13, census in 5, packaged in 2 and rowless-unit in 1. The ordinary English words around them appear in hundreds." />
+  <img src="/images/local-models-vocabulary.svg" alt="An issue from the forge with its words shaded by how many of the forge's issues contained them when I measured. The rarest are identifiers: checks/service-state.nix appears in 14, StateDirectory in 13, census in 5, packaged in 2 and rowless-unit in 1. The ordinary English words around them appear in hundreds." />
 </button>
-<p class="img-caption">One issue, shaded by how many of the 489 contain each word. <code>checks/service-state.nix</code> is in 14 of them, <code>StateDirectory</code> in 13, <code>rowless-unit</code> in exactly one. Those carry the sentence, and they are the strings a model trained on English has never seen. Rarity is measured against this forge rather than against English, which is why "fewer" is blue too.</p>
+<p class="img-caption">One issue, shaded by how many of the forge's issues contained each word when I measured. <code>checks/service-state.nix</code> was in 14 of them, <code>StateDirectory</code> in 13, <code>rowless-unit</code> in exactly one. Those carry the sentence, and they are the strings a model trained on English has never seen. Rarity is measured against this forge rather than against English, which is why "fewer" is blue too.</p>
 
 ## The things that didn't work
 
@@ -193,7 +193,9 @@ Training helped and it didn't matter. Three points is five links out of the hund
 
 ## What did beat it
 
-**The links themselves.** Everything above reads text. The one thing that finally beat counting words reads something else: the links already between issues. Take the top three hits counting words finds, and lift whatever those issues already link to. Related issues cluster - a decision, its follow-ups, the fix that later undid it - and they cite each other, so one good hit pulls in siblings that share few words with the new issue. It's worth about four points over all the links, to 67.2%, and comparing the two methods link by link puts that clear of luck. It counts only links that existed when the new issue was filed, and it still has no model in it. A learned ranker over every score on this page, the neural ones included, did no better than this two-number rule on the links it had not trained on.
+**The links themselves.** Everything above reads text. The one thing that beat counting words reads something else: the links already between issues. Take the top three hits counting words finds, and lift whatever those issues already link to. Related issues cluster - a decision, its follow-ups, the fix that later undid it - and they cite each other, so one good hit pulls in siblings that share few words with the new issue. It counts only links that existed when the new issue was filed, and it still has no model in it.
+
+How sure I am took a second, stricter look. The two numbers it runs on were picked on links written before 22 September, and on the links written after that date it added about ten points. Those links didn't exist when the numbers were chosen, which makes it the cleanest test on this page. Re-picking the numbers from scratch on smaller, earlier slices was shakier: with too little history it chooses badly, and averaged over time the gain shrank into the noise. So it helps, and it needs history to tune on. A learned ranker over every score here gained about as much and was steadier when re-tuned, and taking the neural scores out of it changed nothing. Pull requests, the other structure a forge keeps, added nothing either: they mostly repeat links the issues already carry.
 
 ## What I'd tell anyone trying this
 
@@ -205,14 +207,14 @@ Training helped and it didn't matter. Three points is five links out of the hund
 
 **Write the bar down before you run the test.** Mine was fixed in advance, and it's the only reason the first failure was a clear no rather than a negotiation with myself about whether 2.4% was encouraging.
 
-**Build it so you can run it again.** Every number here is one run against a frozen copy of the forge, on the date at the top of this page. The corpus has a checksum and the tool carries its own benchmark, so re-measuring takes seconds. None of these numbers are permanent, and I'd expect the gap to grow: counting words gets better statistics from more documents, while an off-the-shelf model learns nothing from mine. Two days after the snapshot the forge was 40% bigger, and on the links written since 2026-09-22 counting words had gone from 54.2% to 58.1% while the five-most-recent baseline fell - so far the direction I expected. I haven't re-run the models on it.
+**Build it so you can run it again.** Every number here is one run against a frozen copy of the forge, on the date at the top of this page. The corpus has a checksum and the tool carries its own benchmark, so re-measuring takes seconds. None of these numbers are permanent, and I'd expect the gap to grow: counting words gets better statistics from more documents, while an off-the-shelf model learns nothing from mine. Two days after the snapshot the forge was 40% bigger, and on the links written since 2026-09-22 counting words had risen from 54.2% to 58.1%. I can't count that as proof: by then the word-counting tool existed, links written after it read about six points higher, and some of them were probably found with it. I haven't re-run the models on it.
 
 ## What this doesn't show
 
-The answer key only credits links someone bothered to type. One issue about journal entries failing to arrive carried no reference at all, so every suggestion for it scored as a miss - including the obviously correct earlier issue about the same subsystem. The numbers are a floor on usefulness, not a measure of precision.
+The answer key only credits links someone bothered to type. One issue about journal entries failing to arrive carried no reference at all, so every suggestion for it scored as a miss - including the obviously correct earlier issue about the same subsystem. The numbers are a floor on usefulness, not a measure of precision. Most of those links were also typed by agents that search by words, which could tilt the key toward counting words. The models lost among the links I wrote myself too, though, and did no better on the pairs sharing the fewest words, so I don't think the key decided it.
 
 The corpus is small, and the largest models were never tried, so nothing here says a big one would fail. Nor were the code-trained retrieval models, now the ones I'd most want to see: the two I could run are code-trained *encoders* rather than retrieval models, and one scored barely above random. Their vectors were never built to be compared by distance, so that number says nothing about code training.
 
-I expected the result to belong to this kind of text, and wrote here that the ranking would flip on prose. So I ran the same test on my notes vault - 3,495 wikilinks between about 7,600 notes - and it didn't. Counting words beat all four models there too, in the same order. The one difference is that blending in the best model helps by about a point, which does not survive on the held-out half. My notes turn out to be short and full of names, which is closer to the forge than I'd assumed.
+I expected the result to belong to this kind of text, and wrote here that the ranking would flip on prose. So I ran the same test on my notes vault, grading against its wikilinks, and it didn't. Counting words beat all four models there too, in the same order. The one difference is that blending in the best model helps by about a point, which does not survive on the held-out half. My notes turn out to be short and full of names, which is closer to the forge than I'd assumed.
 
 The last limit is the tool's own doing. Something that finds a genuinely related issue about two thirds of the time **cannot be read as a clearance.** Checking it, seeing nothing, and concluding the question is new converts *I didn't look* into *I looked and it was clear*, which is worse than never having looked. So it says so on every run.
