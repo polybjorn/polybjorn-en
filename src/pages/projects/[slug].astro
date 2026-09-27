@@ -323,6 +323,53 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
         white-space: normal;
       }
     }
+    /* The vocabulary figure, in markup for the reasons .mchart gives above. It
+       was a 720px SVG with its line breaks baked in, which a 327px phone scaled
+       to a few pixels of text; here the words are real text that reflows, can be
+       selected and searched, and is read aloud in order, and re-measuring a
+       count is an edit rather than regenerating a file.
+
+       Deliberately not a <pre>: the body is a wrapping paragraph and pre would
+       send it sideways on a phone instead. Monospace without pre keeps the one
+       thing the typeface is here to say, which is that the exact strings are
+       the point. */
+    article :global(.vocab) { margin: 1.5rem 0; }
+    article :global(.vocab-issue) {
+      background: #15181d;
+      border-radius: 6px;
+      padding: 1rem 1.1rem 0.85rem;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.85rem;
+      line-height: 1.75;
+    }
+    article :global(.vocab-title) { font-size: 0.92rem; margin-bottom: 0.7rem; }
+    /* The four inks the SVG had, unchanged, and still counted across this forge
+       rather than across English. The rarest are the identifiers, which is the
+       whole claim the figure is making. */
+    article :global(.v-rare) { color: #6aaeee; font-weight: 600; }
+    article :global(.v-mid) { color: #b5bac3; }
+    article :global(.v-common) { color: #6b7681; }
+    article :global(.v-link) { color: #4a5058; }
+    /* Swatches rather than the words themselves in their own colour: the
+       hidden-link ink is nearly the background by design, which is fine on a
+       reference inside the text and useless on the label explaining it. */
+    article :global(.vocab-key) {
+      display: flex; flex-wrap: wrap; gap: 0.3rem 1rem;
+      margin-top: 0.9rem; padding-top: 0.75rem;
+      border-top: 1px solid #23272e;
+      font-family: 'Piazzolla', serif; font-size: 0.8rem; color: #8a8f99;
+    }
+    article :global(.vocab-key span) { display: inline-flex; align-items: center; gap: 0.4rem; }
+    article :global(.vocab-sw) { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+    article :global(.sw-rare) { background: #6aaeee; }
+    article :global(.sw-mid) { background: #b5bac3; }
+    article :global(.sw-common) { background: #6b7681; }
+    article :global(.sw-link) { background: #4a5058; }
+    /* Below the figure and muted, the way the chart's caption sits, rather than
+       welded to the card the way .img-caption is to an image. */
+    article :global(.vocab-cap) {
+      color: #8a8f99; font-size: 0.85rem; margin-top: 0.7rem; line-height: 1.5;
+    }
     article :global(hr) { border: none; border-top: 1px solid #2a2f37; margin: 2rem 0; }
     article :global(.article-gallery) {
       display: grid;
