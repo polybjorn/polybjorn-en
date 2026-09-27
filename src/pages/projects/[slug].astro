@@ -287,21 +287,26 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
       display: grid; grid-template-columns: subgrid;
       align-items: center; margin-bottom: 0.4rem;
     }
-    /* No underline: four of them stacked in a column is noisier than the data.
-       The links still have to be findable, so they carry the brighter body ink
-       against the muted label grey, and the underline comes back on hover and
-       keyboard focus. Accent blue is avoided deliberately - it sits right next
-       to a coloured bar and the two compete, and the bars now carry that
-       exact blue. */
+    /* The accent goes on the link, as it does everywhere else in the article:
+       the prose two paragraphs up carries blue underlined links, so a reader
+       arrives at the figure already taught that blue is clickable. This column
+       used to invert that - blue on the terms that only explain themselves,
+       body ink on the real links.
+       No underline, still: four of them stacked in a column is noisier than
+       the data, and it comes back on hover and keyboard focus. The old note
+       here avoided blue because it would sit beside a bar of the same colour,
+       which the flip fixes rather than causes: every link in this chart names
+       a neural model and every one of those rows carries an amber bar, and it
+       is the tip terms that sit beside the blue ones. */
     article :global(.mchart-label a) {
-      color: #dde1e7;
+      color: #6AAEEE;
       text-decoration: none;
     }
     article :global(.mchart-label a:hover),
     article :global(.mchart-label a:focus-visible) { text-decoration: underline; }
     /* Same reasoning inside tables, where a link would otherwise underline a
        whole row of cells. */
-    article :global(table a) { color: #dde1e7; text-decoration: none; }
+    article :global(table a) { color: #6AAEEE; text-decoration: none; }
     article :global(table a:hover),
     article :global(table a:focus-visible) { text-decoration: underline; }
     article :global(.mchart-label) {
@@ -324,7 +329,14 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
        means the container's edge, which gives it exactly the bars' width, below
        the hovered row and clear of the labels. */
     article :global(.mchart-row) { position: relative; }
-    article :global(.mchart-tip) { cursor: help; outline: none; color: #6AAEEE; }
+    /* A term that explains itself is not a link and should not dress as one.
+       Body ink against the muted label grey says there is something here, and
+       the dotted underline is what says it opens rather than navigates - the
+       shape an abbreviation has carried since before the web. */
+    article :global(.mchart-tip) {
+      cursor: help; outline: none; color: #dde1e7;
+      text-decoration: underline dotted #4a5058; text-underline-offset: 3px;
+    }
     article :global(.mchart-tip:focus-visible) { outline: 2px solid #6AAEEE; outline-offset: 2px; border-radius: 2px; }
     article :global(.mchart-tipbox) {
       position: absolute; grid-column: 2 / 3; grid-row: 1 / 2;
