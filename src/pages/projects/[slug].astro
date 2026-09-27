@@ -84,7 +84,9 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
     h1 { font-size: 2.2rem; margin-bottom: 0.5rem; font-weight: 700; line-height: 1.2; text-align: center; }
     .meta { color: #8a8f99; font-size: 0.95rem; margin-bottom: 2.5rem; text-align: center; }
     /* Separated by a middot rather than a second line, so the header keeps
-       its shape whether or not a piece has been revised.
+       its shape whether or not a piece has been revised. A work in progress
+       gets neither: it shows its latest date alone, because the day it first
+       went up says little about a piece that is still moving.
 
        The spacing is a margin, not spaces inside content: the build minifies
        `content: " \00b7 "` down to `content:" \00b7"`, which leaves the dot
@@ -423,13 +425,15 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
     )}
     <h1>{project.data.title}</h1>
     <div class="meta">
-      {project.data.updated ? (
+      {project.data.wip ? (
+        <span class="meta-live" tabindex={0}>{fmt(project.data.updated ?? project.data.date)}<span class="meta-wip" role="tooltip">work in progress</span></span>
+      ) : project.data.updated ? (
         <>
           {fmt(project.data.date)}
-          <span class="meta-upd"><span class:list={{ 'meta-live': project.data.wip }} tabindex={project.data.wip ? 0 : undefined}>updated {fmt(project.data.updated)}{project.data.wip && <span class="meta-wip" role="tooltip">work in progress</span>}</span></span>
+          <span class="meta-upd">updated {fmt(project.data.updated)}</span>
         </>
       ) : (
-        <span class:list={{ 'meta-live': project.data.wip }} tabindex={project.data.wip ? 0 : undefined}>{fmt(project.data.date)}{project.data.wip && <span class="meta-wip" role="tooltip">work in progress</span>}</span>
+        fmt(project.data.date)
       )}
     </div>
     <article>

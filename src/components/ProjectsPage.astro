@@ -19,6 +19,12 @@ const projects = (await getCollection('projects', ({ data }) =>
   .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
 
 const fmt = (d: Date) => d.toISOString().slice(0, 10);
+// A work in progress is dated by its latest revision, not by the day it first
+// went up: the publication date is the less useful of the two while a piece is
+// still moving, so it is dropped rather than shown alongside. A finished piece
+// keeps its publication date, which is what the ordering is by.
+const shown = (data: { date: Date; updated?: Date; wip: boolean }) =>
+  fmt(data.wip ? (data.updated ?? data.date) : data.date);
 const cardHref = (slug: string) => lang === 'no' ? `https://polybjorn.com/projects/${slug}` : `/projects/${slug}`;
 // The path on the other site, not on this one: polybjorn.no serves the
 // Norwegian build at its root, so /no/prosjekter is a 404 over there.
@@ -153,7 +159,7 @@ const altLangPath = lang === 'no' ? '/projects' : '/prosjekter';
             <a class="card" href={cardHref(a.id)}>
               <div class="text">
                 <h2>{a.data.title}</h2>
-                <div class="meta">{fmt(a.data.date)}{a.data.wip && <span class="meta-wip">work in progress</span>}</div>
+                <div class="meta">{shown(a.data)}{a.data.wip && <span class="meta-wip">work in progress</span>}</div>
                 <div class="desc">{a.data.description}</div>
               </div>
               {(a.data.thumb ?? a.data.cover) && (

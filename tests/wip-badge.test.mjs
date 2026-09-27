@@ -24,6 +24,7 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const SRC = join(ROOT, 'src', 'content', 'projects');
 
 const flag = (body, name) => new RegExp(`^${name}:\\s*true\\s*$`, 'm').test(body);
+const field = (body, name) => body.match(new RegExp(`^${name}:\\s*(\\S+)`, 'm'))?.[1];
 
 /**
  * Every article, with its flags read from source rather than hardcoded.
@@ -39,6 +40,8 @@ const articles = readdirSync(SRC)
     const body = readFileSync(join(SRC, f), 'utf8');
     return {
       slug: f.replace(/\.md$/, ''),
+      date: field(body, 'date'),
+      updated: field(body, 'updated'),
       wip: flag(body, 'wip'),
       unlisted: flag(body, 'unlisted'),
       draft: flag(body, 'draft'),
@@ -94,6 +97,51 @@ test('the listing card carries the same status, when the piece is listed', () =>
     const badge = card.querySelector('.meta .meta-wip');
     assert.ok(badge, `${slug}: on the listing with no status on its card`);
     assert.equal(badge.textContent.trim(), 'work in progress');
+  }
+});
+
+/**
+ * The date a work in progress is filed under.
+ *
+ * A piece still moving is dated by its latest revision alone: the publication
+ * date is dropped rather than shown beside it, because the day it first went up
+ * says little while the content is changing. A finished piece that was revised
+ * keeps both, separated by the middot below. Asserted in both places a date is
+ * rendered, for the same reason the badge is.
+ */
+test('a work in progress is dated by its latest revision alone', () => {
+  const revised = articles.filter(a => a.wip && a.updated);
+  assert.ok(revised.length, 'no work in progress has been updated, so this proves nothing');
+
+  for (const { slug, date, updated } of revised) {
+    const { window } = loadPage(`projects/${slug}/index.html`);
+    const meta = window.document.querySelector('.meta').textContent;
+    assert.ok(meta.includes(updated), `${slug}: header does not show ${updated}`);
+    assert.ok(!meta.includes(date), `${slug}: header still shows the publication date ${date}`);
+    assert.doesNotMatch(meta, /updated/, `${slug}: header still labels the date "updated"`);
+
+    const { window: listing } = loadPage('projects/index.html');
+    const card = [...listing.document.querySelectorAll('li .card')]
+      .find(c => c.getAttribute('href').endsWith(`/projects/${slug}`));
+    if (!card) {
+      assert.ok(unlisted.has(slug), `${slug}: missing from the listing without being unlisted`);
+      continue;
+    }
+    const cardMeta = card.querySelector('.meta').textContent;
+    assert.ok(cardMeta.includes(updated), `${slug}: card does not show ${updated}`);
+    assert.ok(!cardMeta.includes(date), `${slug}: card still shows the publication date ${date}`);
+  }
+});
+
+test('a finished piece that was revised keeps both dates', () => {
+  const revised = articles.filter(a => !a.wip && a.updated);
+  if (!revised.length) return; // none right now; the assertion is here for when there is
+
+  for (const { slug, date, updated } of revised) {
+    const { window } = loadPage(`projects/${slug}/index.html`);
+    const meta = window.document.querySelector('.meta').textContent;
+    assert.ok(meta.includes(date), `${slug}: header dropped the publication date`);
+    assert.ok(meta.includes(`updated ${updated}`), `${slug}: header dropped the revision date`);
   }
 });
 
