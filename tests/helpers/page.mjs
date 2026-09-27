@@ -64,12 +64,12 @@ export function loadPage(page, {
     },
   });
 
-  if (runModules) runInlineModules(dom.window);
+  if (runModules) runPageModules(dom.window);
   return dom;
 }
 
 /**
- * Runs the page's inline module scripts, which jsdom will not.
+ * Runs the page's own module scripts, which jsdom will not.
  *
  * Astro compiles a component's `<script>` into an inline
  * `<script type="module">`, and jsdom implements no ES modules at all - it
@@ -90,14 +90,26 @@ export function loadPage(page, {
  * scopes: minified, two of them on the same page both declare `var e`, and in
  * a shared global the second would reassign the first's captured variable -
  * a bug the browser does not have.
+ *
+ * A page's script is sometimes inline and sometimes a file: Astro inlines a
+ * hoisted script while it stays under about 4KB and emits it to /_astro
+ * once it grows past that. This used to read the inline ones only, so on
+ * 2026-09-27 an edit that pushed the article's script to 4,625 bytes moved it
+ * out of the page and three back-link tests failed with nothing wrong in the
+ * code they cover. Both spellings are the page's own script, so both run.
  */
-function runInlineModules(window) {
-  const scripts = [...window.document.querySelectorAll('script[type="module"]:not([src])')];
+function runPageModules(window) {
+  const scripts = [...window.document.querySelectorAll('script[type="module"]')]
+    .filter(script => {
+      const src = script.getAttribute('src');
+      return !src || src.startsWith('/');   // local build output, not a CDN
+    });
   if (!scripts.length) {
-    throw new Error('no inline module scripts on this page, so runModules proves nothing');
+    throw new Error('no module scripts on this page, so runModules proves nothing');
   }
   for (const script of scripts) {
-    const code = script.textContent;
+    const src = script.getAttribute('src');
+    const code = src ? readFileSync(join(DIST, src), 'utf8') : script.textContent;
     if (/\b(?:import|export)\b/.test(code)) {
       throw new Error('an inline module imports or exports, so it cannot run as a classic script');
     }

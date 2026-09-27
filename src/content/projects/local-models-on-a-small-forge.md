@@ -41,15 +41,22 @@ The models I tried are all small enough to run on a laptop. Most turn each issue
       <span><i class="mchart-sw mchart-emb"></i>neural model</span>
       <span><i class="mchart-sw mchart-ctl"></i>baseline to beat</span>
     </div>
-    <div class="mchart-modes" hidden>
-      <button type="button" class="mchart-mode" data-mode="recall" aria-pressed="true">quality</button>
-      <button type="button" class="mchart-mode" data-mode="speed" aria-pressed="false">speed</button>
-    </div>
-  </div>
-  <div class="mchart-row mchart-ticks" hidden>
-    <div></div>
-    <div class="mchart-tickbar"><span style="left:21.9%">1s</span><span style="left:61.0%">1min</span><span style="left:100%">1h</span></div>
-    <div></div>
+    <details class="mchart-modes" hidden>
+      <summary class="mchart-mode">quality</summary>
+      <div class="mchart-menu">
+        <p id="mchart-shows">bars show</p>
+        <div role="group" aria-labelledby="mchart-shows">
+          <button type="button" data-mode="recall" aria-pressed="true">quality</button>
+          <button type="button" data-mode="speed" aria-pressed="false">speed</button>
+        </div>
+        <p id="mchart-sorts">sorted by</p>
+        <div role="group" aria-labelledby="mchart-sorts">
+          <button type="button" data-sort="recall" aria-pressed="true">quality</button>
+          <button type="button" data-sort="speed" aria-pressed="false">speed</button>
+          <button type="button" data-sort="name" aria-pressed="false">name</button>
+        </div>
+      </div>
+    </details>
   </div>
   <div class="mchart-group">Counting words, then a second pass</div>
   <div class="mchart-row" data-recall="67.2" data-secs="0.4">
