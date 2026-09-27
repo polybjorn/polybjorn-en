@@ -322,7 +322,11 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
     article :global(.mchart-lex) { background: #6aaeee; }
     article :global(.mchart-emb) { background: #e8b775; }
     article :global(.mchart-ctl) { background: #8a8f99; }
-    @media (max-width: 480px) {
+    /* 560, not 480: the row carries two numbers now, and between those two
+       widths the side column wins the fight for space and leaves the bars
+       about 130px to say everything in. Stacking the label sooner gives them
+       the full column back. */
+    @media (max-width: 560px) {
       article :global(.mchart) { grid-template-columns: 1fr max-content; column-gap: 0.5rem; }
       article :global(.mchart-row) { row-gap: 0.35rem; }
       article :global(.mchart-tipbox) { grid-column: 1 / 2; grid-row: 2 / 3; }
