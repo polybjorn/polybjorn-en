@@ -788,7 +788,31 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
       // out instead, changes while nobody is looking, and fades back - so the
       // reader sees two clean states rather than the journey between them.
       // The switch itself keeps its slide; it is what was just pressed.
+      // The controls leave the speed view, so the figure loses two rows and a
+      // heading, and everything under it - caption, prose, the next heading -
+      // used to jump the moment the table was rebuilt. The figure carries that
+      // change instead: its height is measured either side of the rebuild and
+      // tweened over the fade back in, so the page below travels rather than
+      // snapping. Clipped while it runs, because the taller state overflows a
+      // height still on its way up, and the group that grows is the last one.
       let crossing: Animation[] = [];
+      let resizing: Animation | null = null;
+      const resize = (rebuild: () => void) => {
+        const before = mchart.getBoundingClientRect().height;
+        rebuild();
+        const after = mchart.getBoundingClientRect().height;
+        if (Math.abs(after - before) < 1) return;
+        resizing?.cancel();
+        mchart.style.overflow = 'clip';
+        resizing = mchart.animate(
+          [{ height: before + 'px' }, { height: after + 'px' }],
+          { duration: 240, easing: 'ease-out' },
+        );
+        const done = resizing;
+        done.finished.then(() => {
+          if (resizing === done) mchart.style.removeProperty('overflow');
+        }).catch(() => { /* cancelled by the next press; it owns the state */ });
+      };
       const cross = (rebuild: () => void, settle: boolean, table: HTMLElement[]) => {
         const still = settle
           || window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -805,7 +829,7 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
           { duration: 170, easing: 'ease-in', fill: 'forwards' },
         ));
         Promise.all(crossing.map(one => one.finished)).then(() => {
-          rebuild();
+          resize(rebuild);
           for (const running of crossing) running.cancel();
           crossing = table.map(part => part.animate(
             [{ opacity: 0 }, { opacity: 1 }],
