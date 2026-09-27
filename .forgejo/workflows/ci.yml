@@ -12,6 +12,11 @@
 # repo paid for the other half of that gate with a 102-commit history rewrite
 # on 2026-09-13, when the push range was the merge commit alone; the action
 # carries the fixed range and a selftest that runs ahead of the check.
+#
+# static: offline semgrep over the tree, from ci-actions #29, which rolled the
+# gate out to four repos and left the three Astro sites off the list (#122).
+# Not a required context - that is a branch-protection change and admin-only -
+# so it is advisory until Bjorn makes it required.
 name: CI
 
 on:
@@ -108,6 +113,35 @@ jobs:
       # has already done, so the two halves are run directly instead.
       - run: npm run test:worker
       - run: npm run test:pages
+
+  static:
+    # The `semgrep` label and nowhere else: semgrep publishes no standalone
+    # binary, so nixfleet #1106 put the official image behind a label of its own,
+    # and semgrep-scan refuses to run anywhere it cannot find /semgrep.
+    runs-on: semgrep
+    timeout-minutes: 10
+    steps:
+      # Alpine, so no node - the composite checkout rather than actions/checkout,
+      # the same position the python and nix labels are already in.
+      - uses: https://git-ci.pebblecove.xyz:8447/bjorn/ci-actions/checkout@v1
+        with:
+          token: ${{ github.token }}
+      - uses: https://git-ci.pebblecove.xyz:8447/bjorn/ci-actions/semgrep-scan@v1
+        with:
+          # These two rather than `default` (1073 rules): 50 tracked files are
+          # .js, .mjs or .ts, and `default`'s python half would scan none of
+          # them. semgrep does not parse .astro, so the 25 .astro files are out
+          # of scope and the script blocks inside them go unscanned - the real
+          # gap in this gate's coverage.
+          rulesets: javascript typescript
+          # Every finding, not only what a change introduces, which is where
+          # bjorn/media-tools landed after #33 and #34. `new` needs a baseline
+          # commit, history on the checkout and a special case for
+          # workflow_dispatch, and buys nothing on a tree with no standing
+          # findings. If this reds on arrival then the findings are real: they
+          # get fixed, or a line gets a trailing `# nosemgrep: <rule-id>` with
+          # the reason above it, rather than this moving back to `new`.
+          fail-on: any
 
   attribution:
     runs-on: docker
