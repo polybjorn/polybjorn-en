@@ -196,7 +196,7 @@ The likeliest reason is what my issues are made of. They're full of exact names,
       <span><i class="vocab-sw sw-common"></i>more than 150</span>
     </div>
   </div>
-  <figcaption class="vocab-cap">Rarity is counted across this forge&#39;s 489 issues, not across English, so a plain word like &quot;fewer&quot; comes out rare.</figcaption>
+  <figcaption class="vocab-cap">Rarity is counted across the issues on this forge, so a plain word like &quot;fewer&quot; comes out rare.</figcaption>
 </figure>
 
 Where a method had settings to tune, I tuned them on older links and checked them on newer ones, so the results aren't just fitted to the answers. The answer key only counts links someone bothered to write, so a useful suggestion can still score as a miss, and the real numbers are probably a little higher. Most of those links were written by the AI coding agents I run, which search by keyword and might favour counting words, but the models lost on the links I wrote myself too.
