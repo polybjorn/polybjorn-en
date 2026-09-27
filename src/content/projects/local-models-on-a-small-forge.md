@@ -211,6 +211,6 @@ To check the result wasn't peculiar to this forge, I ran the same comparison on 
 
 Before any of this I aimed a model at my labels, predicting who should act on an issue and escalating when unsure. Four issues in five are labelled within a minute of being filed, so there was no decision left for a model to take. Five minutes of counting would have told me that before I built anything.
 
-So for this job the models came close but didn't earn their place, and they cost far more. Counting words runs the whole test in under a minute with nothing to download. The small models needed a few minutes to process the forge, and the largest took about seven and a half hours on my server's processor. Here the cheapest method is also the best one.
+So for this job the models came close but didn't earn their place, and they cost far more. Counting words runs the whole test in under a minute with nothing to download. The small models needed a few minutes to process the forge, and the largest took about seven and a half hours on my server's processor - though most of those hours were the half-precision weights it ships, which my processor has to emulate, and in single precision the same pass is closer to half an hour. Here the cheapest method is also the best one.
 
 The models aren't bad at language; my issues just aren't much language. The models I'd most like to try next are ones trained on code, which have seen strings like these before.
