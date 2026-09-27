@@ -75,8 +75,14 @@ export function loadPage(page, {
  * `<script type="module">`, and jsdom implements no ES modules at all - it
  * parses those and never executes them. A classic inline script still runs, so
  * the enquiry tests, whose 50KB handler is `is:inline`, have always exercised
- * real behaviour; what nothing reached is the component scripts - the article
- * page's lightbox, for one, is never built under jsdom.
+ * real behaviour.
+ *
+ * For the component scripts, tests/article-corner-link.test.mjs got there first:
+ * it finds the one script it cares about and evals it by hand. This is that
+ * trick made shared, with the two guards a hand-rolled copy tends not to carry -
+ * separate scopes, and a refusal on import or export. That test keeps its own
+ * version deliberately: it asserts the corner is still driven by an inline
+ * script, which running every module would not tell it.
  *
  * Eval'ing them as classic scripts is only sound while they carry no import or
  * export, so one that does throws here rather than passing quietly with nothing
