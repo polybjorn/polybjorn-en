@@ -389,6 +389,10 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
       aspect-ratio: 16 / 9;
       transition: border-color 0.2s;
     }
+    article :global(.gallery-thumb:hover img),
+    article :global(.gallery-thumb:focus-visible img) {
+      transform: scale(1.04);
+    }
     article :global(.gallery-thumb:hover),
     article :global(.gallery-thumb:focus-visible) {
       border-color: #6AAEEE;
@@ -401,6 +405,7 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
       object-fit: cover;
       margin: 0;
       border-radius: 0;
+      transition: transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1);
     }
     @media (max-width: 480px) {
       article :global(.article-gallery) {
@@ -411,13 +416,26 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
       position: fixed;
       inset: 0;
       background: rgba(15, 17, 21, 0.92);
-      display: none;
+      display: flex;
       align-items: center;
       justify-content: center;
       z-index: 200;
       padding: 2rem;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.22s ease, visibility 0s linear 0.22s;
     }
-    :global(.gallery-lightbox.open) { display: flex; }
+    :global(.gallery-lightbox.open) {
+      opacity: 1;
+      visibility: visible;
+      transition-delay: 0s;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      article :global(.gallery-thumb img),
+      :global(.gallery-lightbox) { transition: none; }
+      article :global(.gallery-thumb:hover img),
+      article :global(.gallery-thumb:focus-visible img) { transform: none; }
+    }
     :global(.gallery-lightbox img) {
       max-width: 90vw;
       max-height: 90vh;
@@ -519,6 +537,12 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
         alt: t.querySelector('img')?.alt ?? '',
       }));
       let idx = 0;
+      // Bumped by every navigation and by close, so an image that finishes
+      // loading after the viewer moved on does not overwrite the newer one.
+      let seq = 0;
+      let lastWheel = 0;
+      const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
+      const EASE = 'cubic-bezier(0.2, 0.8, 0.2, 1)';
 
       const lightbox = document.createElement('div');
       lightbox.className = 'gallery-lightbox';
@@ -527,15 +551,61 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
       const lbImg = lightbox.querySelector('img')!;
       lbImg.style.cursor = 'pointer';
 
-      const show = (i: number) => {
-        idx = (i + items.length) % items.length;
+      const preload = (src: string) => {
+        const im = new Image();
+        im.src = src;
+        return im.decode().catch(() => {});
+      };
+      const setImg = () => {
         lbImg.src = items[idx].src;
         lbImg.alt = items[idx].alt;
       };
-      const prev = () => show(idx - 1);
-      const next = () => show(idx + 1);
+      // dir: -1/1 slides between images; from: the clicked thumbnail, which
+      // the opening image grows out of.
+      const show = async (i: number, dir = 0, from?: HTMLElement) => {
+        idx = (i + items.length) % items.length;
+        const mine = ++seq;
+        const animate = !reduceMotion.matches;
+        if (from) lbImg.style.visibility = 'hidden';
+        await preload(items[idx].src);
+        if (mine !== seq) return;
+        if (dir && animate) {
+          await lbImg.animate(
+            [{ opacity: 1, transform: 'none' }, { opacity: 0, transform: `translateX(${-dir * 24}px)` }],
+            { duration: 110, easing: 'ease-in' },
+          ).finished.catch(() => {});
+          if (mine !== seq) return;
+          setImg();
+          lbImg.animate(
+            [{ opacity: 0, transform: `translateX(${dir * 24}px)` }, { opacity: 1, transform: 'none' }],
+            { duration: 200, easing: EASE },
+          );
+          return;
+        }
+        setImg();
+        lbImg.style.visibility = '';
+        if (from && animate) {
+          const f = from.getBoundingClientRect();
+          const t = lbImg.getBoundingClientRect();
+          if (!t.width) return;
+          const dx = f.left + f.width / 2 - (t.left + t.width / 2);
+          const dy = f.top + f.height / 2 - (t.top + t.height / 2);
+          lbImg.animate(
+            [{ opacity: 0.3, transform: `translate(${dx}px, ${dy}px) scale(${f.width / t.width})` }, { opacity: 1, transform: 'none' }],
+            { duration: 320, easing: EASE },
+          );
+        }
+      };
+      const prev = () => show(idx - 1, -1);
+      const next = () => show(idx + 1, 1);
       const isOpen = () => lightbox.classList.contains('open');
-      const closeLb = () => lightbox.classList.remove('open');
+      const closeLb = () => {
+        seq++;
+        lightbox.classList.remove('open');
+        if (!reduceMotion.matches) {
+          lbImg.animate([{ transform: 'none' }, { transform: 'scale(0.96)' }], { duration: 220, easing: 'ease-in' });
+        }
+      };
 
       lightbox.querySelector('.close')!.addEventListener('click', closeLb);
       lightbox.addEventListener('click', e => { if (e.target === lightbox) closeLb(); });
@@ -548,6 +618,11 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
       lightbox.addEventListener('wheel', e => {
         if (!isOpen()) return;
         e.preventDefault();
+        // A trackpad swipe fires a stream of wheel events; only the first one
+        // after a pause turns the page, so one gesture moves one image.
+        const quiet = e.timeStamp - lastWheel > 150;
+        lastWheel = e.timeStamp;
+        if (!quiet) return;
         if (e.deltaY > 0) next();
         else prev();
       }, { passive: false });
@@ -564,8 +639,8 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
 
       thumbs.forEach((btn, i) => {
         btn.addEventListener('click', () => {
-          show(i);
           lightbox.classList.add('open');
+          show(i, 0, btn as HTMLElement);
         });
       });
     }
