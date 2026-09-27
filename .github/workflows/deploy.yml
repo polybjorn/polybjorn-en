@@ -48,13 +48,13 @@ jobs:
       - uses: actions/upload-pages-artifact@v5
         with:
           path: dist/
-      - uses: peaceiris/actions-gh-pages@v4
+      # dist-no is published by deploy-no, which waits for polybjorn.com to be
+      # live, so it has to survive out of this job.
+      - uses: actions/upload-artifact@v7
         with:
-          deploy_key: ${{ secrets.NO_DEPLOY_KEY }}
-          external_repository: polybjorn/polybjorn-no
-          publish_branch: main
-          publish_dir: ./dist-no
-          commit_message: ${{ github.event.head_commit.message }}
+          name: dist-no
+          path: dist-no/
+          retention-days: 1
 
   deploy:
     needs: build
@@ -67,8 +67,34 @@ jobs:
       - id: deployment
         uses: actions/deploy-pages@v5
 
-  indexnow:
+  # polybjorn.no has no article pages of its own: its project cards link to
+  # polybjorn.com/projects/<slug>. Pushing dist-no from the build job put those
+  # cards live before the English pages they point at, because polybjorn.com
+  # only publishes once the deploy job above has run - so a new article 404'd
+  # from the Norwegian listing, and the edge cached that 404 for ten minutes.
+  # Waiting on deploy means the target exists before the link to it does. The
+  # cost is that a failed English deploy holds the Norwegian site back too,
+  # which is the right way round for a site that links into the other one.
+  deploy-no:
     needs: deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@v7
+        with:
+          name: dist-no
+          path: dist-no
+      - uses: peaceiris/actions-gh-pages@v4
+        with:
+          deploy_key: ${{ secrets.NO_DEPLOY_KEY }}
+          external_repository: polybjorn/polybjorn-no
+          publish_branch: main
+          publish_dir: ./dist-no
+          commit_message: ${{ github.event.head_commit.message }}
+
+  indexnow:
+    # Both sitemaps are read below, so both sites have to be live first.
+    needs: [deploy, deploy-no]
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
