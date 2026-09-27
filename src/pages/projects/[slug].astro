@@ -302,8 +302,17 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
     }
     article :global(.mchart-track) { background: #23272e; border-radius: 3px; height: 1.15rem; }
     article :global(.mchart-bar) { height: 100%; border-radius: 3px; min-width: 2px; }
+    /* Two numbers share the side column: what the bar measures, and what the
+       method costs to run. The percentage holds a fixed width so the times
+       line up down the chart whatever the recall reads, and the time is muted
+       because the bars are the comparison and this is the price beside it. */
     article :global(.mchart-val) {
       font-size: 0.85rem; font-variant-numeric: tabular-nums; color: #dde1e7;
+      display: flex; align-items: baseline; gap: 0.7rem;
+    }
+    article :global(.mchart-pct) { min-width: 3.1rem; }
+    article :global(.mchart-cost) {
+      color: #8a8f99; min-width: 3.4rem; text-align: right;
     }
     /* The site's own three: accent blue for the method that won, the warm
        accent for every neural arm, and the muted grey the page already uses
