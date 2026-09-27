@@ -246,11 +246,13 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
       display: grid; grid-template-columns: subgrid; align-items: center;
       gap: 0.35rem 0.6rem; margin-bottom: 0.9rem;
     }
-    /* The switch takes the line above the key rather than sharing it: ending
-       it on the numbers' right edge pulls it left across the bar column, and
-       the key needs that room to stay on one line. */
+    /* Both on one line. The switch ends on the numbers' right edge, which
+       pulls it left across the bar column; the key runs from the figure's left
+       edge and needs 266px of the 418 that leaves, so the two clear each other
+       with room to spare. An earlier version of this wrapped, and the cause
+       was the key being confined to the 300px bar column - not its type. */
     article :global(.mchart-modes) { grid-row: 1; }
-    article :global(.mchart-head .mchart-key) { grid-row: 2; }
+    article :global(.mchart-head .mchart-key) { grid-row: 1; }
     /* The head sits on the chart's own columns: the key runs from the figure's
        left edge, the control starts where the numbers do. The key wants about
        510px and the bar column is 300, so starting it at the bars forces it
@@ -273,8 +275,8 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
       grid-column: 1 / -1; justify-content: center;
     }
     article :global(.mchart-key) {
-      display: flex; flex-wrap: wrap; gap: 0.35rem 0.85rem;
-      color: #b5bac3; font-size: 0.8rem;
+      display: flex; flex-wrap: wrap; gap: 0.35rem 1rem;
+      color: #b5bac3; font-size: 0.85rem;
       /* Centred when it is alone; beside the buttons it sits left, which is
          what the head's space-between gives it. */
       justify-content: center;
@@ -430,6 +432,11 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
       article :global(.mchart-head:has(.mchart-modes[hidden]) .mchart-key),
       article :global(.mchart-modes) { grid-column: 1 / -1; justify-self: center; }
       article :global(.mchart-modes) { transform: none; margin-right: 0; }
+      /* Both were pinned to row 1 for the wide layout, where they sit side by
+         side. Stacked, that same pin puts them in one cell on top of each
+         other, so the rows are split again here. */
+      article :global(.mchart-modes) { grid-row: 1; }
+      article :global(.mchart-head .mchart-key) { grid-row: 2; }
       article :global(.mchart-head .mchart-key) {
         flex-wrap: wrap; justify-content: center;
       }
@@ -658,11 +665,10 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
     if (mchart && mview) {
       const options = Array.from(mview.querySelectorAll<HTMLButtonElement>('button'));
       const rows = Array.from(mchart.querySelectorAll<HTMLElement>('.mchart-row[data-recall]'));
-      // Everything below the head: the rows, the group headings and the
-      // caption. This is what crosses over between the two views; the switch
-      // and the key stay put and stay visible.
-      const table = Array.from(mchart.children)
-        .filter(child => !child.classList.contains('mchart-head')) as HTMLElement[];
+      // Only what actually differs between the views fades. A group heading
+      // says the same thing in both, and the caption and the key never change
+      // at all, so fading them just made the whole chart blink. The one
+      // exception is the controls' own heading, which leaves with its rows.
       // Rows are sorted inside their own group, never across: the groups are
       // the chart's argument - counting words, a model, a second pass over
       // the first - and one flat list would trade that for a glance. The
@@ -680,6 +686,11 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
           current.anchor = child.nextSibling;
         }
       }
+      const leaving = groups
+        .filter(group => group.rows.every(row => !row.dataset.secs))
+        .map(group => group.heading);
+      const table = [...rows, ...leaving];
+
       // 0.1s at the left of a bar, 1h at the right: a decade scale, because
       // the fastest method here is four orders off the slowest and a linear
       // bar would leave sixteen rows invisible.
