@@ -432,9 +432,6 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
       article :global(.mchart) { grid-template-columns: 1fr max-content; column-gap: 0.5rem; }
       article :global(.mchart-row) { row-gap: 0.35rem; }
       article :global(.mchart-tipbox) { grid-column: 1 / 2; grid-row: 2 / 3; }
-      /* The scale row carries one empty cell per column it has to skip, so it
-         sheds one when the grid drops to two columns - otherwise its third
-         child wraps onto a line of its own and the axis sits under the bars. */
       /* Two centred lines rather than two columns: neither has room to sit
          on its own alignment line at this width. */
       article :global(.mchart-head) { grid-template-columns: 1fr; }
