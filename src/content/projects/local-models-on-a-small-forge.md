@@ -42,10 +42,10 @@ The models I tried are all small enough to run on a laptop. Most turn each issue
       <span><i class="mchart-sw mchart-ctl"></i>baseline to beat</span>
     </div>
     <details class="mchart-modes" hidden>
-      <summary class="mchart-current" aria-label="what the bars show">quality</summary>
+      <summary class="mchart-current" aria-label="what the bars show">Quality</summary>
       <div class="mchart-list">
-        <button type="button" data-mode="recall" aria-pressed="true">quality</button>
-        <button type="button" data-mode="speed" aria-pressed="false">speed</button>
+        <button type="button" data-mode="recall" aria-pressed="true">Quality</button>
+        <button type="button" data-mode="speed" aria-pressed="false">Speed</button>
       </div>
     </details>
   </div>
