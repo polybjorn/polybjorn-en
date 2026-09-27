@@ -244,8 +244,13 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
        back in the middle rather than leaving it hanging at the left. */
     article :global(.mchart-head) {
       display: grid; grid-template-columns: subgrid; align-items: center;
-      gap: 0.5rem 0.6rem; margin-bottom: 0.9rem;
+      gap: 0.35rem 0.6rem; margin-bottom: 0.9rem;
     }
+    /* The switch takes the line above the key rather than sharing it: ending
+       it on the numbers' right edge pulls it left across the bar column, and
+       the key needs that room to stay on one line. */
+    article :global(.mchart-modes) { grid-row: 1; }
+    article :global(.mchart-head .mchart-key) { grid-row: 2; }
     /* The head sits on the chart's own columns: the key runs from the figure's
        left edge, the control starts where the numbers do. The key wants about
        510px and the bar column is 300, so starting it at the bars forces it
@@ -255,7 +260,13 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
     article :global(.mchart-head .mchart-key) {
       grid-column: 1 / 3; justify-content: flex-start; flex-wrap: nowrap;
     }
-    article :global(.mchart-modes) { grid-column: 3 / 4; justify-self: start; }
+    /* Translate rather than margin: a percentage in translate is the element's
+       own width, so this lands the switch's right edge on 3rem from the
+       column start - the numbers' right edge - whatever the two words are. */
+    article :global(.mchart-modes) {
+      grid-column: 3 / 4; justify-self: start;
+      transform: translateX(calc(3rem - 100%));
+    }
     /* Alone - no JS, so no control - the key centres over the whole figure
        again, which is where it sat before there was anything beside it. */
     article :global(.mchart-head:has(.mchart-modes[hidden]) .mchart-key) {
@@ -337,11 +348,15 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
     @media (prefers-reduced-motion: reduce) {
       article :global(.mchart-bar) { transition: none; }
     }
-    /* Left, so a number sits against the bar it belongs to. Right-aligned in
+    /* Left, so a number sits against the bar it belongs to - right-aligned in
        a column wider than the digits, a short value like 2.6% drifted away
-       from its own bar. */
+       from its own bar. The width is set rather than left to stretch: the
+       cell fills a 1fr column otherwise, and then the numbers have no right
+       edge for the switch above them to line up with. 3rem clears "55 min",
+       the longest thing either view puts here. */
     article :global(.mchart-val) {
       font-size: 0.85rem; font-variant-numeric: tabular-nums; color: #dde1e7;
+      width: 3rem; justify-self: start;
     }
     /* Two segments and a thumb that slides between them, because there is one
        question - which measure the bars are showing - and two answers. A
@@ -360,10 +375,10 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
       position: relative; display: grid; grid-template-columns: 1fr 1fr;
       background: #23272e; border: 1px solid #2a2e35; border-radius: 999px;
       padding: 2px;
-      /* Its own padding, border and the segment's inset would set the first
-         label a padding-width right of the numbers below it. Pulling the box
-         back by exactly that starts the two texts on one line. */
-      margin-left: calc(-0.55rem - 3px);
+      /* Its own padding, border and the segment's inset would set the last
+         label a padding-width inside the box's right edge. Pushing the box out
+         by exactly that lands the word on the numbers' right edge. */
+      margin-right: calc(-0.55rem - 3px);
     }
     article :global(.mchart-modes[hidden]),
     article :global(.mchart-group[hidden]),
@@ -418,6 +433,7 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
       article :global(.mchart-head .mchart-key),
       article :global(.mchart-head:has(.mchart-modes[hidden]) .mchart-key),
       article :global(.mchart-modes) { grid-column: 1 / -1; justify-self: center; }
+      article :global(.mchart-modes) { transform: none; margin-right: 0; }
       article :global(.mchart-head .mchart-key) {
         flex-wrap: wrap; justify-content: center;
       }
