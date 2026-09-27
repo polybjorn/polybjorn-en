@@ -344,18 +344,11 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
     }
     article :global(.mchart-track) { background: #23272e; border-radius: 3px; height: 1.15rem; }
     article :global(.mchart-bar) { height: 100%; border-radius: 3px; min-width: 2px; }
-    /* A bar only travels when its own row is standing still. Then there is
-       something to follow: the same bar, the same place, a new length, and the
-       eye can read how far it moved. A bar in a row that is also changing
-       position has nothing to anchor that to, so those go behind the fade
-       instead - which is also why this cannot simply be set on every bar, as
-       a tween running under a fade shows through as the row comes back. */
-    article :global(.mchart-row.mchart-slide .mchart-bar) {
-      transition: width 0.62s cubic-bezier(0.22, 1, 0.36, 1);
-    }
-    @media (prefers-reduced-motion: reduce) {
-      article :global(.mchart-row.mchart-slide .mchart-bar) { transition: none; }
-    }
+    /* Every bar tweens its length on a switch, and every row slides to its new
+       place. Neither is declared here: the reorder re-inserts the rows, and a
+       node that leaves the document drops a running CSS transition, so the
+       script drives both through the Web Animations API after the move. It
+       honours prefers-reduced-motion itself. */
     /* Left, so a number sits against the bar it belongs to - right-aligned in
        a column wider than the digits, a short value like 2.6% drifted away
        from its own bar. The width is set rather than left to stretch: the
@@ -390,7 +383,13 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
     }
     article :global(.mchart-modes[hidden]),
     article :global(.mchart-group[hidden]),
+    article :global(.mchart-said[hidden]),
     article :global(.mchart-row[hidden]) { display: none; }
+    /* The caption says what the view on screen measures and nothing about the
+       other one, so each sentence is shorter than the pair it replaced. Without
+       the script only the recall sentence is ever shown, which is the only view
+       there is then. It is a block so its height is measurable when it swaps. */
+    article :global(.mchart-said) { display: block; }
     /* The thumb is one element that moves, not a background that jumps
        between two: half the track less its padding, so translating it by its
        own width lands it exactly on the other segment. */
@@ -672,6 +671,8 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
     if (mchart && mview) {
       const options = Array.from(mview.querySelectorAll<HTMLButtonElement>('button'));
       const rows = Array.from(mchart.querySelectorAll<HTMLElement>('.mchart-row[data-recall]'));
+      const cap = mchart.querySelector<HTMLElement>('.mchart-cap');
+      const said = Array.from(mchart.querySelectorAll<HTMLElement>('.mchart-said'));
       // Only what actually differs between the views fades. A group heading
       // says the same thing in both, and the caption and the key never change
       // at all, so fading them just made the whole chart blink. The one
@@ -703,73 +704,14 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
           ? (one, two) => Number(one.dataset.secs ?? Infinity) - Number(two.dataset.secs ?? Infinity)
           : (one, two) => Number(two.dataset.recall) - Number(one.dataset.recall));
 
-      // Which rows a reorder can leave where they are. Not "same index in both
-      // orders" - that was the first answer and it was wrong, because inserting
-      // rows AROUND a row still moves it, and a moved node loses its running
-      // transition. What survives is the longest run of rows already in the
-      // right relative order; everything else has to be lifted past them. The
-      // winner comes out in that run, which is the point.
-      const stayPut = (sorted: HTMLElement[], live: HTMLElement[]) => {
-        const at = new Map(live.map((row, index) => [row, index]));
-        const seq = sorted.map(row => at.get(row) ?? -1);
-        const tails: number[] = [];
-        const tailAt: number[] = [];
-        const cameFrom = new Array(seq.length).fill(-1);
-        for (let i = 0; i < seq.length; i += 1) {
-          if (seq[i] < 0) continue;
-          let low = 0;
-          let high = tails.length;
-          while (low < high) {
-            const mid = (low + high) >> 1;
-            if (tails[mid] < seq[i]) low = mid + 1; else high = mid;
-          }
-          tails[low] = seq[i];
-          tailAt[low] = i;
-          cameFrom[i] = low > 0 ? tailAt[low - 1] : -1;
-        }
-        const keep = new Set<HTMLElement>();
-        let walk = tailAt.length ? tailAt[tailAt.length - 1] : -1;
-        while (walk >= 0) {
-          keep.add(sorted[walk]);
-          walk = cameFrom[walk];
-        }
-        return keep;
-      };
-
-      // One plan per switch, used twice: to decide what fades, and to do the
-      // reorder. Two answers to that question would drift apart.
-      const planFor = (mode: string) => groups.map(group => {
-        const sorted = orderFor(mode, group);
-        const live = (Array.from(mchart.children) as HTMLElement[])
-          .filter(child => group.rows.includes(child));
-        return { group, sorted, keep: stayPut(sorted, live) };
-      });
-
-      // What crosses over is not the whole table. A label reads the same in
-      // both views, so a row that keeps its place only swaps its bar and its
-      // number and its name never flickers. A row that moves fades whole -
-      // otherwise the label slides while the bar beside it is mid-fade, which
-      // is the jump the fade exists to hide. The controls and their heading
-      // leave entirely, so they go whole too.
-      const crossingParts = (plan: ReturnType<typeof planFor>) => {
-        const staying = new Set<HTMLElement>();
-        for (const step of plan) for (const row of step.keep) staying.add(row);
-        const parts: HTMLElement[] = [];
-        for (const row of rows) {
-          const stays = staying.has(row);
-          row.classList.toggle('mchart-slide', stays);
-          if (!stays) {
-            parts.push(row);
-            continue;
-          }
-          // Its bar slides to the new length rather than fading, so only the
-          // number crosses over. The bar is the thing worth watching on a row
-          // that holds its place - the winner holds its place in both views.
-          const val = row.querySelector<HTMLElement>('.mchart-val');
-          if (val) parts.push(val);
-        }
-        return [...parts, ...leaving];
-      };
+      // One duration for the whole switch, so everything lands together: a row
+      // travelling to its new place, a bar changing length, the number crossing
+      // over and the two control rows folding away. Slower than the 170ms
+      // cross-fade this replaces, on purpose - the reorder is the thing being
+      // read, and a fade fast enough not to drag was a fade short enough to
+      // read as a cut.
+      const TRAVEL = 700;
+      const EASE = 'cubic-bezier(0.42, 0, 0.35, 1)';
 
       // 0.1s at the left of a bar, 1h at the right: a decade scale, because
       // the fastest method here is four orders off the slowest and a linear
@@ -780,69 +722,173 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
         : t < 60 ? Math.round(t) + ' s'
         : t < 3600 ? Math.round(t / 60) + ' min' : (t / 3600).toFixed(1) + ' h';
 
-      // Every bar changes length, the rows change order, and two of them
-      // leave: animating all of that at once was the mess. The table fades
-      // out instead, changes while nobody is looking, and fades back - so the
-      // reader sees two clean states rather than the journey between them.
-      // The switch itself keeps its slide; it is what was just pressed.
-      // The controls leave the speed view, so the figure loses two rows and a
-      // heading, and everything under it - caption, prose, the next heading -
-      // used to jump the moment the table was rebuilt. The figure carries that
-      // change instead: its height is measured either side of the rebuild and
-      // tweened over the fade back in, so the page below travels rather than
-      // snapping. Clipped while it runs, because the taller state overflows a
-      // height still on its way up, and the group that grows is the last one.
-      let crossing: Animation[] = [];
-      let resizing: Animation | null = null;
-      const resize = (rebuild: () => void) => {
-        const before = mchart.getBoundingClientRect().height;
-        rebuild();
-        const after = mchart.getBoundingClientRect().height;
-        if (Math.abs(after - before) < 1) return;
-        resizing?.cancel();
-        mchart.style.overflow = 'clip';
-        resizing = mchart.animate(
-          [{ height: before + 'px' }, { height: after + 'px' }],
-          { duration: 240, easing: 'ease-out' },
-        );
-        const done = resizing;
-        done.finished.then(() => {
-          if (resizing === done) mchart.style.removeProperty('overflow');
-        }).catch(() => { /* cancelled by the next press; it owns the state */ });
-      };
-      const cross = (rebuild: () => void, settle: boolean, table: HTMLElement[]) => {
-        const still = settle
-          || window.matchMedia('(prefers-reduced-motion: reduce)').matches
-          || typeof mchart.animate !== 'function';
-        if (still) {
-          rebuild();
-          return;
+      // The rows MOVE. Where each one sits is read before the reorder and again
+      // after it, and the difference is played back as a translate that ends at
+      // nothing, so a row slides from where it was to where it now belongs
+      // while its bar tweens its length underneath it. Cross-fading them was
+      // the earlier answer and it is what kept reading as a jump: a fade hides
+      // the reorder rather than showing it, and the reorder is the point.
+      //
+      // A transform costs no layout, so nothing here fights the grid and no row
+      // has to be held still to protect a running transition - which is what
+      // the longest-ordered-run plan existed for. Every row is re-inserted now
+      // and the animation is started afterwards, off measured positions.
+      type Place = { top: number; bar: number };
+      const placesOf = () => {
+        const at = new Map<HTMLElement, Place>();
+        for (const row of rows) {
+          if (row.hasAttribute('hidden')) continue;
+          const bar = row.querySelector<HTMLElement>('.mchart-bar');
+          at.set(row, {
+            top: row.getBoundingClientRect().top,
+            bar: bar ? bar.getBoundingClientRect().width : 0,
+          });
         }
-        // A second press mid-fade cancels the first, or the table can be left
-        // sitting at whatever opacity that one had reached.
-        for (const running of crossing) running.cancel();
-        crossing = table.map(part => part.animate(
-          [{ opacity: 1 }, { opacity: 0 }],
-          { duration: 170, easing: 'ease-in', fill: 'forwards' },
-        ));
-        Promise.all(crossing.map(one => one.finished)).then(() => {
-          resize(rebuild);
-          for (const running of crossing) running.cancel();
-          crossing = table.map(part => part.animate(
-            [{ opacity: 0 }, { opacity: 1 }],
-            { duration: 240, easing: 'ease-out' },
-          ));
-        }).catch(() => { /* cancelled by the next press; it owns the state */ });
+        return at;
       };
 
+      let moving: Animation[] = [];
+      const travel = (from: Map<HTMLElement, Place>) => {
+        for (const running of moving) running.cancel();
+        moving = [];
+        for (const row of rows) {
+          const was = from.get(row);
+          if (!was || row.hasAttribute('hidden')) continue;
+          const dy = was.top - row.getBoundingClientRect().top;
+          if (Math.abs(dy) > 0.5) {
+            moving.push(row.animate(
+              [{ transform: 'translateY(' + dy + 'px)' }, { transform: 'none' }],
+              { duration: TRAVEL, easing: EASE },
+            ));
+          }
+          // In pixels both ends, not the percentage the rebuild just set: a
+          // keyframe pair has to interpolate, and the bar column does not
+          // change width mid-switch, so the two are the same distance.
+          const bar = row.querySelector<HTMLElement>('.mchart-bar');
+          if (bar) {
+            const wide = bar.getBoundingClientRect().width;
+            if (Math.abs(wide - was.bar) > 0.5) {
+              moving.push(bar.animate(
+                [{ width: was.bar + 'px' }, { width: wide + 'px' }],
+                { duration: TRAVEL, easing: EASE },
+              ));
+            }
+          }
+          // The number is the one thing that cannot travel - it is different
+          // text in each view - so it crosses over where it stands, in half the
+          // time, and is readable again well before the row has landed.
+          const val = row.querySelector<HTMLElement>('.mchart-val');
+          if (val) {
+            moving.push(val.animate(
+              [{ opacity: 0 }, { opacity: 1 }],
+              { duration: Math.round(TRAVEL / 2), easing: 'ease-out' },
+            ));
+          }
+        }
+      };
+
+      // The controls leave the speed view, so the figure loses two rows and a
+      // heading, and the caption and prose under it would jump the moment those
+      // are hidden. They fold instead - height and both margins to nothing over
+      // the same TRAVEL - so everything below travels on the reflow.
+      //
+      // Tweening the FIGURE's height was tried first and was worse: everything
+      // inside a box reflows the instant a row is hidden, so the caption snapped
+      // to its new place while only the empty space below it animated, and
+      // growing needed `overflow: clip`, which cut the arriving rows off until
+      // the box caught up.
+      //
+      // Both boxes are measured, never guessed: the real height and margins on
+      // the way out, the natural ones on the way back. Overflow is held hidden
+      // while a fold runs, because a grid row does not clip itself. The group
+      // being folded is the last one, so no travelling row is affected by it.
+      type Box = { height: number; top: string; bottom: string };
+      const shy = [...leaving, ...rows.filter(row => !row.dataset.secs)];
+      // What is mid-fold right now. A row folding away is un-hidden while it
+      // runs, so without this a press that reverses it reads as a row that was
+      // there all along, and it would snap to full height instead of opening
+      // from where the interrupted fold left it.
+      const shutting = new Set<HTMLElement>();
+      let folding: Animation[] = [];
+      const boxesOf = () => {
+        const was = new Map<HTMLElement, Box | null>();
+        for (const el of shy) {
+          if (el.hasAttribute('hidden')) {
+            was.set(el, null);
+            continue;
+          }
+          const style = window.getComputedStyle(el);
+          was.set(el, {
+            height: el.getBoundingClientRect().height,
+            top: style.marginTop,
+            bottom: style.marginBottom,
+          });
+        }
+        return was;
+      };
+      const fold = (was: Map<HTMLElement, Box | null>) => {
+        for (const running of folding) running.cancel();
+        folding = [];
+        for (const el of shy) {
+          const before = was.get(el) ?? null;
+          const gone = el.hasAttribute('hidden');
+          const stood = before !== null && !shutting.has(el);
+          if (stood === !gone) continue;
+          const flat = { height: '0px', marginTop: '0px', marginBottom: '0px', opacity: 0 };
+          el.style.overflow = 'hidden';
+          let run: Animation;
+          if (gone) {
+            // Un-hidden for as long as the fold runs, so there is something
+            // to fold, and hidden again by its own finish handler below.
+            shutting.add(el);
+            if (before) el.removeAttribute('hidden');
+            run = el.animate([
+              {
+                height: (before?.height ?? 0) + 'px',
+                marginTop: before?.top ?? '0px',
+                marginBottom: before?.bottom ?? '0px',
+                opacity: 1,
+              },
+              flat,
+            ], { duration: TRAVEL, easing: EASE });
+            run.finished.then(() => {
+              el.setAttribute('hidden', '');
+              shutting.delete(el);
+            }).catch(() => { shutting.delete(el); });
+          } else {
+            // Arriving, and the rebuild has already un-hidden it, so its
+            // natural box is readable here.
+            const style = window.getComputedStyle(el);
+            run = el.animate([
+              { ...flat, height: (before?.height ?? 0) + 'px' },
+              {
+                height: el.getBoundingClientRect().height + 'px',
+                marginTop: style.marginTop,
+                marginBottom: style.marginBottom,
+                opacity: 1,
+              },
+            ], { duration: TRAVEL, easing: EASE });
+          }
+          folding.push(run);
+          run.finished
+            .then(() => { el.style.removeProperty('overflow'); })
+            .catch(() => { el.style.removeProperty('overflow'); });
+        }
+      };
       const paint = (mode: string, settle = false) => {
+        // Pressing the view you are already on is not a change, so nothing
+        // moves: repainting it fades every number back in from nothing, which
+        // reads as the table blinking for no reason. The first paint still runs
+        // this - it is what puts the table into the state the switch claims -
+        // and a second press of the view a switch is already travelling
+        // towards is also nothing, because the mode is set before the motion.
+        if (!settle && mchart.dataset.mode === mode) return;
         for (const option of options) {
           option.setAttribute('aria-pressed', String(option.dataset.mode === mode));
         }
-        const plan = planFor(mode);
-        const table = crossingParts(plan);
+        const order = groups.map(group => ({ group, sorted: orderFor(mode, group) }));
         mchart.dataset.mode = mode;
-        cross(() => {
+        const rebuild = () => {
           for (const row of rows) {
             const bar = row.querySelector<HTMLElement>('.mchart-bar');
             const val = row.querySelector<HTMLElement>('.mchart-val');
@@ -861,21 +907,53 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
               val.textContent = row.dataset.recall + '%';
             }
           }
-          for (const step of plan) {
+          for (const el of said) el.toggleAttribute('hidden', el.dataset.said !== mode);
+          for (const step of order) {
             step.group.heading.toggleAttribute('hidden',
               mode === 'speed' && step.group.rows.every(row => !row.dataset.secs));
-            // Walked backwards so each row that has to move is placed directly
-            // before the one that follows it, and the rows being kept are
-            // never touched - a moved node loses its running transition, and
-            // those are the ones whose bars are meant to travel.
+            // Walked backwards, so each row is placed directly before the one
+            // that follows it and a group's anchor never moves.
             let after: Node | null = step.group.anchor;
             for (let i = step.sorted.length - 1; i >= 0; i -= 1) {
               const row = step.sorted[i];
-              if (!step.keep.has(row)) mchart.insertBefore(row, after);
+              mchart.insertBefore(row, after);
               after = row;
             }
           }
-        }, settle, table);
+        };
+        // No motion on the first paint, under a reduced-motion preference, or
+        // where the Web Animations API is missing: the table is simply in the
+        // other state, which is the whole point of the switch either way.
+        if (settle
+          || window.matchMedia('(prefers-reduced-motion: reduce)').matches
+          || typeof mchart.animate !== 'function') {
+          rebuild();
+          return;
+        }
+        // Both reads happen before the rebuild and both plays after it, so
+        // nothing measures a layout that an animation has already begun to
+        // change.
+        const boxes = boxesOf();
+        const from = placesOf();
+        const tall = cap ? cap.getBoundingClientRect().height : 0;
+        rebuild();
+        travel(from);
+        fold(boxes);
+        // The caption is the one thing that cannot travel to its new state - it
+        // is different words - so it crosses over where it stands, and its box
+        // is tweened because the two sentences need not wrap to the same number
+        // of lines. Text inside a box that changes height snaps, which is why
+        // the fade is over the sentence and the tween is under it.
+        if (cap) {
+          const now = cap.getBoundingClientRect().height;
+          for (const el of said) {
+            if (el.hasAttribute('hidden')) continue;
+            el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: Math.round(TRAVEL / 2), easing: 'ease-out' });
+          }
+          if (Math.abs(now - tall) > 0.5) {
+            cap.animate([{ height: tall + 'px' }, { height: now + 'px' }], { duration: TRAVEL, easing: EASE });
+          }
+        }
       };
 
       for (const option of options) {
