@@ -327,66 +327,38 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
     article :global(.mchart-val) {
       font-size: 0.85rem; font-variant-numeric: tabular-nums; color: #dde1e7;
     }
-    /* One menu, not a row of pills. What the bars measure and what order the
-       rows sit in are two questions, and a pill each is five controls over a
-       chart meant to be read rather than operated. <details> carries its own
-       open and close, so the script only answers clicks - and the whole thing
-       ships hidden, because without the script it is a control that does
-       nothing. [hidden] needs the explicit rule: .mchart-row sets display,
-       and a display rule beats the attribute.
-       A bar shows one measure at a time either way: recall is a linear
-       percentage and a run is 0.24s to 55min, and one geometry carrying both
-       scales misreads both. */
-    article :global(.mchart-modes) { position: relative; }
+    /* One dropdown, because there is one question: which measure the bars are
+       showing. The rows sort by whatever it picks, so the order always matches
+       what the reader chose to look at. A bar shows one measure at a time
+       either way - recall is a linear percentage and a run is 0.24s to 55min,
+       and one geometry carrying both scales misreads both.
+       It ships hidden and the script reveals it: without the script the chart
+       is what it always was, and a dropdown that did nothing would be worse
+       than none. [hidden] needs the explicit rule for the rows and headings,
+       which set display themselves. */
+    article :global(.mchart-modes) {
+      font: inherit; font-size: 0.8rem; color: #b5bac3; cursor: pointer;
+      background: #23272e; border: 1px solid #2a2e35; border-radius: 999px;
+      padding: 0.25rem 1.6rem 0.25rem 0.75rem; appearance: none;
+      /* Its own padding and border would set the label a padding-width right
+         of the numbers below it, which reads as the control hanging off the
+         side of the table. Pulling the box back by exactly that puts the two
+         texts on one line. */
+      margin-left: calc(-0.75rem - 1px);
+      background-image: linear-gradient(45deg, transparent 50%, #b5bac3 50%),
+        linear-gradient(135deg, #b5bac3 50%, transparent 50%);
+      background-position: calc(100% - 0.85rem) 55%, calc(100% - 0.6rem) 55%;
+      background-size: 0.25rem 0.25rem, 0.25rem 0.25rem;
+      background-repeat: no-repeat;
+    }
+    article :global(.mchart-modes:hover) { color: #dde1e7; border-color: #3a3f47; }
+    article :global(.mchart-modes:focus-visible) {
+      outline: 2px solid #6AAEEE; outline-offset: 2px;
+    }
+    article :global(.mchart-modes option) { background: #1e2228; color: #dde1e7; }
     article :global(.mchart-modes[hidden]),
     article :global(.mchart-group[hidden]),
     article :global(.mchart-row[hidden]) { display: none; }
-    article :global(.mchart-mode) {
-      font: inherit; font-size: 0.8rem; color: #b5bac3; cursor: pointer;
-      background: #23272e; border: 1px solid #2a2e35; border-radius: 999px;
-      padding: 0.25rem 0.75rem; list-style: none;
-      display: inline-flex; align-items: center; gap: 0.4rem;
-    }
-    article :global(.mchart-mode::-webkit-details-marker) { display: none; }
-    article :global(.mchart-mode::after) {
-      content: ""; width: 0; height: 0; border: 0.25rem solid transparent;
-      border-top-color: currentColor; margin-top: 0.25rem;
-    }
-    article :global(.mchart-mode:hover) { color: #dde1e7; border-color: #3a3f47; }
-    article :global(.mchart-modes[open] .mchart-mode) {
-      background: #2a2f37; color: #dde1e7; border-color: #4a5058;
-    }
-    article :global(.mchart-mode:focus-visible) {
-      outline: 2px solid #6AAEEE; outline-offset: 2px;
-    }
-    /* A closed <details> hides its children by not laying them out - but an
-       absolutely positioned one escapes that in Firefox and sat open under
-       the button. Closing it explicitly is the fix. */
-    article :global(.mchart-modes:not([open]) .mchart-menu) { display: none; }
-    article :global(.mchart-menu) {
-      position: absolute; z-index: 6; top: calc(100% + 4px); left: 0;
-      min-width: 9.5rem; padding: 0.45rem;
-      background: #1e2228; border: 1px solid #2a2e35; border-radius: 6px;
-      box-shadow: 0 6px 18px rgb(0 0 0 / 35%);
-    }
-    article :global(.mchart-menu p) {
-      margin: 0 0.3rem 0.3rem; font-size: 0.7rem; color: #8a8f99;
-      text-transform: uppercase; letter-spacing: 0.05em;
-    }
-    article :global(.mchart-menu div) { display: flex; flex-wrap: wrap; gap: 0.25rem; }
-    article :global(.mchart-menu div + p) { margin-top: 0.55rem; }
-    article :global(.mchart-menu button) {
-      font: inherit; font-size: 0.8rem; color: #b5bac3; cursor: pointer;
-      background: #23272e; border: 1px solid #2a2e35; border-radius: 999px;
-      padding: 0.15rem 0.6rem;
-    }
-    article :global(.mchart-menu button:hover) { color: #dde1e7; border-color: #3a3f47; }
-    article :global(.mchart-menu button[aria-pressed="true"]) {
-      background: #2a2f37; color: #dde1e7; border-color: #4a5058;
-    }
-    article :global(.mchart-menu button:focus-visible) {
-      outline: 2px solid #6AAEEE; outline-offset: 2px;
-    }
     /* The site's own three: accent blue for the method that won, the warm
        accent for every neural arm, and the muted grey the page already uses
        for secondary text on the two controls. Blue against warm also keeps
@@ -626,24 +598,20 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
 
     // The methods chart holds two measures per row - how often a method finds
     // the issue, and how long it takes - and a bar can only carry one at a
-    // time, so a menu over the chart asks which, and in what order. The whole
-    // control ships hidden and is revealed here: without this script the
+    // time, so a dropdown over the chart picks which. The rows sort by
+    // whatever it picks, so the order always matches the measure on screen.
+    // The control ships hidden and is revealed here: without this script the
     // chart is what it always was, recall in its written order.
     // #speed in the URL opens on the other measure, so a link can point at it.
     const mchart = document.querySelector<HTMLElement>('.mchart');
-    const mmenu = mchart?.querySelector<HTMLDetailsElement>('.mchart-modes');
-    if (mchart && mmenu) {
-      const summary = mmenu.querySelector<HTMLElement>('summary');
-      const options = Array.from(mmenu.querySelectorAll<HTMLButtonElement>('button'));
+    const mview = mchart?.querySelector<HTMLSelectElement>('.mchart-modes');
+    if (mchart && mview) {
       const rows = Array.from(mchart.querySelectorAll<HTMLElement>('.mchart-row[data-recall]'));
-      // Rows keep the order they were written in until something asks
-      // otherwise, and every sort is applied to this list rather than to the
-      // last sorted one, so the orders cannot compound.
-      const written = rows.slice();
-      // The group each row belongs to, read off the headings rather than
-      // repeated as an attribute on 27 rows. The anchor is whatever follows a
-      // group's last row in the written order - the next heading, or the
-      // caption - and it never moves, so re-inserting before it is enough.
+      // Rows are sorted inside their own group, never across: the groups are
+      // the chart's argument - counting words, a model, a second pass over
+      // the first - and one flat list would trade that for a glance. The
+      // heading is read off the markup rather than repeated on 27 rows, and a
+      // group's anchor is whatever follows its last row, which never moves.
       type Group = { heading: HTMLElement; rows: HTMLElement[]; anchor: Node | null };
       const groups: Group[] = [];
       let current: Group | null = null;
@@ -664,14 +632,33 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
       const say = (t: number) => t < 1 ? t.toFixed(1) + ' s'
         : t < 60 ? Math.round(t) + ' s'
         : t < 3600 ? Math.round(t / 60) + ' min' : (t / 3600).toFixed(1) + ' h';
-      const secsOf = (row: HTMLElement) => Number(row.dataset.secs ?? Infinity);
-      const nameOf = (row: HTMLElement) =>
-        (row.querySelector('.mchart-label')?.textContent ?? '').replace(/^\+\s*/, '').toLowerCase();
 
-      let mode = 'recall';
-      let order = 'written';
+      // The bars ease between measures on their own, in CSS. The rows change
+      // ORDER too, and that is a jump unless something animates it: measure
+      // where each row is, let the sort happen, then play it back from where
+      // it was. Reduced motion skips the whole thing, and jsdom has no
+      // animate() at all, so both are checked rather than assumed.
+      const glide = (rearrange: () => void) => {
+        const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+          || typeof Element.prototype.animate !== 'function';
+        if (still) {
+          rearrange();
+          return;
+        }
+        const before = new Map(rows.map(row => [row, row.getBoundingClientRect().top]));
+        rearrange();
+        for (const row of rows) {
+          const from = before.get(row);
+          const shift = from === undefined ? 0 : from - row.getBoundingClientRect().top;
+          if (!shift) continue;
+          row.animate(
+            [{ transform: 'translateY(' + shift + 'px)' }, { transform: 'none' }],
+            { duration: 320, easing: 'cubic-bezier(0.4, 0, 0.2, 1)' },
+          );
+        }
+      };
 
-      const paint = () => {
+      const paint = (mode: string) => {
         mchart.dataset.mode = mode;
         for (const row of rows) {
           const bar = row.querySelector<HTMLElement>('.mchart-bar');
@@ -680,58 +667,34 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
           const secs = row.dataset.secs;
           // The two controls sort the list and stop: no index to build, so no
           // run time, and a row reading "-" is a row asking to be read for
-          // nothing. They leave the speed view entirely and their heading
-          // goes with them.
+          // nothing. They leave the speed view, and their heading with them.
           row.toggleAttribute('hidden', mode === 'speed' && !secs);
           if (mode === 'speed') {
             if (!secs) continue;
-            bar.style.minWidth = '';
             bar.style.width = ((Math.log10(Number(secs)) - LOW) / SPAN * 100).toFixed(1) + '%';
             val.textContent = say(Number(secs));
           } else {
-            bar.style.minWidth = '';
             bar.style.width = row.dataset.recall + '%';
             val.textContent = row.dataset.recall + '%';
           }
         }
-        // Sorting happens inside each group, never across them: the groups
-        // are the chart's argument - counting words, a model, a second pass -
-        // and a global sort would throw that away to save the reader a glance.
-        for (const group of groups) {
-          group.heading.toggleAttribute('hidden', group.rows.every(row => row.hasAttribute('hidden')));
-          const sorted = group.rows.slice();
-          if (order === 'recall') {
-            sorted.sort((one, two) => Number(two.dataset.recall) - Number(one.dataset.recall));
-          } else if (order === 'speed') {
-            sorted.sort((one, two) => secsOf(one) - secsOf(two));
-          } else if (order === 'name') {
-            sorted.sort((one, two) => nameOf(one).localeCompare(nameOf(two)));
+        glide(() => {
+          for (const group of groups) {
+            group.heading.toggleAttribute('hidden',
+              group.rows.every(row => row.hasAttribute('hidden')));
+            const sorted = group.rows.slice();
+            sorted.sort(mode === 'speed'
+              ? (one, two) => Number(one.dataset.secs ?? Infinity) - Number(two.dataset.secs ?? Infinity)
+              : (one, two) => Number(two.dataset.recall) - Number(one.dataset.recall));
+            for (const row of sorted) mchart.insertBefore(row, group.anchor);
           }
-          for (const row of sorted) mchart.insertBefore(row, group.anchor);
-        }
-        if (summary) summary.firstChild!.nodeValue = mode === 'speed' ? 'speed' : 'quality';
-        for (const option of options) {
-          const on = option.dataset.mode ? option.dataset.mode === mode
-            : option.dataset.sort === (order === 'written' ? 'recall' : order);
-          option.setAttribute('aria-pressed', String(on));
-        }
+        });
       };
 
-      for (const option of options) {
-        option.addEventListener('click', () => {
-          if (option.dataset.mode) mode = option.dataset.mode;
-          if (option.dataset.sort) order = option.dataset.sort;
-          paint();
-          mmenu.open = false;
-        });
-      }
-      // A menu left open behind a click elsewhere is a menu in the way.
-      document.addEventListener('click', event => {
-        if (mmenu.open && !mmenu.contains(event.target as Node)) mmenu.open = false;
-      });
-      mmenu.removeAttribute('hidden');
-      if (location.hash === '#speed') mode = 'speed';
-      paint();
+      mview.addEventListener('change', () => paint(mview.value));
+      mview.removeAttribute('hidden');
+      if (location.hash === '#speed') mview.value = 'speed';
+      paint(mview.value);
     }
 
     const thumbs = document.querySelectorAll('.cover-btn, .gallery-thumb, .img-zoom');
