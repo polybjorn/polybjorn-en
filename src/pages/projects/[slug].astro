@@ -343,9 +343,19 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
       visibility: visible; opacity: 1; transition-delay: 0s;
     }
     article :global(.mchart-track) { background: #23272e; border-radius: 3px; height: 1.15rem; }
-    /* No width transition: the bars change length behind a fade now, and a
-       tween running underneath it showed through as the table came back. */
     article :global(.mchart-bar) { height: 100%; border-radius: 3px; min-width: 2px; }
+    /* A bar only travels when its own row is standing still. Then there is
+       something to follow: the same bar, the same place, a new length, and the
+       eye can read how far it moved. A bar in a row that is also changing
+       position has nothing to anchor that to, so those go behind the fade
+       instead - which is also why this cannot simply be set on every bar, as
+       a tween running under a fade shows through as the row comes back. */
+    article :global(.mchart-row.mchart-slide .mchart-bar) {
+      transition: width 0.62s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    @media (prefers-reduced-motion: reduce) {
+      article :global(.mchart-row.mchart-slide .mchart-bar) { transition: none; }
+    }
     /* Left, so a number sits against the bar it belongs to - right-aligned in
        a column wider than the digits, a short value like 2.6% drifted away
        from its own bar. The width is set rather than left to stretch: the
@@ -711,13 +721,15 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
         for (const row of rows) {
           const stays = !(mode === 'speed' && !row.dataset.secs)
             && before.indexOf(row) === after.indexOf(row);
+          row.classList.toggle('mchart-slide', stays);
           if (!stays) {
             parts.push(row);
             continue;
           }
-          const bar = row.querySelector<HTMLElement>('.mchart-bar');
+          // Its bar slides to the new length rather than fading, so only the
+          // number crosses over. The bar is the thing worth watching on a row
+          // that holds its place - the winner holds its place in both views.
           const val = row.querySelector<HTMLElement>('.mchart-val');
-          if (bar) parts.push(bar);
           if (val) parts.push(val);
         }
         return [...parts, ...leaving];
