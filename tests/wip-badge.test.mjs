@@ -8,9 +8,10 @@
  * publishing something unfinished on purpose, which needs the third without
  * the first two.
  *
- * The badge is asserted in both places it appears, because they are separate
- * components with their own copies of the markup and the styling, and a change
- * to one has no way of reaching the other.
+ * The badge and the date under a title are both asserted in the two places they
+ * are rendered - the article header and the listing card - because those are
+ * separate components with their own copies of the markup and the styling, and
+ * a change to one has no way of reaching the other.
  */
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
