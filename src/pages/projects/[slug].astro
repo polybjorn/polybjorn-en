@@ -287,21 +287,26 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
       display: grid; grid-template-columns: subgrid;
       align-items: center; margin-bottom: 0.4rem;
     }
-    /* No underline: four of them stacked in a column is noisier than the data.
-       The links still have to be findable, so they carry the brighter body ink
-       against the muted label grey, and the underline comes back on hover and
-       keyboard focus. Accent blue is avoided deliberately - it sits right next
-       to a coloured bar and the two compete, and the bars now carry that
-       exact blue. */
+    /* The accent goes on the link, as it does everywhere else in the article:
+       the prose two paragraphs up carries blue underlined links, so a reader
+       arrives at the figure already taught that blue is clickable. This column
+       used to invert that - blue on the terms that only explain themselves,
+       body ink on the real links.
+       No underline, still: four of them stacked in a column is noisier than
+       the data, and it comes back on hover and keyboard focus. The old note
+       here avoided blue because it would sit beside a bar of the same colour,
+       which the flip fixes rather than causes: every link in this chart names
+       a neural model and every one of those rows carries an amber bar, and it
+       is the tip terms that sit beside the blue ones. */
     article :global(.mchart-label a) {
-      color: #dde1e7;
+      color: #6AAEEE;
       text-decoration: none;
     }
     article :global(.mchart-label a:hover),
     article :global(.mchart-label a:focus-visible) { text-decoration: underline; }
     /* Same reasoning inside tables, where a link would otherwise underline a
        whole row of cells. */
-    article :global(table a) { color: #dde1e7; text-decoration: none; }
+    article :global(table a) { color: #6AAEEE; text-decoration: none; }
     article :global(table a:hover),
     article :global(table a:focus-visible) { text-decoration: underline; }
     article :global(.mchart-label) {
@@ -324,7 +329,14 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
        means the container's edge, which gives it exactly the bars' width, below
        the hovered row and clear of the labels. */
     article :global(.mchart-row) { position: relative; }
-    article :global(.mchart-tip) { cursor: help; outline: none; color: #6AAEEE; }
+    /* A term that explains itself is not a link and should not dress as one.
+       Body ink against the muted label grey says there is something here, and
+       the dotted underline is what says it opens rather than navigates - the
+       shape an abbreviation has carried since before the web. */
+    article :global(.mchart-tip) {
+      cursor: help; outline: none; color: #dde1e7;
+      text-decoration: underline dotted #4a5058; text-underline-offset: 3px;
+    }
     article :global(.mchart-tip:focus-visible) { outline: 2px solid #6AAEEE; outline-offset: 2px; border-radius: 2px; }
     article :global(.mchart-tipbox) {
       position: absolute; grid-column: 2 / 3; grid-row: 1 / 2;
@@ -638,6 +650,8 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
   </main>
   <a class="to-top" href="#" onclick="window.scrollTo({top:0,behavior:'smooth'});this.classList.remove('visible');return false;" aria-label="To top"><ArrowUp size={28} stroke-width={1.5} /></a>
   <script>
+    import { annotate } from 'rough-notation';
+
     const backHome = document.querySelector('.back-home')!;
     const scrollTop = document.querySelector('.to-top')!;
 
@@ -875,6 +889,74 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
             .catch(() => { el.style.removeProperty('overflow'); });
         }
       };
+      // Two states where nothing is animated: a reader who asked for less
+      // motion, and a browser without the Web Animations API.
+      const still = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        || typeof mchart.animate !== 'function';
+
+      // The best row in each view is ringed in the site's green, so the winner
+      // is findable without reading 27 numbers. It is per view and it MOVES:
+      // the best quality is counting words plus the links already there, and
+      // the shortest run is untuned BM25, a different row and one 20 points off
+      // the top on quality. The groups sort inside themselves, so the winner is
+      // not the first row on screen either way, and the ring is what says the
+      // two questions have different answers.
+      //
+      // It goes on a span the script wraps the number in, not on the cell: the
+      // cell is a fixed 3rem and an oval around it would hang off the right of
+      // a short value. Every rebuild rewrites that text and takes the span and
+      // the ring's svg with it, so the ring is redrawn after a switch rather
+      // than moved.
+      const RING = '#4CAF82';
+      let ringed: ReturnType<typeof annotate> | null = null;
+      let drawing = 0;
+      let seen: IntersectionObserver | null = null;
+      const winner = (mode: string) => {
+        const live = rows.filter(row => mode !== 'speed' || row.dataset.secs);
+        // Fastest wins the speed view, highest recall the other, so the rank
+        // the two share is signed.
+        const rank = (row: HTMLElement) => mode === 'speed'
+          ? -Number(row.dataset.secs) : Number(row.dataset.recall);
+        return live.sort((one, two) => rank(two) - rank(one))[0] as HTMLElement | undefined;
+      };
+      const ring = (mode: string, animate: boolean) => {
+        ringed?.remove();
+        ringed = null;
+        const val = winner(mode)?.querySelector<HTMLElement>('.mchart-val');
+        if (!val) return;
+        const num = document.createElement('span');
+        num.textContent = val.textContent;
+        val.replaceChildren(num);
+        ringed = annotate(num, {
+          type: 'circle', color: RING, strokeWidth: 2, padding: [4, 8],
+          animate, animationDuration: 600,
+        });
+        ringed.show();
+        // Decorative, and hidden from a screen reader on purpose: the rows are
+        // already sorted by the measure and the number itself is read out, so an
+        // unnamed graphic here would only add a stop.
+        val.querySelector('svg')?.setAttribute('aria-hidden', 'true');
+      };
+      // The first ring waits for the figure to be on screen, the way the CV's
+      // underlines do. Drawn at load it is finished long before the reader has
+      // scrolled this far down the article, and a hand-drawn ring is mostly the
+      // stroke being drawn.
+      const ringWhenSeen = (mode: string) => {
+        if (still() || typeof IntersectionObserver !== 'function') {
+          ring(mode, false);
+          return;
+        }
+        seen = new IntersectionObserver(entries => {
+          if (!entries.some(entry => entry.isIntersecting)) return;
+          seen?.disconnect();
+          seen = null;
+          // The mode is read again here, not closed over: a reader can reach
+          // the buttons and switch before the figure has been scrolled to.
+          ring(mchart.dataset.mode ?? mode, true);
+        }, { threshold: 0.1 });
+        seen.observe(mchart);
+      };
+
       const paint = (mode: string, settle = false) => {
         // Pressing the view you are already on is not a change, so nothing
         // moves: repainting it fades every number back in from nothing, which
@@ -883,6 +965,9 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
         // and a second press of the view a switch is already travelling
         // towards is also nothing, because the mode is set before the motion.
         if (!settle && mchart.dataset.mode === mode) return;
+        // A switch already travelling has a ring waiting on its landing, for a
+        // row this one is about to move again.
+        window.clearTimeout(drawing);
         for (const option of options) {
           option.setAttribute('aria-pressed', String(option.dataset.mode === mode));
         }
@@ -924,10 +1009,12 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
         // No motion on the first paint, under a reduced-motion preference, or
         // where the Web Animations API is missing: the table is simply in the
         // other state, which is the whole point of the switch either way.
-        if (settle
-          || window.matchMedia('(prefers-reduced-motion: reduce)').matches
-          || typeof mchart.animate !== 'function') {
+        // The ring is drawn here rather than scheduled: unanimated, and at once,
+        // because there is no travel to wait for.
+        if (settle || still()) {
           rebuild();
+          if (settle) ringWhenSeen(mode);
+          else ring(mode, false);
           return;
         }
         // Both reads happen before the rebuild and both plays after it, so
@@ -954,6 +1041,12 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
             cap.animate([{ height: tall + 'px' }, { height: now + 'px' }], { duration: TRAVEL, easing: EASE });
           }
         }
+        // Drawn once the rows have landed. It belongs to a different row in
+        // each view, so a ring that travelled would be travelling to a row it
+        // is about to leave - and rebuild() has already taken the old one with
+        // the cell's text, which is what leaves the switch itself uncluttered.
+        seen?.disconnect();
+        drawing = window.setTimeout(() => ring(mode, true), TRAVEL);
       };
 
       for (const option of options) {

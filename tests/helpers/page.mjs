@@ -79,17 +79,15 @@ export function loadPage(page, {
  *
  * For the component scripts, tests/article-corner-link.test.mjs got there first:
  * it finds the one script it cares about and evals it by hand. This is that
- * trick made shared, with the two guards a hand-rolled copy tends not to carry -
- * separate scopes, and a refusal on import or export. That test keeps its own
+ * trick made shared, with the guard a hand-rolled copy tends not to carry:
+ * separate scopes. That test keeps its own
  * version deliberately: it asserts the corner is still driven by an inline
  * script, which running every module would not tell it.
  *
- * Eval'ing them as classic scripts is only sound while they carry no import or
- * export, so one that does throws here rather than passing quietly with nothing
- * having run. Each goes in its own function so the modules keep separate
- * scopes: minified, two of them on the same page both declare `var e`, and in
- * a shared global the second would reassign the first's captured variable -
- * a bug the browser does not have.
+ * Each goes in its own function so the modules keep separate scopes: minified,
+ * two of them on the same page both declare `var e`, and in a shared global the
+ * second would reassign the first's captured variable - a bug the browser does
+ * not have.
  *
  * A page's script is sometimes inline and sometimes a file: Astro inlines a
  * hoisted script while it stays under about 4KB and emits it to /_astro
@@ -97,6 +95,15 @@ export function loadPage(page, {
  * 2026-09-27 an edit that pushed the article's script to 4,625 bytes moved it
  * out of the page and three back-link tests failed with nothing wrong in the
  * code they cover. Both spellings are the page's own script, so both run.
+ *
+ * A script that imports is linked by hand, in runModule below. That used to
+ * throw, on the reasoning that eval'ing a module as a classic script is only
+ * sound while it has no imports. True, and the throw still guards the forms the
+ * linking does not cover - but as a blanket refusal it turned a second page
+ * using a dependency into a failing suite. The CV page had rough-notation to
+ * itself and Rollup inlined it; the day the article's chart imported it too, the
+ * library became a chunk both pages import, and five tests failed with nothing
+ * wrong in the code they cover.
  */
 function runPageModules(window) {
   const scripts = [...window.document.querySelectorAll('script[type="module"]')]
@@ -107,14 +114,66 @@ function runPageModules(window) {
   if (!scripts.length) {
     throw new Error('no module scripts on this page, so runModules proves nothing');
   }
+  const linked = new Map();
   for (const script of scripts) {
     const src = script.getAttribute('src');
     const code = src ? readFileSync(join(DIST, src), 'utf8') : script.textContent;
-    if (/\b(?:import|export)\b/.test(code)) {
-      throw new Error('an inline module imports or exports, so it cannot run as a classic script');
-    }
-    window.eval(`(function(){"use strict";\n${code}\n})()`);
+    runModule(window, linked, src ? src.replace(/^\//, '') : 'index.html', code);
   }
+}
+
+/**
+ * Evaluates one module, having first evaluated whatever it imports.
+ *
+ * Only the shapes Rollup emits are understood, and only for a file inside dist:
+ * an import of anything else throws rather than running with a binding quietly
+ * missing. Each import becomes a destructure off the dependency's exports and
+ * the `export {}` at the end becomes assignments onto this module's, which is
+ * enough for a bundle's own chunks - they carry no cycles, and nothing in them
+ * reassigns an exported binding after the fact, which is the case a real live
+ * binding would be needed for.
+ */
+function runModule(window, linked, path, code) {
+  if (linked.has(path)) return linked.get(path);
+  const exports = {};
+  linked.set(path, exports);
+
+  const need = (spec) => {
+    const dep = spec.startsWith('/') ? spec.slice(1)
+      : spec.startsWith('.') ? join(dirname(path), spec)
+      : null;
+    if (!dep || !existsSync(join(DIST, dep))) {
+      throw new Error(`${path} imports "${spec}", which is not a file in dist`);
+    }
+    return runModule(window, linked, dep, readFileSync(join(DIST, dep), 'utf8'));
+  };
+
+  const source = code
+    .replace(/\bimport\s*\{([^}]*)\}\s*from\s*(["'])(.+?)\2;?/g,
+      (_, names, __, spec) => `const {${names.replace(/\s+as\s+/g, ':')}} = __need(${JSON.stringify(spec)});`)
+    .replace(/\bimport\s*\*\s*as\s+(\w+)\s*from\s*(["'])(.+?)\2;?/g,
+      (_, name, __, spec) => `const ${name} = __need(${JSON.stringify(spec)});`)
+    .replace(/\bimport\s+(\w+)\s*from\s*(["'])(.+?)\2;?/g,
+      (_, name, __, spec) => `const ${name} = __need(${JSON.stringify(spec)}).default;`)
+    .replace(/\bimport\s*(["'])(.+?)\1;?/g,
+      (_, __, spec) => `__need(${JSON.stringify(spec)});`)
+    .replace(/\bexport\s*\{([^}]*)\};?/g, (_, names) => {
+      const pairs = names.split(',').filter(one => one.trim()).map((one) => {
+        const [local, named = local] = one.trim().split(/\s+as\s+/);
+        return `${JSON.stringify(named)}: ${local}`;
+      });
+      return `Object.assign(__exports, {${pairs.join(',')}});`;
+    })
+    .replace(/\bexport\s+default\s/g, '__exports.default = ');
+
+  // Whatever the rewrites did not reach. A module form nobody has needed yet
+  // has to fail loudly: linked by halves it would run with a binding missing,
+  // and the test would read that as the behaviour being gone.
+  if (/\bimport\s*[{*"'(]|\bexport\s*[{*]|\bexport\s+(?:default|const|let|var|function|class)\b/.test(source)) {
+    throw new Error(`${path} carries a module form the harness cannot link by hand`);
+  }
+  window.eval(`(function(__need, __exports){"use strict";\n${source}\n})`)(need, exports);
+  return exports;
 }
 
 /** Lets the page's own handlers and any awaited fetch settle. */
