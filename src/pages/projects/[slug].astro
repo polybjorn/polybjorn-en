@@ -222,6 +222,11 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
        bars sit centred on the page; 1.7 is what keeps a side column at least
        as wide as the longest label at full width, and past that the label
        column only grows by what it needs. */
+    /* Equal side columns, so the bars sit centred on the page - 1.7 is what
+       keeps a side column at least as wide as the longest label at full width.
+       A max-content number column pulled the bars off centre by half its
+       width, which is the trade: the bars are the thing being compared, so
+       they get the symmetry and the control lives with a wider column. */
     article :global(.mchart) {
       margin: 1.5rem 0; display: grid;
       grid-template-columns: 1fr minmax(0, 1.7fr) 1fr; column-gap: 0.6rem;
@@ -232,11 +237,48 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
       color: #8a8f99; font-size: 0.85rem; margin-top: 0.7rem; line-height: 1.5;
       text-align: center;
     }
+    /* One line over the chart: what the colours mean on the left, the view
+       control on the right. They wrap to their own lines on a narrow screen
+       and both centre there, which is where the key sat before the buttons
+       existed. Without JS the buttons never appear, and :has puts the key
+       back in the middle rather than leaving it hanging at the left. */
+    article :global(.mchart-head) {
+      display: grid; grid-template-columns: subgrid; align-items: center;
+      gap: 0.35rem 0.6rem; margin-bottom: 0.9rem;
+    }
+    /* Both on one line. The switch ends on the numbers' right edge, which
+       pulls it left across the bar column; the key runs from the figure's left
+       edge and needs 266px of the 418 that leaves, so the two clear each other
+       with room to spare. An earlier version of this wrapped, and the cause
+       was the key being confined to the 300px bar column - not its type. */
+    article :global(.mchart-modes) { grid-row: 1; }
+    article :global(.mchart-head .mchart-key) { grid-row: 1; }
+    /* The head sits on the chart's own columns: the key runs from the figure's
+       left edge, the control starts where the numbers do. The key wants about
+       510px and the bar column is 300, so starting it at the bars forces it
+       onto two lines - it takes the label column as well and holds one line
+       instead, which is what it is for. Centring it across those two columns
+       was the version that lined up with nothing. */
+    article :global(.mchart-head .mchart-key) {
+      grid-column: 1 / 3; justify-content: flex-start; flex-wrap: nowrap;
+    }
+    /* Translate rather than margin: a percentage in translate is the element's
+       own width, so this lands the switch's right edge on 3rem from the
+       column start - the numbers' right edge - whatever the two words are. */
+    article :global(.mchart-modes) {
+      grid-column: 3 / 4; justify-self: start;
+      transform: translateX(calc(3rem - 100%));
+    }
+    /* Alone - no JS, so no control - the key centres over the whole figure
+       again, which is where it sat before there was anything beside it. */
+    article :global(.mchart-head:has(.mchart-modes[hidden]) .mchart-key) {
+      grid-column: 1 / -1; justify-content: center;
+    }
     article :global(.mchart-key) {
       display: flex; flex-wrap: wrap; gap: 0.35rem 1rem;
-      color: #b5bac3; font-size: 0.85rem; margin-bottom: 0.9rem;
-      /* Centred over the whole figure rather than left-aligned against the
-         label column, which put it above the labels instead of the bars. */
+      color: #b5bac3; font-size: 0.85rem;
+      /* Centred when it is alone; beside the buttons it sits left, which is
+         what the head's space-between gives it. */
       justify-content: center;
     }
     article :global(.mchart-key span) { display: inline-flex; align-items: center; gap: 0.4rem; }
@@ -274,7 +316,7 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
       color: #dde1e7; font-size: 0.75rem; text-transform: uppercase;
       letter-spacing: 0.06em; margin: 1rem 0 0.4rem; text-align: center;
     }
-    article :global(.mchart-key + .mchart-group) { margin-top: 0; }
+    article :global(.mchart-head + .mchart-group) { margin-top: 0; }
     /* Focus as well as hover, because a tap on a phone focuses the span and
        never hovers it. The box is a direct child of the row so it can sit in
        the bar column: an absolutely positioned grid child takes its grid area
@@ -302,8 +344,78 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
     }
     article :global(.mchart-track) { background: #23272e; border-radius: 3px; height: 1.15rem; }
     article :global(.mchart-bar) { height: 100%; border-radius: 3px; min-width: 2px; }
+    /* A bar only travels when its own row is standing still. Then there is
+       something to follow: the same bar, the same place, a new length, and the
+       eye can read how far it moved. A bar in a row that is also changing
+       position has nothing to anchor that to, so those go behind the fade
+       instead - which is also why this cannot simply be set on every bar, as
+       a tween running under a fade shows through as the row comes back. */
+    article :global(.mchart-row.mchart-slide .mchart-bar) {
+      transition: width 0.62s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    @media (prefers-reduced-motion: reduce) {
+      article :global(.mchart-row.mchart-slide .mchart-bar) { transition: none; }
+    }
+    /* Left, so a number sits against the bar it belongs to - right-aligned in
+       a column wider than the digits, a short value like 2.6% drifted away
+       from its own bar. The width is set rather than left to stretch: the
+       cell fills a 1fr column otherwise, and then the numbers have no right
+       edge for the switch above them to line up with. 3rem clears "55 min",
+       the longest thing either view puts here. */
     article :global(.mchart-val) {
       font-size: 0.85rem; font-variant-numeric: tabular-nums; color: #dde1e7;
+      width: 3rem; justify-self: start;
+    }
+    /* Two segments and a thumb that slides between them, because there is one
+       question - which measure the bars are showing - and two answers. A
+       dropdown made the reader open something to see the choice; here both
+       words are on screen and either is one tap, which is what mattered on a
+       phone. The rows sort by whatever is picked, so the order always matches
+       what is being looked at.
+       A bar shows one measure at a time either way: recall is a linear
+       percentage and a run is 0.24s to 55min, and one geometry carrying both
+       scales misreads both.
+       It ships hidden and the script reveals it - without the script the chart
+       is what it always was, and a control that did nothing would be worse
+       than none. [hidden] needs the explicit rule for rows and headings, which
+       set display themselves. */
+    article :global(.mchart-modes) {
+      position: relative; display: grid; grid-template-columns: 1fr 1fr;
+      background: #23272e; border: 1px solid #2a2e35; border-radius: 999px;
+      padding: 2px;
+      /* Its own padding, border and the segment's inset would set the last
+         label a padding-width inside the box's right edge. Pushing the box out
+         by exactly that lands the word on the numbers' right edge. */
+      margin-right: calc(-0.55rem - 3px);
+    }
+    article :global(.mchart-modes[hidden]),
+    article :global(.mchart-group[hidden]),
+    article :global(.mchart-row[hidden]) { display: none; }
+    /* The thumb is one element that moves, not a background that jumps
+       between two: half the track less its padding, so translating it by its
+       own width lands it exactly on the other segment. */
+    article :global(.mchart-thumb) {
+      position: absolute; top: 2px; bottom: 2px; left: 2px;
+      width: calc(50% - 2px); border-radius: 999px; background: #2a2f37;
+      border: 1px solid #4a5058;
+      transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    article :global(.mchart[data-mode="speed"] .mchart-thumb) {
+      transform: translateX(100%);
+    }
+    @media (prefers-reduced-motion: reduce) {
+      article :global(.mchart-thumb) { transition: none; }
+    }
+    article :global(.mchart-modes button) {
+      position: relative; z-index: 1; font: inherit; font-size: 0.8rem;
+      color: #8a8f99; cursor: pointer; background: none; border: 0;
+      border-radius: 999px; padding: 0.2rem 0.55rem;
+      transition: color 0.25s ease;
+    }
+    article :global(.mchart-modes button:hover) { color: #b5bac3; }
+    article :global(.mchart-modes button[aria-pressed="true"]) { color: #dde1e7; }
+    article :global(.mchart-modes button:focus-visible) {
+      outline: 2px solid #6AAEEE; outline-offset: 2px;
     }
     /* The site's own three: accent blue for the method that won, the warm
        accent for every neural arm, and the muted grey the page already uses
@@ -313,10 +425,28 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
     article :global(.mchart-lex) { background: #6aaeee; }
     article :global(.mchart-emb) { background: #e8b775; }
     article :global(.mchart-ctl) { background: #8a8f99; }
-    @media (max-width: 480px) {
+    /* 560, not 480: kept from the two-number layout. The rows are back to one
+       number, but the axis labels and the button row both read better stacked
+       before the bars get narrow. */
+    @media (max-width: 560px) {
       article :global(.mchart) { grid-template-columns: 1fr max-content; column-gap: 0.5rem; }
       article :global(.mchart-row) { row-gap: 0.35rem; }
       article :global(.mchart-tipbox) { grid-column: 1 / 2; grid-row: 2 / 3; }
+      /* Two centred lines rather than two columns: neither has room to sit
+         on its own alignment line at this width. */
+      article :global(.mchart-head) { grid-template-columns: 1fr; }
+      article :global(.mchart-head .mchart-key),
+      article :global(.mchart-head:has(.mchart-modes[hidden]) .mchart-key),
+      article :global(.mchart-modes) { grid-column: 1 / -1; justify-self: center; }
+      article :global(.mchart-modes) { transform: none; margin-right: 0; }
+      /* Both were pinned to row 1 for the wide layout, where they sit side by
+         side. Stacked, that same pin puts them in one cell on top of each
+         other, so the rows are split again here. */
+      article :global(.mchart-modes) { grid-row: 1; }
+      article :global(.mchart-head .mchart-key) { grid-row: 2; }
+      article :global(.mchart-head .mchart-key) {
+        flex-wrap: wrap; justify-content: center;
+      }
       /* label moves above its own bar rather than squeezing a third column */
       article :global(.mchart-label) {
         grid-column: 1 / -1; text-align: left; margin-top: 0.4rem;
@@ -529,6 +659,231 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
       backHome.classList.toggle('hidden', window.scrollY > 60);
       scrollTop.classList.toggle('visible', window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 20);
     }, { passive: true });
+
+    // The methods chart holds two measures per row - how often a method finds
+    // the issue, and how long it takes - and a bar can only carry one at a
+    // time, so a two-segment switch over the chart picks which. The rows sort
+    // by whatever it picks, so the order always matches the measure on screen.
+    // The control ships hidden and is revealed here: without this script the
+    // chart is what it always was, recall in its written order.
+    // #speed in the URL opens on the other measure, so a link can point at it.
+    const mchart = document.querySelector<HTMLElement>('.mchart');
+    const mview = mchart?.querySelector<HTMLElement>('.mchart-modes');
+    if (mchart && mview) {
+      const options = Array.from(mview.querySelectorAll<HTMLButtonElement>('button'));
+      const rows = Array.from(mchart.querySelectorAll<HTMLElement>('.mchart-row[data-recall]'));
+      // Only what actually differs between the views fades. A group heading
+      // says the same thing in both, and the caption and the key never change
+      // at all, so fading them just made the whole chart blink. The one
+      // exception is the controls' own heading, which leaves with its rows.
+      // Rows are sorted inside their own group, never across: the groups are
+      // the chart's argument - counting words, a model, a second pass over
+      // the first - and one flat list would trade that for a glance. The
+      // heading is read off the markup rather than repeated on 27 rows, and a
+      // group's anchor is whatever follows its last row, which never moves.
+      type Group = { heading: HTMLElement; rows: HTMLElement[]; anchor: Node | null };
+      const groups: Group[] = [];
+      let current: Group | null = null;
+      for (const child of Array.from(mchart.children) as HTMLElement[]) {
+        if (child.classList.contains('mchart-group')) {
+          current = { heading: child, rows: [], anchor: null };
+          groups.push(current);
+        } else if (current && child.classList.contains('mchart-row') && child.dataset.recall) {
+          current.rows.push(child);
+          current.anchor = child.nextSibling;
+        }
+      }
+      const leaving = groups
+        .filter(group => group.rows.every(row => !row.dataset.secs))
+        .map(group => group.heading);
+
+      const orderFor = (mode: string, group: Group) => group.rows
+        .filter(row => !(mode === 'speed' && !row.dataset.secs))
+        .sort(mode === 'speed'
+          ? (one, two) => Number(one.dataset.secs ?? Infinity) - Number(two.dataset.secs ?? Infinity)
+          : (one, two) => Number(two.dataset.recall) - Number(one.dataset.recall));
+
+      // Which rows a reorder can leave where they are. Not "same index in both
+      // orders" - that was the first answer and it was wrong, because inserting
+      // rows AROUND a row still moves it, and a moved node loses its running
+      // transition. What survives is the longest run of rows already in the
+      // right relative order; everything else has to be lifted past them. The
+      // winner comes out in that run, which is the point.
+      const stayPut = (sorted: HTMLElement[], live: HTMLElement[]) => {
+        const at = new Map(live.map((row, index) => [row, index]));
+        const seq = sorted.map(row => at.get(row) ?? -1);
+        const tails: number[] = [];
+        const tailAt: number[] = [];
+        const cameFrom = new Array(seq.length).fill(-1);
+        for (let i = 0; i < seq.length; i += 1) {
+          if (seq[i] < 0) continue;
+          let low = 0;
+          let high = tails.length;
+          while (low < high) {
+            const mid = (low + high) >> 1;
+            if (tails[mid] < seq[i]) low = mid + 1; else high = mid;
+          }
+          tails[low] = seq[i];
+          tailAt[low] = i;
+          cameFrom[i] = low > 0 ? tailAt[low - 1] : -1;
+        }
+        const keep = new Set<HTMLElement>();
+        let walk = tailAt.length ? tailAt[tailAt.length - 1] : -1;
+        while (walk >= 0) {
+          keep.add(sorted[walk]);
+          walk = cameFrom[walk];
+        }
+        return keep;
+      };
+
+      // One plan per switch, used twice: to decide what fades, and to do the
+      // reorder. Two answers to that question would drift apart.
+      const planFor = (mode: string) => groups.map(group => {
+        const sorted = orderFor(mode, group);
+        const live = (Array.from(mchart.children) as HTMLElement[])
+          .filter(child => group.rows.includes(child));
+        return { group, sorted, keep: stayPut(sorted, live) };
+      });
+
+      // What crosses over is not the whole table. A label reads the same in
+      // both views, so a row that keeps its place only swaps its bar and its
+      // number and its name never flickers. A row that moves fades whole -
+      // otherwise the label slides while the bar beside it is mid-fade, which
+      // is the jump the fade exists to hide. The controls and their heading
+      // leave entirely, so they go whole too.
+      const crossingParts = (plan: ReturnType<typeof planFor>) => {
+        const staying = new Set<HTMLElement>();
+        for (const step of plan) for (const row of step.keep) staying.add(row);
+        const parts: HTMLElement[] = [];
+        for (const row of rows) {
+          const stays = staying.has(row);
+          row.classList.toggle('mchart-slide', stays);
+          if (!stays) {
+            parts.push(row);
+            continue;
+          }
+          // Its bar slides to the new length rather than fading, so only the
+          // number crosses over. The bar is the thing worth watching on a row
+          // that holds its place - the winner holds its place in both views.
+          const val = row.querySelector<HTMLElement>('.mchart-val');
+          if (val) parts.push(val);
+        }
+        return [...parts, ...leaving];
+      };
+
+      // 0.1s at the left of a bar, 1h at the right: a decade scale, because
+      // the fastest method here is four orders off the slowest and a linear
+      // bar would leave sixteen rows invisible.
+      const LOW = Math.log10(0.1);
+      const SPAN = Math.log10(3600) - LOW;
+      const say = (t: number) => t < 1 ? t.toFixed(1) + ' s'
+        : t < 60 ? Math.round(t) + ' s'
+        : t < 3600 ? Math.round(t / 60) + ' min' : (t / 3600).toFixed(1) + ' h';
+
+      // Every bar changes length, the rows change order, and two of them
+      // leave: animating all of that at once was the mess. The table fades
+      // out instead, changes while nobody is looking, and fades back - so the
+      // reader sees two clean states rather than the journey between them.
+      // The switch itself keeps its slide; it is what was just pressed.
+      // The controls leave the speed view, so the figure loses two rows and a
+      // heading, and everything under it - caption, prose, the next heading -
+      // used to jump the moment the table was rebuilt. The figure carries that
+      // change instead: its height is measured either side of the rebuild and
+      // tweened over the fade back in, so the page below travels rather than
+      // snapping. Clipped while it runs, because the taller state overflows a
+      // height still on its way up, and the group that grows is the last one.
+      let crossing: Animation[] = [];
+      let resizing: Animation | null = null;
+      const resize = (rebuild: () => void) => {
+        const before = mchart.getBoundingClientRect().height;
+        rebuild();
+        const after = mchart.getBoundingClientRect().height;
+        if (Math.abs(after - before) < 1) return;
+        resizing?.cancel();
+        mchart.style.overflow = 'clip';
+        resizing = mchart.animate(
+          [{ height: before + 'px' }, { height: after + 'px' }],
+          { duration: 240, easing: 'ease-out' },
+        );
+        const done = resizing;
+        done.finished.then(() => {
+          if (resizing === done) mchart.style.removeProperty('overflow');
+        }).catch(() => { /* cancelled by the next press; it owns the state */ });
+      };
+      const cross = (rebuild: () => void, settle: boolean, table: HTMLElement[]) => {
+        const still = settle
+          || window.matchMedia('(prefers-reduced-motion: reduce)').matches
+          || typeof mchart.animate !== 'function';
+        if (still) {
+          rebuild();
+          return;
+        }
+        // A second press mid-fade cancels the first, or the table can be left
+        // sitting at whatever opacity that one had reached.
+        for (const running of crossing) running.cancel();
+        crossing = table.map(part => part.animate(
+          [{ opacity: 1 }, { opacity: 0 }],
+          { duration: 170, easing: 'ease-in', fill: 'forwards' },
+        ));
+        Promise.all(crossing.map(one => one.finished)).then(() => {
+          resize(rebuild);
+          for (const running of crossing) running.cancel();
+          crossing = table.map(part => part.animate(
+            [{ opacity: 0 }, { opacity: 1 }],
+            { duration: 240, easing: 'ease-out' },
+          ));
+        }).catch(() => { /* cancelled by the next press; it owns the state */ });
+      };
+
+      const paint = (mode: string, settle = false) => {
+        for (const option of options) {
+          option.setAttribute('aria-pressed', String(option.dataset.mode === mode));
+        }
+        const plan = planFor(mode);
+        const table = crossingParts(plan);
+        mchart.dataset.mode = mode;
+        cross(() => {
+          for (const row of rows) {
+            const bar = row.querySelector<HTMLElement>('.mchart-bar');
+            const val = row.querySelector<HTMLElement>('.mchart-val');
+            if (!bar || !val) continue;
+            const secs = row.dataset.secs;
+            // The two controls sort the list and stop: no index to build, so
+            // no run time, and a row reading "-" is a row asking to be read
+            // for nothing. They leave the speed view, heading and all.
+            row.toggleAttribute('hidden', mode === 'speed' && !secs);
+            if (mode === 'speed') {
+              if (!secs) continue;
+              bar.style.width = ((Math.log10(Number(secs)) - LOW) / SPAN * 100).toFixed(1) + '%';
+              val.textContent = say(Number(secs));
+            } else {
+              bar.style.width = row.dataset.recall + '%';
+              val.textContent = row.dataset.recall + '%';
+            }
+          }
+          for (const step of plan) {
+            step.group.heading.toggleAttribute('hidden',
+              mode === 'speed' && step.group.rows.every(row => !row.dataset.secs));
+            // Walked backwards so each row that has to move is placed directly
+            // before the one that follows it, and the rows being kept are
+            // never touched - a moved node loses its running transition, and
+            // those are the ones whose bars are meant to travel.
+            let after: Node | null = step.group.anchor;
+            for (let i = step.sorted.length - 1; i >= 0; i -= 1) {
+              const row = step.sorted[i];
+              if (!step.keep.has(row)) mchart.insertBefore(row, after);
+              after = row;
+            }
+          }
+        }, settle, table);
+      };
+
+      for (const option of options) {
+        option.addEventListener('click', () => paint(option.dataset.mode ?? 'recall'));
+      }
+      mview.removeAttribute('hidden');
+      paint(location.hash === '#speed' ? 'speed' : 'recall', true);
+    }
 
     const thumbs = document.querySelectorAll('.cover-btn, .gallery-thumb, .img-zoom');
     if (thumbs.length) {
