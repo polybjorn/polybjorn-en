@@ -21,11 +21,19 @@ export const PAGES = [
 
 /**
  * @param {string} page path under dist
- * @param {{ styles?: boolean }} options styles:true inlines the linked
- *   stylesheets, which jsdom will not fetch on its own. Only the tests that ask
- *   the cascade a question need it; it roughly triples the parse.
+ * @param {{ styles?: boolean, url?: string, referrer?: string, runModules?: boolean }} options
+ *   styles:true inlines the linked stylesheets, which jsdom will not fetch on
+ *   its own. Only the tests that ask the cascade a question need it; it roughly
+ *   triples the parse. url and referrer set what the page thinks it was served
+ *   from and navigated from, which is how a test reaches behaviour that branches
+ *   on either. runModules is described below.
  */
-export function loadPage(page, { styles = false } = {}) {
+export function loadPage(page, {
+  styles = false,
+  url = 'https://polybjorn.no/3d-printing/enquiry',
+  referrer,
+  runModules = false,
+} = {}) {
   const file = join(DIST, page);
   if (!existsSync(file)) {
     throw new Error(`${page} is not built. Run \`npm run build\` first (npm test does).`);
@@ -41,7 +49,11 @@ export function loadPage(page, { styles = false } = {}) {
 
   const dom = new JSDOM(html, {
     runScripts: 'dangerously',
-    url: 'https://polybjorn.no/3d-printing/enquiry',
+    url,
+    // jsdom validates this as a URL and throws on an empty string, while a
+    // browser reports document.referrer as "" when there is none - so the two
+    // ways a test can say "no referrer" both have to land on omitting it.
+    referrer: referrer || undefined,
     beforeParse(window) {
       // Three things the page uses that jsdom does not implement. Without them
       // the component's script throws on load and every test fails for the
@@ -52,7 +64,39 @@ export function loadPage(page, { styles = false } = {}) {
     },
   });
 
+  if (runModules) runInlineModules(dom.window);
   return dom;
+}
+
+/**
+ * Runs the page's inline module scripts, which jsdom will not.
+ *
+ * Astro compiles a component's `<script>` into an inline
+ * `<script type="module">`, and jsdom implements no ES modules at all - it
+ * parses those and never executes them. A classic inline script still runs, so
+ * the enquiry tests, whose 50KB handler is `is:inline`, have always exercised
+ * real behaviour; what nothing reached is the component scripts - the article
+ * page's lightbox, for one, is never built under jsdom.
+ *
+ * Eval'ing them as classic scripts is only sound while they carry no import or
+ * export, so one that does throws here rather than passing quietly with nothing
+ * having run. Each goes in its own function so the modules keep separate
+ * scopes: minified, two of them on the same page both declare `var e`, and in
+ * a shared global the second would reassign the first's captured variable -
+ * a bug the browser does not have.
+ */
+function runInlineModules(window) {
+  const scripts = [...window.document.querySelectorAll('script[type="module"]:not([src])')];
+  if (!scripts.length) {
+    throw new Error('no inline module scripts on this page, so runModules proves nothing');
+  }
+  for (const script of scripts) {
+    const code = script.textContent;
+    if (/\b(?:import|export)\b/.test(code)) {
+      throw new Error('an inline module imports or exports, so it cannot run as a classic script');
+    }
+    window.eval(`(function(){"use strict";\n${code}\n})()`);
+  }
 }
 
 /** Lets the page's own handlers and any awaited fetch settle. */
