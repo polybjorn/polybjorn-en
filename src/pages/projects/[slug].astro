@@ -335,77 +335,57 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
     article :global(.mchart-val) {
       font-size: 0.85rem; font-variant-numeric: tabular-nums; color: #dde1e7;
     }
-    /* One dropdown, because there is one question: which measure the bars are
-       showing. The rows sort by whatever it picks, so the order always matches
-       what the reader chose to look at. A bar shows one measure at a time
-       either way - recall is a linear percentage and a run is 0.24s to 55min,
-       and one geometry carrying both scales misreads both.
-       It is <details> and two buttons rather than a <select> because the
-       browser draws a select's list itself, in its own colours, and a white
-       system list dropping out of a dark page is the one part of this chart
-       nothing here can style. It ships hidden and the script reveals it:
-       without the script the chart is what it always was, and a control that
-       did nothing would be worse than none. [hidden] needs the explicit rule
-       for rows and headings, which set display themselves. */
-    article :global(.mchart-modes) { position: relative; }
+    /* Two segments and a thumb that slides between them, because there is one
+       question - which measure the bars are showing - and two answers. A
+       dropdown made the reader open something to see the choice; here both
+       words are on screen and either is one tap, which is what mattered on a
+       phone. The rows sort by whatever is picked, so the order always matches
+       what is being looked at.
+       A bar shows one measure at a time either way: recall is a linear
+       percentage and a run is 0.24s to 55min, and one geometry carrying both
+       scales misreads both.
+       It ships hidden and the script reveals it - without the script the chart
+       is what it always was, and a control that did nothing would be worse
+       than none. [hidden] needs the explicit rule for rows and headings, which
+       set display themselves. */
+    article :global(.mchart-modes) {
+      position: relative; display: grid; grid-template-columns: 1fr 1fr;
+      background: #23272e; border: 1px solid #2a2e35; border-radius: 999px;
+      padding: 2px;
+      /* Its own padding, border and the segment's own inset would set the
+         first label right of the numbers below it, which reads as the control
+         hanging off the side of the table. Pulling the box back by exactly
+         that puts the two texts on one line. */
+      margin-left: calc(-0.55rem - 3px);
+    }
     article :global(.mchart-modes[hidden]),
     article :global(.mchart-group[hidden]),
     article :global(.mchart-row[hidden]) { display: none; }
-    article :global(.mchart-current) {
-      font-size: 0.8rem; color: #b5bac3; cursor: pointer; list-style: none;
-      background: #23272e; border: 1px solid #2a2e35; border-radius: 6px;
-      padding: 0.25rem 0.55rem; display: inline-flex; align-items: center;
-      gap: 0.4rem;
-      /* Its own padding and border would set the label a padding-width right
-         of the numbers below it, which reads as the control hanging off the
-         side of the table. Pulling the box back by exactly that puts the two
-         texts on one line. */
-      margin-left: calc(-0.55rem - 1px);
+    /* The thumb is one element that moves, not a background that jumps
+       between two: half the track less its padding, so translating it by its
+       own width lands it exactly on the other segment. */
+    article :global(.mchart-thumb) {
+      position: absolute; top: 2px; bottom: 2px; left: 2px;
+      width: calc(50% - 2px); border-radius: 999px; background: #2a2f37;
+      border: 1px solid #4a5058;
+      transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
     }
-    article :global(.mchart-current::-webkit-details-marker) { display: none; }
-    article :global(.mchart-current::after) {
-      content: ""; width: 0; height: 0; border: 0.25rem solid transparent;
-      border-top-color: currentColor; margin-top: 0.25rem;
-      transition: transform 0.2s ease;
+    article :global(.mchart[data-mode="speed"] .mchart-thumb) {
+      transform: translateX(100%);
     }
-    article :global(.mchart-modes[open] .mchart-current::after) {
-      transform: rotate(180deg); margin-top: -0.2rem;
+    @media (prefers-reduced-motion: reduce) {
+      article :global(.mchart-thumb) { transition: none; }
     }
-    article :global(.mchart-current:hover) { color: #dde1e7; border-color: #3a3f47; }
-    article :global(.mchart-modes[open] .mchart-current) {
-      background: #2a2f37; color: #dde1e7; border-color: #4a5058;
+    article :global(.mchart-modes button) {
+      position: relative; z-index: 1; font: inherit; font-size: 0.8rem;
+      color: #8a8f99; cursor: pointer; background: none; border: 0;
+      border-radius: 999px; padding: 0.2rem 0.55rem;
+      transition: color 0.25s ease;
     }
-    article :global(.mchart-current:focus-visible) {
+    article :global(.mchart-modes button:hover) { color: #b5bac3; }
+    article :global(.mchart-modes button[aria-pressed="true"]) { color: #dde1e7; }
+    article :global(.mchart-modes button:focus-visible) {
       outline: 2px solid #6AAEEE; outline-offset: 2px;
-    }
-    /* A closed <details> hides its children by not laying them out - but an
-       absolutely positioned one escapes that in Firefox and sat open under
-       the summary. Closing it explicitly is the fix. */
-    article :global(.mchart-modes:not([open]) .mchart-list) { display: none; }
-    article :global(.mchart-list) {
-      position: absolute; z-index: 6; top: calc(100% + 5px);
-      left: calc(-0.55rem - 1px); min-width: 100%; padding: 0.25rem;
-      display: flex; flex-direction: column;
-      background: #1e2228; border: 1px solid #2a2e35; border-radius: 7px;
-      box-shadow: 0 8px 20px rgb(0 0 0 / 40%);
-    }
-    article :global(.mchart-list button) {
-      font: inherit; font-size: 0.8rem; color: #b5bac3; cursor: pointer;
-      background: none; border: 0; border-radius: 4px; text-align: left;
-      padding: 0.3rem 0.55rem 0.3rem 1.15rem; position: relative;
-      white-space: nowrap;
-    }
-    article :global(.mchart-list button:hover) { background: #23272e; color: #dde1e7; }
-    article :global(.mchart-list button[aria-pressed="true"]) { color: #dde1e7; }
-    /* The tick marks the current measure rather than a second highlight, which
-       would compete with hover for the same meaning. */
-    article :global(.mchart-list button[aria-pressed="true"]::before) {
-      content: ""; position: absolute; left: 0.45rem; top: 50%;
-      width: 0.3rem; height: 0.3rem; border-radius: 50%;
-      background: #6aaeee; transform: translateY(-50%);
-    }
-    article :global(.mchart-list button:focus-visible) {
-      outline: 2px solid #6AAEEE; outline-offset: -2px;
     }
     /* The site's own three: accent blue for the method that won, the warm
        accent for every neural arm, and the muted grey the page already uses
@@ -649,16 +629,15 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
 
     // The methods chart holds two measures per row - how often a method finds
     // the issue, and how long it takes - and a bar can only carry one at a
-    // time, so a dropdown over the chart picks which. The rows sort by
-    // whatever it picks, so the order always matches the measure on screen.
+    // time, so a two-segment switch over the chart picks which. The rows sort
+    // by whatever it picks, so the order always matches the measure on screen.
     // The control ships hidden and is revealed here: without this script the
     // chart is what it always was, recall in its written order.
     // #speed in the URL opens on the other measure, so a link can point at it.
     const mchart = document.querySelector<HTMLElement>('.mchart');
-    const mview = mchart?.querySelector<HTMLDetailsElement>('.mchart-modes');
-    const mcurrent = mview?.querySelector<HTMLElement>('.mchart-current');
-    if (mchart && mview && mcurrent) {
-      const options = Array.from(mview.querySelectorAll<HTMLButtonElement>('.mchart-list button'));
+    const mview = mchart?.querySelector<HTMLElement>('.mchart-modes');
+    if (mchart && mview) {
+      const options = Array.from(mview.querySelectorAll<HTMLButtonElement>('button'));
       const rows = Array.from(mchart.querySelectorAll<HTMLElement>('.mchart-row[data-recall]'));
       // Rows are sorted inside their own group, never across: the groups are
       // the chart's argument - counting words, a model, a second pass over
@@ -759,11 +738,6 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
 
       const paint = (mode: string, settle = false) => {
         mchart.dataset.mode = mode;
-        // Read off the chosen option rather than spelled again here: the
-        // markup is where these words live, and a second copy is how the
-        // closed control ended up lower case while its own menu was not.
-        const chosen = options.find(option => option.dataset.mode === mode);
-        if (chosen?.textContent) mcurrent.textContent = chosen.textContent;
         for (const option of options) {
           option.setAttribute('aria-pressed', String(option.dataset.mode === mode));
         }
@@ -808,19 +782,8 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
       };
 
       for (const option of options) {
-        option.addEventListener('click', () => {
-          paint(option.dataset.mode ?? 'recall');
-          mview.open = false;
-        });
+        option.addEventListener('click', () => paint(option.dataset.mode ?? 'recall'));
       }
-      // A menu left open behind a click elsewhere, or behind Escape, is a menu
-      // in the way.
-      document.addEventListener('click', event => {
-        if (mview.open && !mview.contains(event.target as Node)) mview.open = false;
-      });
-      document.addEventListener('keydown', event => {
-        if (event.key === 'Escape') mview.open = false;
-      });
       mview.removeAttribute('hidden');
       paint(location.hash === '#speed' ? 'speed' : 'recall', true);
     }
