@@ -35,14 +35,14 @@ Grading needed an answer key, and the forge already had one. Whenever I mention 
 The models I tried are all small enough to run on a laptop. Most turn each issue into a position in space, so that similar issues land near each other, and suggest the nearest ones. The chart shows each model on its own, and again as a second pass over what counting words found.
 
 <figure class="mchart" role="group" aria-label="Recall at 5 by method, in four groups. Two stages: counting words plus the links already between issues reaches 67.2 percent; blending in a neural model reaches 63.8 to 65.1, and the ms-marco-MiniLM-L-6-v2 reranker 49.4. Counting words alone: term weighting with comments reaches 63.8 percent, tuned BM25 62.8. Neural models on their own: the best, SPLADE, reaches 56.7 percent, and single-vector gte-small 46.0. Controls: recency 23.1 percent, random 2.6. Each row also gives the time to work through the forge once on my server's processor, from under a second for counting words to 55 minutes for Qwen3-Embedding.">
+  <div class="mchart-modes" hidden>
+    <button type="button" class="mchart-mode" data-mode="recall" aria-pressed="true">quality</button>
+    <button type="button" class="mchart-mode" data-mode="speed" aria-pressed="false">speed</button>
+  </div>
   <div class="mchart-key">
     <span><i class="mchart-sw mchart-lex"></i>no model</span>
     <span><i class="mchart-sw mchart-emb"></i>neural model</span>
     <span><i class="mchart-sw mchart-ctl"></i>baseline to beat</span>
-  </div>
-  <div class="mchart-modes" hidden>
-    <button type="button" class="mchart-mode" data-mode="recall" aria-pressed="true">how often it finds it</button>
-    <button type="button" class="mchart-mode" data-mode="speed" aria-pressed="false">how long it takes</button>
   </div>
   <div class="mchart-row mchart-ticks" hidden>
     <div></div>
