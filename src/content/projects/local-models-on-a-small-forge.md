@@ -60,6 +60,11 @@ The models I tried are a couple of hundred megabytes each, run without a graphic
     <div class="mchart-val">65.1%</div>
   </div>
   <div class="mchart-row">
+    <div class="mchart-label">+ <a href="https://huggingface.co/Qwen/Qwen3-Embedding-0.6B">Qwen3-Embedding</a>*</div>
+    <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:64.0%"></div></div>
+    <div class="mchart-val">64.0%</div>
+  </div>
+  <div class="mchart-row">
     <div class="mchart-label">+ <a href="https://huggingface.co/lightonai/GTE-ModernColBERT-v1">GTE-ModernColBERT</a>*</div>
     <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:64.1%"></div></div>
     <div class="mchart-val">64.1%</div>
@@ -132,6 +137,11 @@ The models I tried are a couple of hundred megabytes each, run without a graphic
     <div class="mchart-val">56.7%</div>
   </div>
   <div class="mchart-row">
+    <div class="mchart-label"><a href="https://huggingface.co/Qwen/Qwen3-Embedding-0.6B">Qwen3-Embedding-0.6B</a></div>
+    <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:56.2%"></div></div>
+    <div class="mchart-val">56.2%</div>
+  </div>
+  <div class="mchart-row">
     <div class="mchart-label"><a href="https://huggingface.co/answerdotai/answerai-colbert-small-v1">answerai-colbert-small</a></div>
     <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:54.4%"></div></div>
     <div class="mchart-val">54.4%</div>
@@ -193,6 +203,7 @@ The likeliest reason is what my issues are made of: identifiers like `StateDirec
 
 - **Reading the whole issue.** Splitting each issue and its comments into passages and scoring the best one lifted gte-small from 46.0% to 51.1%, still twelve points short.
 - **Rerankers.** Given whole issues, comments included, ms-marco-MiniLM-L-6-v2 reordered counting words' top twenty and landed fourteen points below the order it started from. A larger one, bge-reranker-base, did worse still on the first quarter of the queries, fifteen points below counting words there, and I stopped it.
+- **A newer, larger model.** Qwen3-Embedding-0.6B was the best single-vector model here at 56.2%, five points above gte-small and still seven below counting words; blended in, it added nothing.
 - **Rewriting identifiers into words.** Turning `checks/service-state.nix` into "checks service state nix" before the model read it changed nothing: gte-small stayed at about 51%. Making the identifiers readable isn't enough; what counting words exploits is that the exact string is rare.
 - **Teaching a model my vocabulary.** Fine-tuned on my own linked pairs, a model went from 37.7% to 40.9% on links it had never seen - inside the noise - against 48.7% for counting words on the same held-back slice.
 - **A learned ranker** over every score on this page matched the link rule, and taking the neural scores out of it changed nothing.
