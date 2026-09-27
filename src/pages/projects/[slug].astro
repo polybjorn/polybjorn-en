@@ -222,9 +222,17 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
        bars sit centred on the page; 1.7 is what keeps a side column at least
        as wide as the longest label at full width, and past that the label
        column only grows by what it needs. */
+    /* The number column is max-content, not a third of the figure: as 1fr it
+       was 176px holding about 40px of digits, so everything aligned to it -
+       the switch above all - hung in dead space well right of the last thing
+       a reader can see. Sized to its contents, the column's right edge IS the
+       numbers' right edge, the bars take back the difference, and the control
+       can align to a line that exists. The label column keeps its flex so the
+       bars still start clear of the longest name. */
     article :global(.mchart) {
       margin: 1.5rem 0; display: grid;
-      grid-template-columns: 1fr minmax(0, 1.7fr) 1fr; column-gap: 0.6rem;
+      grid-template-columns: 1fr minmax(0, 1.7fr) max-content;
+      column-gap: 0.6rem;
     }
     article :global(.mchart > *) { grid-column: 1 / -1; }
     /* Sits below the bars, so the spacing goes above it. */
@@ -250,7 +258,7 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
     article :global(.mchart-head .mchart-key) {
       grid-column: 1 / 3; justify-content: flex-start; flex-wrap: nowrap;
     }
-    article :global(.mchart-modes) { grid-column: 3 / 4; justify-self: start; }
+    article :global(.mchart-modes) { grid-column: 3 / 4; justify-self: end; }
     /* Alone - no JS, so no control - the key centres over the whole figure
        again, which is where it sat before there was anything beside it. */
     article :global(.mchart-head:has(.mchart-modes[hidden]) .mchart-key) {
@@ -334,6 +342,7 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
     }
     article :global(.mchart-val) {
       font-size: 0.85rem; font-variant-numeric: tabular-nums; color: #dde1e7;
+      text-align: right;
     }
     /* Two segments and a thumb that slides between them, because there is one
        question - which measure the bars are showing - and two answers. A
@@ -352,11 +361,11 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
       position: relative; display: grid; grid-template-columns: 1fr 1fr;
       background: #23272e; border: 1px solid #2a2e35; border-radius: 999px;
       padding: 2px;
-      /* Its own padding, border and the segment's own inset would set the
-         first label right of the numbers below it, which reads as the control
-         hanging off the side of the table. Pulling the box back by exactly
-         that puts the two texts on one line. */
-      margin-left: calc(-0.55rem - 3px);
+      /* Its own padding, border and the segment's inset would set the last
+         label a padding-width inside its own right edge, which reads as the
+         control stopping short of the column it sits over. Pushing the box
+         out by exactly that lines the two texts up on the right. */
+      margin-right: calc(-0.55rem - 3px);
     }
     article :global(.mchart-modes[hidden]),
     article :global(.mchart-group[hidden]),
