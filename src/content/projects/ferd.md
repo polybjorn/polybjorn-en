@@ -15,7 +15,7 @@ links:
 
 For years my GPS routes from hikes sat in a folder on disk, and the places I'd been or wanted to go were mostly in my head. I'd never found a tool that held both.
 
-Phone apps already do a lot of this. Organic Maps and OsmAnd both keep bookmarks and GPS routes on the same map, and Trail Sense covers the outdoor utility side. But each of them keeps its map on the one device it's installed on, and I wanted one that every device can reach.
+Phone apps already do a lot of this. [CoMaps](https://comaps.app) and [OsmAnd](https://osmand.net) both keep bookmarks and GPS routes on the same map, and [Trail Sense](https://kylecorry.com/Trail-Sense/) covers the outdoor utility side. I still use all three. But they are phone apps, and what I save in them stays on the phone. I wanted one copy on a machine I own, reachable from any device with a browser.
 
 Ferd is that option: one map for the pins and the lines, running on my own machine.
 
