@@ -186,10 +186,19 @@ Counting words beat every model. The best one on its own, SPLADE, was seven poin
 
 The likeliest reason is what my issues are made of. They're full of exact names, like `StateDirectory`, `checks/service-state.nix` and the names of my machines. Matching a rare string exactly is what counting words does best, and what a model trained on ordinary prose does worst.
 
-<button class="img-zoom" type="button" data-full="/images/local-models-vocabulary.svg">
-  <img src="/images/local-models-vocabulary.svg" alt="An issue from the forge with its words shaded by how many of the forge's issues contained them when I measured. The rarest are identifiers: checks/service-state.nix appears in 14, StateDirectory in 13, census in 5, packaged in 2 and rowless-unit in 1. The ordinary English words around them appear in hundreds." />
-</button>
-<p class="img-caption">One issue, each word shaded by how many issues it appears in. The rare ones carry the meaning, and they&#39;re mostly exact names a model trained on English has rarely seen. Rarity is counted across this forge, not across English, which is why an ordinary word like "fewer" counts as rare here.</p>
+<figure class="vocab">
+  <div class="vocab-issue">
+    <div class="vocab-title"><span class="v-mid">checks:</span><span class="v-rare"> service-state</span><span class="v-common"> cannot</span><span class="v-mid"> see</span><span class="v-common"> a</span><span class="v-rare"> StateDirectory</span><span class="v-common"> from</span><span class="v-common"> a</span><span class="v-rare"> packaged</span><span class="v-mid"> unit</span></div>
+    <div class="vocab-body"><span class="v-rare">checks/service-state.nix</span><span class="v-common"> cannot</span><span class="v-mid"> see</span><span class="v-common"> a</span><span class="v-rare"> StateDirectory=</span><span class="v-common"> that</span><span class="v-mid"> comes</span><span class="v-common"> from</span><span class="v-common"> a</span><span class="v-rare"> PACKAGED</span><span class="v-mid"> unit</span><span class="v-common"> file,</span><span class="v-common"> so</span><span class="v-common"> the</span><span class="v-rare"> rowless-unit</span><span class="v-rare"> census</span><span class="v-link"> #849</span><span class="v-mid"> added</span><span class="v-mid"> asks</span><span class="v-common"> its</span><span class="v-mid"> question</span><span class="v-common"> of</span><span class="v-rare"> fewer</span><span class="v-mid"> units</span><span class="v-common"> than</span><span class="v-common"> the</span><span class="v-common"> host</span><span class="v-common"> has.</span></div>
+    <div class="vocab-key">
+      <span><i class="vocab-sw sw-rare"></i>in 20 or fewer issues</span>
+      <span><i class="vocab-sw sw-mid"></i>21 to 150</span>
+      <span><i class="vocab-sw sw-common"></i>more than 150</span>
+      <span><i class="vocab-sw sw-link"></i>hidden link</span>
+    </div>
+  </div>
+  <figcaption class="vocab-cap">One issue, each word shaded by how many of the forge&#39;s 489 issues it appears in. The rare ones carry the meaning, and they&#39;re mostly exact names a model trained on English has rarely seen. Rarity is counted across this forge, not across English, which is why an ordinary word like &quot;fewer&quot; counts as rare here.</figcaption>
+</figure>
 
 Where a method had settings to tune, I tuned them on older links and checked them on newer ones, so the results aren't just fitted to the answers. The answer key only counts links someone bothered to write, so a useful suggestion can still score as a miss, and the real numbers are probably a little higher. Most of those links were written by the AI coding agents I run, which search by keyword and might favour counting words, but the models lost on the links I wrote myself too.
 

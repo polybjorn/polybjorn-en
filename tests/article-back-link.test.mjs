@@ -48,10 +48,19 @@ test('a lookalike host cannot aim the arrow', () => {
 });
 
 test('the harness really is running the page script', () => {
-  // Without this the four tests above would pass on a page whose script never
-  // ran, since the unchanged href is also the expected answer in three of them.
-  // The lightbox is built by that same script and by nothing else.
+  // Without this the tests above would pass on a page whose script never ran,
+  // since the unchanged href is also the expected answer in three of them.
+  //
+  // The scroll handler, not the lightbox: that was the guard until this article
+  // stopped carrying an image, and a guard that only holds while a page happens
+  // to have a zoomable figure is not one. This handler is registered
+  // unconditionally by the same script the arrow depends on.
   const { window } = loadPage(ARTICLE, { url: EN, runModules: true });
-  assert.ok(window.document.querySelector('.gallery-lightbox'),
+  const arrow = window.document.querySelector('.back-home');
+  assert.equal(arrow.classList.contains('hidden'), false, 'the arrow starts visible');
+
+  window.scrollY = 120;
+  window.dispatchEvent(new window.Event('scroll'));
+  assert.ok(arrow.classList.contains('hidden'),
     'the page script did not run, so the assertions above prove nothing');
 });
