@@ -343,16 +343,15 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
       line-height: 1.75;
     }
     article :global(.vocab-title) { font-size: 0.92rem; margin-bottom: 0.7rem; }
-    /* The four inks the SVG had, unchanged, and still counted across this forge
-       rather than across English. The rarest are the identifiers, which is the
-       whole claim the figure is making. */
+    /* Three inks, counted across this forge rather than across English. The
+       rarest are the identifiers, which is the whole claim the figure is
+       making. */
     article :global(.v-rare) { color: #6aaeee; font-weight: 600; }
     article :global(.v-mid) { color: #b5bac3; }
     article :global(.v-common) { color: #6b7681; }
-    article :global(.v-link) { color: #4a5058; }
-    /* Swatches rather than the words themselves in their own colour: the
-       hidden-link ink is nearly the background by design, which is fine on a
-       reference inside the text and useless on the label explaining it. */
+    /* Swatches rather than the labels in their own ink: the common band is a
+       dim grey that is readable as one word inside a sentence and tiring as a
+       label, and the swatch keeps all three labels the same legible colour. */
     article :global(.vocab-key) {
       display: flex; flex-wrap: wrap; gap: 0.3rem 1rem;
       /* Centred like .mchart-key, so the key reads as belonging to the figure
@@ -367,7 +366,6 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
     article :global(.sw-rare) { background: #6aaeee; }
     article :global(.sw-mid) { background: #b5bac3; }
     article :global(.sw-common) { background: #6b7681; }
-    article :global(.sw-link) { background: #4a5058; }
     /* Below the figure and muted, the way the chart's caption sits, rather than
        welded to the card the way .img-caption is to an image. */
     article :global(.vocab-cap) {

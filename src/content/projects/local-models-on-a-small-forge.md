@@ -189,15 +189,14 @@ The likeliest reason is what my issues are made of. They're full of exact names,
 <figure class="vocab">
   <div class="vocab-issue">
     <div class="vocab-title"><span class="v-mid">checks:</span><span class="v-rare"> service-state</span><span class="v-common"> cannot</span><span class="v-mid"> see</span><span class="v-common"> a</span><span class="v-rare"> StateDirectory</span><span class="v-common"> from</span><span class="v-common"> a</span><span class="v-rare"> packaged</span><span class="v-mid"> unit</span></div>
-    <div class="vocab-body"><span class="v-rare">checks/service-state.nix</span><span class="v-common"> cannot</span><span class="v-mid"> see</span><span class="v-common"> a</span><span class="v-rare"> StateDirectory=</span><span class="v-common"> that</span><span class="v-mid"> comes</span><span class="v-common"> from</span><span class="v-common"> a</span><span class="v-rare"> PACKAGED</span><span class="v-mid"> unit</span><span class="v-common"> file,</span><span class="v-common"> so</span><span class="v-common"> the</span><span class="v-rare"> rowless-unit</span><span class="v-rare"> census</span><span class="v-link"> #849</span><span class="v-mid"> added</span><span class="v-mid"> asks</span><span class="v-common"> its</span><span class="v-mid"> question</span><span class="v-common"> of</span><span class="v-rare"> fewer</span><span class="v-mid"> units</span><span class="v-common"> than</span><span class="v-common"> the</span><span class="v-common"> host</span><span class="v-common"> has.</span></div>
+    <div class="vocab-body"><span class="v-rare">checks/service-state.nix</span><span class="v-common"> cannot</span><span class="v-mid"> see</span><span class="v-common"> a</span><span class="v-rare"> StateDirectory=</span><span class="v-common"> that</span><span class="v-mid"> comes</span><span class="v-common"> from</span><span class="v-common"> a</span><span class="v-rare"> PACKAGED</span><span class="v-mid"> unit</span><span class="v-common"> file,</span><span class="v-common"> so</span><span class="v-common"> the</span><span class="v-rare"> rowless-unit</span><span class="v-rare"> census</span><span class="v-mid"> added</span><span class="v-mid"> asks</span><span class="v-common"> its</span><span class="v-mid"> question</span><span class="v-common"> of</span><span class="v-rare"> fewer</span><span class="v-mid"> units</span><span class="v-common"> than</span><span class="v-common"> the</span><span class="v-common"> host</span><span class="v-common"> has.</span></div>
     <div class="vocab-key">
-      <span><i class="vocab-sw sw-rare"></i>in 20 or fewer issues</span>
+      <span><i class="vocab-sw sw-rare"></i>in up to 20 issues</span>
       <span><i class="vocab-sw sw-mid"></i>21 to 150</span>
       <span><i class="vocab-sw sw-common"></i>more than 150</span>
-      <span><i class="vocab-sw sw-link"></i>hidden link</span>
     </div>
   </div>
-  <figcaption class="vocab-cap">Counted across this forge&#39;s 489 issues, not across English - so &quot;fewer&quot; is rare here.</figcaption>
+  <figcaption class="vocab-cap">Rarity is counted across this forge&#39;s 489 issues, not across English, so a plain word like &quot;fewer&quot; comes out rare.</figcaption>
 </figure>
 
 Where a method had settings to tune, I tuned them on older links and checked them on newer ones, so the results aren't just fitted to the answers. The answer key only counts links someone bothered to write, so a useful suggestion can still score as a miss, and the real numbers are probably a little higher. Most of those links were written by the AI coding agents I run, which search by keyword and might favour counting words, but the models lost on the links I wrote myself too.
