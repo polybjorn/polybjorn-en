@@ -383,7 +383,13 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
     }
     article :global(.mchart-modes[hidden]),
     article :global(.mchart-group[hidden]),
+    article :global(.mchart-said[hidden]),
     article :global(.mchart-row[hidden]) { display: none; }
+    /* The caption says what the view on screen measures and nothing about the
+       other one, so each sentence is shorter than the pair it replaced. Without
+       the script only the recall sentence is ever shown, which is the only view
+       there is then. It is a block so its height is measurable when it swaps. */
+    article :global(.mchart-said) { display: block; }
     /* The thumb is one element that moves, not a background that jumps
        between two: half the track less its padding, so translating it by its
        own width lands it exactly on the other segment. */
@@ -665,6 +671,8 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
     if (mchart && mview) {
       const options = Array.from(mview.querySelectorAll<HTMLButtonElement>('button'));
       const rows = Array.from(mchart.querySelectorAll<HTMLElement>('.mchart-row[data-recall]'));
+      const cap = mchart.querySelector<HTMLElement>('.mchart-cap');
+      const said = Array.from(mchart.querySelectorAll<HTMLElement>('.mchart-said'));
       // Only what actually differs between the views fades. A group heading
       // says the same thing in both, and the caption and the key never change
       // at all, so fading them just made the whole chart blink. The one
@@ -892,6 +900,7 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
               val.textContent = row.dataset.recall + '%';
             }
           }
+          for (const el of said) el.toggleAttribute('hidden', el.dataset.said !== mode);
           for (const step of order) {
             step.group.heading.toggleAttribute('hidden',
               mode === 'speed' && step.group.rows.every(row => !row.dataset.secs));
@@ -919,9 +928,25 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
         // change.
         const boxes = boxesOf();
         const from = placesOf();
+        const tall = cap ? cap.getBoundingClientRect().height : 0;
         rebuild();
         travel(from);
         fold(boxes);
+        // The caption is the one thing that cannot travel to its new state - it
+        // is different words - so it crosses over where it stands, and its box
+        // is tweened because the two sentences need not wrap to the same number
+        // of lines. Text inside a box that changes height snaps, which is why
+        // the fade is over the sentence and the tween is under it.
+        if (cap) {
+          const now = cap.getBoundingClientRect().height;
+          for (const el of said) {
+            if (el.hasAttribute('hidden')) continue;
+            el.animate([{ opacity: 0 }, { opacity: 1 }], { duration: Math.round(TRAVEL / 2), easing: 'ease-out' });
+          }
+          if (Math.abs(now - tall) > 0.5) {
+            cap.animate([{ height: tall + 'px' }, { height: now + 'px' }], { duration: TRAVEL, easing: EASE });
+          }
+        }
       };
 
       for (const option of options) {

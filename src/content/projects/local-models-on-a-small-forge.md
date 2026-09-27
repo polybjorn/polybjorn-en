@@ -186,7 +186,7 @@ The models I tried are all small enough to run on a laptop. Most turn each issue
     <div class="mchart-track"><div class="mchart-bar mchart-ctl" style="width:2.6%"></div></div>
     <div class="mchart-val">2.6%</div>
   </div>
-  <figcaption class="mchart-cap">How often the issue someone linked lands in the first five suggestions. The other view times one pass over the forge, each step ten times the last.</figcaption>
+  <figcaption class="mchart-cap"><span class="mchart-said" data-said="recall">How often the issue someone linked lands in the first five suggestions.</span><span class="mchart-said" data-said="speed" hidden>How long one pass over the forge takes, on a scale where each step is ten times the last.</span></figcaption>
 </figure>
 
 Counting words beat every model. The best one on its own, SPLADE, was seven points behind, and blending any of them into counting words added a point or two at most. What did help was structure rather than language. A decision, its follow-ups and the fix that later undid it tend to link to each other, so one good hit pulls in related issues that share few words with the new one.
