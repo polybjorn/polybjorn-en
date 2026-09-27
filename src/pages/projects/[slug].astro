@@ -700,13 +700,53 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
         .filter(group => group.rows.every(row => !row.dataset.secs))
         .map(group => group.heading);
 
-      // The order a mode puts the rows in, worked out before anything moves,
-      // so the fade can be aimed at what the switch actually changes.
-      const orderFor = (mode: string) => groups.flatMap(group => group.rows
+      const orderFor = (mode: string, group: Group) => group.rows
         .filter(row => !(mode === 'speed' && !row.dataset.secs))
         .sort(mode === 'speed'
           ? (one, two) => Number(one.dataset.secs ?? Infinity) - Number(two.dataset.secs ?? Infinity)
-          : (one, two) => Number(two.dataset.recall) - Number(one.dataset.recall)));
+          : (one, two) => Number(two.dataset.recall) - Number(one.dataset.recall));
+
+      // Which rows a reorder can leave where they are. Not "same index in both
+      // orders" - that was the first answer and it was wrong, because inserting
+      // rows AROUND a row still moves it, and a moved node loses its running
+      // transition. What survives is the longest run of rows already in the
+      // right relative order; everything else has to be lifted past them. The
+      // winner comes out in that run, which is the point.
+      const stayPut = (sorted: HTMLElement[], live: HTMLElement[]) => {
+        const at = new Map(live.map((row, index) => [row, index]));
+        const seq = sorted.map(row => at.get(row) ?? -1);
+        const tails: number[] = [];
+        const tailAt: number[] = [];
+        const cameFrom = new Array(seq.length).fill(-1);
+        for (let i = 0; i < seq.length; i += 1) {
+          if (seq[i] < 0) continue;
+          let low = 0;
+          let high = tails.length;
+          while (low < high) {
+            const mid = (low + high) >> 1;
+            if (tails[mid] < seq[i]) low = mid + 1; else high = mid;
+          }
+          tails[low] = seq[i];
+          tailAt[low] = i;
+          cameFrom[i] = low > 0 ? tailAt[low - 1] : -1;
+        }
+        const keep = new Set<HTMLElement>();
+        let walk = tailAt.length ? tailAt[tailAt.length - 1] : -1;
+        while (walk >= 0) {
+          keep.add(sorted[walk]);
+          walk = cameFrom[walk];
+        }
+        return keep;
+      };
+
+      // One plan per switch, used twice: to decide what fades, and to do the
+      // reorder. Two answers to that question would drift apart.
+      const planFor = (mode: string) => groups.map(group => {
+        const sorted = orderFor(mode, group);
+        const live = (Array.from(mchart.children) as HTMLElement[])
+          .filter(child => group.rows.includes(child));
+        return { group, sorted, keep: stayPut(sorted, live) };
+      });
 
       // What crosses over is not the whole table. A label reads the same in
       // both views, so a row that keeps its place only swaps its bar and its
@@ -714,13 +754,12 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
       // otherwise the label slides while the bar beside it is mid-fade, which
       // is the jump the fade exists to hide. The controls and their heading
       // leave entirely, so they go whole too.
-      const crossingParts = (mode: string) => {
-        const after = orderFor(mode);
-        const before = orderFor(mchart.dataset.mode === 'speed' ? 'speed' : 'recall');
+      const crossingParts = (plan: ReturnType<typeof planFor>) => {
+        const staying = new Set<HTMLElement>();
+        for (const step of plan) for (const row of step.keep) staying.add(row);
         const parts: HTMLElement[] = [];
         for (const row of rows) {
-          const stays = !(mode === 'speed' && !row.dataset.secs)
-            && before.indexOf(row) === after.indexOf(row);
+          const stays = staying.has(row);
           row.classList.toggle('mchart-slide', stays);
           if (!stays) {
             parts.push(row);
@@ -779,7 +818,8 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
         for (const option of options) {
           option.setAttribute('aria-pressed', String(option.dataset.mode === mode));
         }
-        const table = crossingParts(mode);
+        const plan = planFor(mode);
+        const table = crossingParts(plan);
         mchart.dataset.mode = mode;
         cross(() => {
           for (const row of rows) {
@@ -800,14 +840,19 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
               val.textContent = row.dataset.recall + '%';
             }
           }
-          for (const group of groups) {
-            group.heading.toggleAttribute('hidden',
-              mode === 'speed' && group.rows.every(row => !row.dataset.secs));
-            const sorted = group.rows.slice();
-            sorted.sort(mode === 'speed'
-              ? (one, two) => Number(one.dataset.secs ?? Infinity) - Number(two.dataset.secs ?? Infinity)
-              : (one, two) => Number(two.dataset.recall) - Number(one.dataset.recall));
-            for (const row of sorted) mchart.insertBefore(row, group.anchor);
+          for (const step of plan) {
+            step.group.heading.toggleAttribute('hidden',
+              mode === 'speed' && step.group.rows.every(row => !row.dataset.secs));
+            // Walked backwards so each row that has to move is placed directly
+            // before the one that follows it, and the rows being kept are
+            // never touched - a moved node loses its running transition, and
+            // those are the ones whose bars are meant to travel.
+            let after: Node | null = step.group.anchor;
+            for (let i = step.sorted.length - 1; i >= 0; i -= 1) {
+              const row = step.sorted[i];
+              if (!step.keep.has(row)) mchart.insertBefore(row, after);
+              after = row;
+            }
           }
         }, settle, table);
       };
