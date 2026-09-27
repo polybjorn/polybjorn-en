@@ -41,10 +41,13 @@ The models I tried are all small enough to run on a laptop. Most turn each issue
       <span><i class="mchart-sw mchart-emb"></i>neural model</span>
       <span><i class="mchart-sw mchart-ctl"></i>baseline to beat</span>
     </div>
-    <select class="mchart-modes" hidden aria-label="what the bars show">
-      <option value="recall" selected>quality</option>
-      <option value="speed">speed</option>
-    </select>
+    <details class="mchart-modes" hidden>
+      <summary class="mchart-current" aria-label="what the bars show">quality</summary>
+      <div class="mchart-list">
+        <button type="button" data-mode="recall" aria-pressed="true">quality</button>
+        <button type="button" data-mode="speed" aria-pressed="false">speed</button>
+      </div>
+    </details>
   </div>
   <div class="mchart-group">Counting words, then a second pass</div>
   <div class="mchart-row" data-recall="67.2" data-secs="0.4">
@@ -57,15 +60,15 @@ The models I tried are all small enough to run on a laptop. Most turn each issue
     <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:65.1%"></div></div>
     <div class="mchart-val">65.1%</div>
   </div>
-  <div class="mchart-row" data-recall="64.0" data-secs="3294">
-    <div class="mchart-label">+ <a href="https://huggingface.co/Qwen/Qwen3-Embedding-0.6B">Qwen3-Embedding</a></div>
-    <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:64.0%"></div></div>
-    <div class="mchart-val">64.0%</div>
-  </div>
   <div class="mchart-row" data-recall="64.1" data-secs="161">
     <div class="mchart-label">+ <a href="https://huggingface.co/lightonai/GTE-ModernColBERT-v1">GTE-ModernColBERT</a></div>
     <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:64.1%"></div></div>
     <div class="mchart-val">64.1%</div>
+  </div>
+  <div class="mchart-row" data-recall="64.0" data-secs="3294">
+    <div class="mchart-label">+ <a href="https://huggingface.co/Qwen/Qwen3-Embedding-0.6B">Qwen3-Embedding</a></div>
+    <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:64.0%"></div></div>
+    <div class="mchart-val">64.0%</div>
   </div>
   <div class="mchart-row" data-recall="64.0" data-secs="295">
     <div class="mchart-label">+ <a href="https://huggingface.co/thenlper/gte-small">gte-small</a></div>
