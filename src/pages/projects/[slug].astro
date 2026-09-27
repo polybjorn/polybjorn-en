@@ -90,10 +90,19 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
        `content: " \00b7 "` down to `content:" \00b7"`, which leaves the dot
        welded to the word after it. */
     .meta-upd::before { content: "\00b7"; margin: 0 0.45em; }
-    /* Same middot, kept grey, so only the status itself takes the warm accent
-       and does not read as more date. */
-    .meta-wip { color: #e8b775; }
-    .meta-wip::before { content: "\00b7"; color: #8a8f99; margin: 0 0.45em; }
+    /* A piece still in progress marks its latest date in the warm accent and
+       names the status on hover or focus. The label fades with opacity rather
+       than visibility so a screen reader still reads it in place. */
+    .meta-live { color: #e8b775; position: relative; cursor: help; outline: none; }
+    .meta-live:focus-visible { outline: 2px solid #6AAEEE; outline-offset: 2px; border-radius: 2px; }
+    .meta-wip {
+      position: absolute; left: 50%; top: calc(100% + 4px); transform: translateX(-50%); z-index: 5;
+      white-space: nowrap; font-size: 0.8rem; padding: 0.3rem 0.55rem; border-radius: 5px;
+      background: #1e2228; border: 1px solid #2a2e35; color: #e8b775;
+      opacity: 0; pointer-events: none; transition: opacity 0.12s;
+    }
+    .meta-live:hover .meta-wip,
+    .meta-live:focus .meta-wip { opacity: 1; }
 
     article :global(h2) { font-size: 1.5rem; margin: 2rem 0 0.75rem; font-weight: 700; }
     article :global(h3) { font-size: 1.2rem; margin: 1.5rem 0 0.5rem; font-weight: 700; }
@@ -414,9 +423,14 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
     )}
     <h1>{project.data.title}</h1>
     <div class="meta">
-      {fmt(project.data.date)}
-      {project.data.updated && <span class="meta-upd">updated {fmt(project.data.updated)}</span>}
-      {project.data.wip && <span class="meta-wip">work in progress</span>}
+      {project.data.updated ? (
+        <>
+          {fmt(project.data.date)}
+          <span class="meta-upd"><span class:list={{ 'meta-live': project.data.wip }} tabindex={project.data.wip ? 0 : undefined}>updated {fmt(project.data.updated)}{project.data.wip && <span class="meta-wip" role="tooltip">work in progress</span>}</span></span>
+        </>
+      ) : (
+        <span class:list={{ 'meta-live': project.data.wip }} tabindex={project.data.wip ? 0 : undefined}>{fmt(project.data.date)}{project.data.wip && <span class="meta-wip" role="tooltip">work in progress</span>}</span>
+      )}
     </div>
     <article>
       <Content />
