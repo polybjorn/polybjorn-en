@@ -12,19 +12,26 @@ interface Props {
 const { lang } = Astro.props as Props;
 const tr = t[lang];
 
+// The date a card is filed under, and the one it shows - the two have to be the
+// same or a column of sorted dates stops descending. A work in progress is dated
+// by its latest revision, because the day it first went up says little while a
+// piece is still moving; a finished piece keeps its publication date. The cost
+// is that editing a work in progress moves it back to the top, which is the
+// right answer for something still being worked on.
+//
+// The feed does not follow: pubDate means publication, and a reader's client
+// would resurface an item on every revision. See projects/rss.xml.js.
+type Dated = { date: Date; updated?: Date; wip: boolean };
+const dated = (data: Dated) => data.wip ? (data.updated ?? data.date) : data.date;
+
 // Listed wherever the route is emitted - see [slug].astro. The RSS channel
 // stays strict, because a feed is not what anyone previews.
 const projects = (await getCollection('projects', ({ data }) =>
   import.meta.env.DEV || process.env.PREVIEW === '1' || (!data.draft && !data.unlisted)))
-  .sort((a, b) => b.data.date.valueOf() - a.data.date.valueOf());
+  .sort((a, b) => dated(b.data).valueOf() - dated(a.data).valueOf());
 
 const fmt = (d: Date) => d.toISOString().slice(0, 10);
-// A work in progress is dated by its latest revision, not by the day it first
-// went up: the publication date is the less useful of the two while a piece is
-// still moving, so it is dropped rather than shown alongside. A finished piece
-// keeps its publication date, which is what the ordering is by.
-const shown = (data: { date: Date; updated?: Date; wip: boolean }) =>
-  fmt(data.wip ? (data.updated ?? data.date) : data.date);
+const shown = (data: Dated) => fmt(dated(data));
 const cardHref = (slug: string) => lang === 'no' ? `https://polybjorn.com/projects/${slug}` : `/projects/${slug}`;
 // The path on the other site, not on this one: polybjorn.no serves the
 // Norwegian build at its root, so /no/prosjekter is a 404 over there.
