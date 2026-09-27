@@ -302,47 +302,50 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
     }
     article :global(.mchart-track) { background: #23272e; border-radius: 3px; height: 1.15rem; }
     article :global(.mchart-bar) { height: 100%; border-radius: 3px; min-width: 2px; }
-    /* Two numbers share the side column: what the bar measures, and what the
-       method costs to run. The percentage holds a fixed width so the times
-       line up down the chart whatever the recall reads, and the time is muted
-       because the bars are the comparison and this is the price beside it. */
     article :global(.mchart-val) {
       font-size: 0.85rem; font-variant-numeric: tabular-nums; color: #dde1e7;
-      display: flex; align-items: baseline; gap: 0.7rem;
     }
-    article :global(.mchart-pct) { min-width: 3.1rem; }
-    /* Time gets its own panel rather than a second bar in the same track:
-       recall is a percentage and a run is anything from a fifth of a second to
-       an hour, and one geometry carrying both scales misreads both. Each step
-       across the strip is ten times the last, so a dot says which order of
-       magnitude and claims nothing finer; the hairlines are 1s, 1min and 1h.
-       The two controls carry no dot because neither builds an index. */
-    article :global(.mchart-time) {
-      position: relative; flex: 1; min-width: 74px; height: 1.15rem;
-      margin-right: 5px;
-      background-image: linear-gradient(#2a2e35, #2a2e35),
-        linear-gradient(#2a2e35, #2a2e35), linear-gradient(#2a2e35, #2a2e35);
-      background-size: 1px 62%, 1px 62%, 1px 62%;
-      background-position: 21.9% 50%, 61.0% 50%, 100% 50%;
+    /* The two views. A bar means one thing at a time: recall on a linear
+       percentage, or the run on a decade scale where each gridline is ten
+       times the last. Both at once needs two scales in one geometry, which
+       misreads both, so the reader picks. The buttons and the axis ship
+       hidden and the script reveals them, because without it the toggle is a
+       control that does nothing.
+       [hidden] alone will not hide either: .mchart-row and .mchart-modes set
+       display, and a display rule beats the attribute. */
+    article :global(.mchart-modes) {
+      display: flex; justify-content: center; gap: 0.4rem; margin-bottom: 0.9rem;
+    }
+    article :global(.mchart-modes[hidden]),
+    article :global(.mchart-row[hidden]) { display: none; }
+    article :global(.mchart-mode) {
+      font: inherit; font-size: 0.8rem; color: #b5bac3; cursor: pointer;
+      background: #23272e; border: 1px solid #2a2e35; border-radius: 999px;
+      padding: 0.25rem 0.75rem;
+    }
+    article :global(.mchart-mode:hover) { color: #dde1e7; border-color: #3a3f47; }
+    article :global(.mchart-mode[aria-pressed="true"]) {
+      background: #2a2f37; color: #dde1e7; border-color: #4a5058;
+    }
+    article :global(.mchart-mode:focus-visible) {
+      outline: 2px solid #6AAEEE; outline-offset: 2px;
+    }
+    article :global(.mchart-ticks) { margin-bottom: 0.45rem; }
+    article :global(.mchart-tickbar) {
+      position: relative; height: 0.9rem; font-size: 0.7rem; color: #8a8f99;
+    }
+    article :global(.mchart-tickbar span) {
+      position: absolute; top: 0; transform: translateX(-50%);
+    }
+    article :global(.mchart-tickbar span:last-child) { transform: translateX(-100%); }
+    /* Decade gridlines live on the track and only while it measures time; on
+       the recall view they would mark nothing. */
+    article :global(.mchart[data-mode="speed"] .mchart-track) {
+      background-image: linear-gradient(#2f343c, #2f343c),
+        linear-gradient(#2f343c, #2f343c), linear-gradient(#2f343c, #2f343c);
+      background-size: 1px 100%, 1px 100%, 1px 100%;
+      background-position: 21.9% 0, 61.0% 0, calc(100% - 1px) 0;
       background-repeat: no-repeat;
-    }
-    article :global(.mchart-dot) {
-      position: absolute; top: 50%; width: 8px; height: 8px;
-      border-radius: 50%; transform: translate(-50%, -50%);
-      /* Surface ring, so a dot landing on a hairline still reads as a dot. */
-      box-shadow: 0 0 0 2px #1e2228;
-    }
-    article :global(.mchart-scale) { margin-bottom: 0.15rem; }
-    article :global(.mchart-scale .mchart-time) { background-image: none; }
-    article :global(.mchart-scale .mchart-pct),
-    article :global(.mchart-scale .mchart-time span) {
-      font-size: 0.7rem; color: #8a8f99; letter-spacing: 0.03em;
-    }
-    article :global(.mchart-scale .mchart-time span) {
-      position: absolute; top: 50%; transform: translate(-50%, -50%);
-    }
-    article :global(.mchart-scale .mchart-time span:last-child) {
-      transform: translate(-90%, -50%);
     }
     /* The site's own three: accent blue for the method that won, the warm
        accent for every neural arm, and the muted grey the page already uses
@@ -352,10 +355,9 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
     article :global(.mchart-lex) { background: #6aaeee; }
     article :global(.mchart-emb) { background: #e8b775; }
     article :global(.mchart-ctl) { background: #8a8f99; }
-    /* 560, not 480: the row carries two numbers now, and between those two
-       widths the side column wins the fight for space and leaves the bars
-       about 130px to say everything in. Stacking the label sooner gives them
-       the full column back. */
+    /* 560, not 480: kept from the two-number layout. The rows are back to one
+       number, but the axis labels and the button row both read better stacked
+       before the bars get narrow. */
     @media (max-width: 560px) {
       article :global(.mchart) { grid-template-columns: 1fr max-content; column-gap: 0.5rem; }
       article :global(.mchart-row) { row-gap: 0.35rem; }
@@ -363,7 +365,7 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
       /* The scale row carries one empty cell per column it has to skip, so it
          sheds one when the grid drops to two columns - otherwise its third
          child wraps onto a line of its own and the axis sits under the bars. */
-      article :global(.mchart-scale > div:first-child) { display: none; }
+      article :global(.mchart-ticks > div:first-child) { display: none; }
       /* label moves above its own bar rather than squeezing a third column */
       article :global(.mchart-label) {
         grid-column: 1 / -1; text-align: left; margin-top: 0.4rem;
@@ -576,6 +578,67 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
       backHome.classList.toggle('hidden', window.scrollY > 60);
       scrollTop.classList.toggle('visible', window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 20);
     }, { passive: true });
+
+    // The methods chart holds two measures per row and a bar can only carry
+    // one of them, so the reader picks which. Recall is the default and the
+    // only view a reader without JS gets, which is why the buttons and the
+    // time axis ship hidden in the markup and are revealed from here rather
+    // than the other way round. #speed in the URL opens on the other view, so
+    // a link can point at it.
+    const mchart = document.querySelector<HTMLElement>('.mchart');
+    if (mchart) {
+      const modeButtons = Array.from(mchart.querySelectorAll<HTMLButtonElement>('.mchart-mode'));
+      const ticks = mchart.querySelector<HTMLElement>('.mchart-ticks');
+      const rows = Array.from(mchart.querySelectorAll<HTMLElement>('.mchart-row[data-recall]'));
+      // Same decade scale the axis is labelled on: 0.1s at the left, 1h at the
+      // right. A run under a tenth of a second would fall off the left, and
+      // nothing here is that fast.
+      const LOW = Math.log10(0.1);
+      const SPAN = Math.log10(3600) - LOW;
+      const say = (t: number) => t < 1 ? t.toFixed(1) + ' s'
+        : t < 60 ? Math.round(t) + ' s'
+        : t < 3600 ? Math.round(t / 60) + ' min' : (t / 3600).toFixed(1) + ' h';
+
+      const paint = (mode: string) => {
+        mchart.dataset.mode = mode;
+        if (ticks) ticks.toggleAttribute('hidden', mode !== 'speed');
+        for (const row of rows) {
+          const bar = row.querySelector<HTMLElement>('.mchart-bar');
+          const val = row.querySelector<HTMLElement>('.mchart-val');
+          if (!bar || !val) continue;
+          const secs = row.dataset.secs;
+          if (mode === 'speed') {
+            // The two controls sort and stop; there is no index to build and
+            // no honest place to put them on a scale of run times.
+            if (!secs) {
+              bar.style.display = 'none';
+              val.textContent = '-';
+              continue;
+            }
+            bar.style.display = '';
+            const t = Number(secs);
+            bar.style.width = ((Math.log10(t) - LOW) / SPAN * 100).toFixed(1) + '%';
+            val.textContent = say(t);
+          } else {
+            bar.style.display = '';
+            bar.style.width = row.dataset.recall + '%';
+            val.textContent = row.dataset.recall + '%';
+          }
+        }
+        for (const button of modeButtons) {
+          button.setAttribute('aria-pressed', String(button.dataset.mode === mode));
+        }
+      };
+
+      const modes = mchart.querySelector<HTMLElement>('.mchart-modes');
+      if (modes && modeButtons.length) {
+        modes.removeAttribute('hidden');
+        for (const button of modeButtons) {
+          button.addEventListener('click', () => paint(button.dataset.mode ?? 'recall'));
+        }
+        paint(location.hash === '#speed' ? 'speed' : 'recall');
+      }
+    }
 
     const thumbs = document.querySelectorAll('.cover-btn, .gallery-thumb, .img-zoom');
     if (thumbs.length) {
