@@ -19,5 +19,5 @@
   <text x="26" y="117" class="mono " xml:space="preserve"><tspan class="r">PACKAGED</tspan><tspan class="m"> unit</tspan><tspan class="c"> file,</tspan><tspan class="c"> so</tspan><tspan class="c"> the</tspan><tspan class="r"> rowless-unit</tspan><tspan class="r"> census</tspan><tspan class="x"> #849</tspan><tspan class="m"> added</tspan><tspan class="m"> asks</tspan><tspan class="c"> its</tspan><tspan class="m"> question</tspan></text>
   <text x="26" y="138" class="mono " xml:space="preserve"><tspan class="c">of</tspan><tspan class="r"> fewer</tspan><tspan class="m"> units</tspan><tspan class="c"> than</tspan><tspan class="c"> the</tspan><tspan class="c"> host</tspan><tspan class="c"> has.</tspan></text>
   <line x1="26" y1="173" x2="694" y2="173" stroke="#23272e" stroke-width="1"/>
-  <text x="26" y="197" class="k" xml:space="preserve"><tspan fill="#6aaeee">■</tspan> in 20 or fewer of the 489 issues    <tspan fill="#b5bac3">■</tspan> 21 to 150    <tspan fill="#6b7681">■</tspan> more than 150    <tspan fill="#4a5058">■</tspan> stripped</text>
+  <text x="26" y="197" class="k" xml:space="preserve"><tspan fill="#6aaeee">■</tspan> in 20 or fewer issues    <tspan fill="#b5bac3">■</tspan> 21 to 150    <tspan fill="#6b7681">■</tspan> more than 150    <tspan fill="#4a5058">■</tspan> hidden link</text>
 </svg>

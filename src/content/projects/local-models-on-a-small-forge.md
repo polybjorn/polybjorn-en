@@ -6,14 +6,12 @@ wip: true
 thumb: /images/local-models-thumb.svg
 thumbAlt: An unlabelled bar chart, one long blue bar above four shorter amber ones and a short grey one
 draft: false
-unlisted: true
+unlisted: false
 ---
 
-I run my own Git forge for my infrastructure, and its issue tracker has a habit I've grown to dislike: I decide something, write it down carefully, and six weeks later rediscover the same question because I'd forgotten the answer was already there.
+After reading about [Jev](https://typesafe.ai/), I wanted to know if small AI models running on my own hardware could do useful work on my Git forge. I kept settling questions there, forgetting I had, and asking them again weeks later, so the first test was whether a model could remind me. So far, a fifty-year-old way of counting words does it better than any of them.
 
-So I built something that tells me which existing issues to read before I file a new one. I expected a small local AI model to do that best. None did. What works counts words, follows the links already between issues, and has no model in it.
-
-## What it does
+The tool I ended up with works like this. I describe a new problem in one line, and it lists the old issues I should read first. Here the problem was that after a reboot, one of my servers sent its whole log history again.
 
 <pre><code>$ issue-related "systemd-journal-upload cursor lost after reboot, journal replays"
 
@@ -25,22 +23,15 @@ a third of real links, so an absent issue here is not a clearance</span></code><
 
 Both were the right things to read, and I'd forgotten both. It finds the issue I actually needed in its top five about two times in three. Showing the five newest issues instead manages about one in four, and picking at random almost never.
 
-Underneath is TF-IDF, a method about fifty years old: count the words in every document, weight rare words above common ones, and call two documents similar when they share unusual vocabulary. Two additions carry most of its strength. It reads the comments as well as the issue text, which are twice the volume and worth about seven points. And it lifts whatever its top three hits already link to.
+That also means it **cannot be read as a clearance.** Checking it, seeing nothing, and concluding the question is new converts *I didn't look* into *I looked and it was clear*, which is worse than never having looked. So it says so on every run.
 
-## How it's graded
+Underneath is [TF-IDF](https://en.wikipedia.org/wiki/Tf%E2%80%93idf). It counts the words in every document, weights rare words above common ones, and calls two documents similar when they share unusual vocabulary. Two additions carry most of its strength. It reads the comments as well as the issue text, which are twice the volume and worth about seven points. And it lifts whatever its top three hits already link to.
 
-> Every time someone writes `#123` in an issue, they're asserting that two issues are related. A judgement someone already made, recorded and free.
+## How I graded it
 
-My forge already had hundreds of them, so the test writes itself: hide the reference, show the system only the new issue's text, and ask whether it finds the issue the author linked - searching only issues that existed at the time, so nothing borrows from the future.
+Grading needed an answer key, and the forge already had one. Whenever I mention an old issue in a new one, I'm recording that the two are related. So the test hides that mention, gives the system only the new issue's text, and lets it search only the issues that existed when the new one was written. If the issue I actually linked comes back in the first five, that counts as a hit.
 
-<button class="img-zoom" type="button" data-full="/images/local-models-answer-key.svg">
-  <img src="/images/local-models-answer-key.svg" alt="Three steps. One, issue 968 cites issue 956, so someone has already said the two are related. Two, strip the reference, so the tool sees the text and never the link. Three, search only the issues that existed when 968 was filed, and count it a hit if 956 comes back in the first five." />
-</button>
-<p class="img-caption">#968 is a real one: it names #956 in its own body, so that pair is one of them.</p>
-
-## Results
-
-The models I tried are a couple of hundred megabytes each, run without a graphics card, and keep the text on my own machines. Most are embedding models, which turn a document into a position in space so that similar things land near each other. A reranker instead reads the new issue and one candidate together and scores the pair. Each went against the same links, with the prompt format its authors specify.
+The models I tried are all small enough to run on a laptop. Most turn each issue into a position in space, so that similar issues land near each other, and suggest the nearest ones. The chart shows each model on its own, and again as a second pass over what counting words found.
 
 <figure class="mchart" role="group" aria-label="Recall at 5 by method, in four groups. Two stages: counting words plus the links already between issues reaches 67.2 percent; blending in a neural model reaches 63.8 to 65.1, and the ms-marco-MiniLM-L-6-v2 reranker 49.4. Counting words alone: term weighting with comments reaches 63.8 percent, tuned BM25 62.8. Neural models on their own: the best, SPLADE, reaches 56.7 percent, and single-vector gte-small 46.0. Controls: recency 23.1 percent, random 2.6.">
   <div class="mchart-key">
@@ -50,32 +41,32 @@ The models I tried are a couple of hundred megabytes each, run without a graphic
   </div>
   <div class="mchart-group">Counting words, then a second pass</div>
   <div class="mchart-row">
-    <div class="mchart-label">+ links already there*</div>
+    <div class="mchart-label">+ <span class="mchart-tip" tabindex="0" aria-describedby="mtip1">links already there</span></div><span class="mchart-tipbox" role="tooltip" tabindex="-1" id="mtip1">Issues the top three hits already link to are moved up.</span>
     <div class="mchart-track"><div class="mchart-bar mchart-lex" style="width:67.2%"></div></div>
     <div class="mchart-val">67.2%</div>
   </div>
   <div class="mchart-row">
-    <div class="mchart-label">+ <a href="https://huggingface.co/naver/splade-cocondenser-ensembledistil">SPLADE</a>*</div>
+    <div class="mchart-label">+ <a href="https://huggingface.co/naver/splade-cocondenser-ensembledistil">SPLADE</a></div>
     <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:65.1%"></div></div>
     <div class="mchart-val">65.1%</div>
   </div>
   <div class="mchart-row">
-    <div class="mchart-label">+ <a href="https://huggingface.co/Qwen/Qwen3-Embedding-0.6B">Qwen3-Embedding</a>*</div>
+    <div class="mchart-label">+ <a href="https://huggingface.co/Qwen/Qwen3-Embedding-0.6B">Qwen3-Embedding</a></div>
     <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:64.0%"></div></div>
     <div class="mchart-val">64.0%</div>
   </div>
   <div class="mchart-row">
-    <div class="mchart-label">+ <a href="https://huggingface.co/lightonai/GTE-ModernColBERT-v1">GTE-ModernColBERT</a>*</div>
+    <div class="mchart-label">+ <a href="https://huggingface.co/lightonai/GTE-ModernColBERT-v1">GTE-ModernColBERT</a></div>
     <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:64.1%"></div></div>
     <div class="mchart-val">64.1%</div>
   </div>
   <div class="mchart-row">
-    <div class="mchart-label">+ <a href="https://huggingface.co/thenlper/gte-small">gte-small</a>*</div>
+    <div class="mchart-label">+ <a href="https://huggingface.co/thenlper/gte-small">gte-small</a></div>
     <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:64.0%"></div></div>
     <div class="mchart-val">64.0%</div>
   </div>
   <div class="mchart-row">
-    <div class="mchart-label">+ <a href="https://huggingface.co/answerdotai/answerai-colbert-small-v1">answerai-colbert-small</a>*</div>
+    <div class="mchart-label">+ <a href="https://huggingface.co/answerdotai/answerai-colbert-small-v1">answerai-colbert-small</a></div>
     <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:63.8%"></div></div>
     <div class="mchart-val">63.8%</div>
   </div>
@@ -86,47 +77,47 @@ The models I tried are a couple of hundred megabytes each, run without a graphic
   </div>
   <div class="mchart-group">Counting words</div>
   <div class="mchart-row">
-    <div class="mchart-label">Counting words + comments</div>
+    <div class="mchart-label"><span class="mchart-tip" tabindex="0" aria-describedby="mtip3">Counting words + comments</span></div><span class="mchart-tipbox" role="tooltip" tabindex="-1" id="mtip3">Counting words over each issue plus all its comments.</span>
     <div class="mchart-track"><div class="mchart-bar mchart-lex" style="width:63.8%"></div></div>
     <div class="mchart-val">63.8%</div>
   </div>
   <div class="mchart-row">
-    <div class="mchart-label">Stemmed</div>
+    <div class="mchart-label"><span class="mchart-tip" tabindex="0" aria-describedby="mtip4">Stemmed</span></div><span class="mchart-tipbox" role="tooltip" tabindex="-1" id="mtip4">Counting words with comments, after cutting words to their stem so restart, restarts and restarted match (a light Porter stemmer).</span>
     <div class="mchart-track"><div class="mchart-bar mchart-lex" style="width:63.8%"></div></div>
     <div class="mchart-val">63.8%</div>
   </div>
   <div class="mchart-row">
-    <div class="mchart-label">BM25 + comments, tuned*</div>
+    <div class="mchart-label"><span class="mchart-tip" tabindex="0" aria-describedby="mtip5">BM25 + comments, tuned</span></div><span class="mchart-tipbox" role="tooltip" tabindex="-1" id="mtip5">A refined version of counting words that stops a repeated word from dominating and evens out long and short issues (BM25F). Titles weighted up and comments down.</span>
     <div class="mchart-track"><div class="mchart-bar mchart-lex" style="width:62.8%"></div></div>
     <div class="mchart-val">62.8%</div>
   </div>
   <div class="mchart-row">
-    <div class="mchart-label">Query likelihood*</div>
+    <div class="mchart-label"><span class="mchart-tip" tabindex="0" aria-describedby="mtip7">Query likelihood</span></div><span class="mchart-tipbox" role="tooltip" tabindex="-1" id="mtip7">Asks how likely each old issue&#39;s words are to have produced the new one&#39;s, comments included (a Dirichlet-smoothed language model).</span>
     <div class="mchart-track"><div class="mchart-bar mchart-lex" style="width:62.5%"></div></div>
     <div class="mchart-val">62.5%</div>
   </div>
   <div class="mchart-row">
-    <div class="mchart-label">Identifiers kept whole</div>
+    <div class="mchart-label"><span class="mchart-tip" tabindex="0" aria-describedby="mtip9">Identifiers kept whole</span></div><span class="mchart-tipbox" role="tooltip" tabindex="-1" id="mtip9">Counting words with comments, but names like checks/service-state.nix stay one word instead of four.</span>
     <div class="mchart-track"><div class="mchart-bar mchart-lex" style="width:61.9%"></div></div>
     <div class="mchart-val">61.9%</div>
   </div>
   <div class="mchart-row">
-    <div class="mchart-label">Counting words</div>
+    <div class="mchart-label"><span class="mchart-tip" tabindex="0" aria-describedby="mtip10">Counting words</span></div><span class="mchart-tipbox" role="tooltip" tabindex="-1" id="mtip10">Scores the words two issues share, with rare words counting more than common ones (TF-IDF). Issue text only, no comments.</span>
     <div class="mchart-track"><div class="mchart-bar mchart-lex" style="width:57.0%"></div></div>
     <div class="mchart-val">57.0%</div>
   </div>
   <div class="mchart-row">
-    <div class="mchart-label">Counting words + topics</div>
+    <div class="mchart-label"><span class="mchart-tip" tabindex="0" aria-describedby="mtip11">Counting words + topics</span></div><span class="mchart-tipbox" role="tooltip" tabindex="-1" id="mtip11">Counting words, blended with a model of which words tend to appear together (LSA).</span>
     <div class="mchart-track"><div class="mchart-bar mchart-lex" style="width:56.3%"></div></div>
     <div class="mchart-val">56.3%</div>
   </div>
   <div class="mchart-row">
-    <div class="mchart-label">Character patterns</div>
+    <div class="mchart-label"><span class="mchart-tip" tabindex="0" aria-describedby="mtip12">Character patterns</span></div><span class="mchart-tipbox" role="tooltip" tabindex="-1" id="mtip12">Counts short runs of letters instead of whole words, so partial matches count (character n-grams).</span>
     <div class="mchart-track"><div class="mchart-bar mchart-lex" style="width:55.0%"></div></div>
     <div class="mchart-val">55.0%</div>
   </div>
   <div class="mchart-row">
-    <div class="mchart-label">BM25, untuned</div>
+    <div class="mchart-label"><span class="mchart-tip" tabindex="0" aria-describedby="mtip13">BM25, untuned</span></div><span class="mchart-tipbox" role="tooltip" tabindex="-1" id="mtip13">A refined version of counting words, with its textbook settings (BM25, k1 = 1.2 and b = 0.75).</span>
     <div class="mchart-track"><div class="mchart-bar mchart-lex" style="width:47.6%"></div></div>
     <div class="mchart-val">47.6%</div>
   </div>
@@ -152,7 +143,7 @@ The models I tried are a couple of hundred megabytes each, run without a graphic
     <div class="mchart-val">52.6%</div>
   </div>
   <div class="mchart-row">
-    <div class="mchart-label"><a href="https://huggingface.co/thenlper/gte-small">gte-small</a>, by passage</div>
+    <div class="mchart-label"><a href="https://huggingface.co/thenlper/gte-small">gte-small</a>, <span class="mchart-tip" tabindex="0" aria-describedby="mtip21">by passage</span></div><span class="mchart-tipbox" role="tooltip" tabindex="-1" id="mtip21">Each issue and its comments split into passages, and the issue scored by its best one.</span>
     <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:51.1%"></div></div>
     <div class="mchart-val">51.1%</div>
   </div>
@@ -178,58 +169,39 @@ The models I tried are a couple of hundred megabytes each, run without a graphic
   </div>
   <div class="mchart-group">Controls</div>
   <div class="mchart-row">
-    <div class="mchart-label">Five most recent</div>
+    <div class="mchart-label"><span class="mchart-tip" tabindex="0" aria-describedby="mtip14">Five most recent</span></div><span class="mchart-tipbox" role="tooltip" tabindex="-1" id="mtip14">Always the five newest issues, which is what a plain issue list shows.</span>
     <div class="mchart-track"><div class="mchart-bar mchart-ctl" style="width:23.1%"></div></div>
     <div class="mchart-val">23.1%</div>
   </div>
   <div class="mchart-row">
-    <div class="mchart-label">Random</div>
+    <div class="mchart-label"><span class="mchart-tip" tabindex="0" aria-describedby="mtip15">Random</span></div><span class="mchart-tipbox" role="tooltip" tabindex="-1" id="mtip15">Five issues at random.</span>
     <div class="mchart-track"><div class="mchart-bar mchart-ctl" style="width:2.6%"></div></div>
     <div class="mchart-val">2.6%</div>
   </div>
-  <figcaption class="mchart-cap">How often the issue someone actually linked shows up in the first five suggestions. Measured on a copy of the forge frozen on 2026-09-24. * settings picked on the older three quarters of the links.</figcaption>
+  <figcaption class="mchart-cap">How often the issue someone actually linked shows up in the first five suggestions.</figcaption>
 </figure>
 
-Counting words beat every model, and not narrowly. The best on its own, SPLADE, came within seven points; blending any of them into the word counting added a point or two at most. What did add something was structure rather than language. A decision, its follow-ups and the fix that later undid it cite each other, so one good hit pulls in siblings that share few words with the new issue.
+Counting words beat every model. The best one on its own, SPLADE, was seven points behind, and blending any of them into counting words added a point or two at most. What did help was structure rather than language. A decision, its follow-ups and the fix that later undid it tend to link to each other, so one good hit pulls in related issues that share few words with the new one.
 
-The likeliest reason is what my issues are made of: identifiers like `StateDirectory`, `checks/service-state.nix` and machine names. Exact matching on a rare string is what counting words does best and what a model trained on ordinary prose does worst. The model is better at language. My text is barely language.
+The likeliest reason is what my issues are made of. They're full of exact names, like `StateDirectory`, `checks/service-state.nix` and the names of my machines. Matching a rare string exactly is what counting words does best, and what a model trained on ordinary prose does worst.
 
 <button class="img-zoom" type="button" data-full="/images/local-models-vocabulary.svg">
   <img src="/images/local-models-vocabulary.svg" alt="An issue from the forge with its words shaded by how many of the forge's issues contained them when I measured. The rarest are identifiers: checks/service-state.nix appears in 14, StateDirectory in 13, census in 5, packaged in 2 and rowless-unit in 1. The ordinary English words around them appear in hundreds." />
 </button>
-<p class="img-caption">One issue, shaded by how many of the forge's issues contained each word when I measured. <code>checks/service-state.nix</code> was in 14 of them, <code>StateDirectory</code> in 13, <code>rowless-unit</code> in exactly one. Those carry the sentence, and they are the strings a model trained on English has never seen. Rarity is measured against this forge rather than against English, which is why "fewer" is blue too.</p>
+<p class="img-caption">One issue, each word shaded by how many issues it appears in. The rare ones carry the meaning, and they&#39;re mostly exact names a model trained on English has rarely seen. Rarity is counted across this forge, not across English, which is why an ordinary word like "fewer" counts as rare here.</p>
+
+Where a method had settings to tune, I tuned them on older links and checked them on newer ones, so the results aren't just fitted to the answers. The answer key only counts links someone bothered to write, so a useful suggestion can still score as a miss, and the real numbers are probably a little higher. Most of those links were written by the AI coding agents I run, which search by keyword and might favour counting words, but the models lost on the links I wrote myself too.
+
+The forge is small and I didn't try the largest models, so none of this says a big model would fail.
 
 ## What else I tried
 
-- **Reading the whole issue.** Splitting each issue and its comments into passages and scoring the best one lifted gte-small from 46.0% to 51.1%, still twelve points short.
-- **Rerankers.** Given whole issues, comments included, ms-marco-MiniLM-L-6-v2 reordered counting words' top twenty and landed fourteen points below the order it started from. A larger one, bge-reranker-base, did worse still on the first quarter of the queries, fifteen points below counting words there, and I stopped it.
-- **A newer, larger model.** Qwen3-Embedding-0.6B was the best single-vector model here at 56.2%, five points above gte-small and still seven below counting words; blended in, it added nothing.
-- **Rewriting identifiers into words.** Turning `checks/service-state.nix` into "checks service state nix" before the model read it changed nothing: gte-small stayed at about 51%. Making the identifiers readable isn't enough; what counting words exploits is that the exact string is rare.
-- **Teaching a model my vocabulary.** Fine-tuned on my own linked pairs, a model went from 37.7% to 40.9% on links it had never seen - inside the noise - against 48.7% for counting words on the same held-back slice.
-- **A learned ranker** over every score on this page matched the link rule, and taking the neural scores out of it changed nothing.
-- **Word translations learned from my links.** Which words in a new issue predict which words in the one it cites? Built from the older links, the tables filled up with ports, timestamps and commit hashes, and moved one link.
-- **Labels and pull requests.** Two linked issues share a host label three times in four, and most issues are named by a pull request, but both repeat what the text and links already say.
-- **Another corpus.** On my notes vault, graded against its wikilinks, counting words beat all four embedding models in the same order. I'd predicted the opposite for prose; my notes turn out to be short and full of names, closer to the forge than I'd assumed.
-- **A model that decides.** Before any of this I tried predicting who should act on an issue, in the shape of [Jev](https://typesafe.ai/): act when confident, escalate when not. Four issues in five are labelled within a minute of being filed, so there was no decision left for a model to take.
+Most of what I tried was aimed at giving the models a fairer chance. Letting them read the whole issue in passages, instead of only its start, lifted gte-small five points. Rewriting `checks/service-state.nix` into plain words changed nothing. Fine-tuning a model on my own linked pairs moved it three points, inside the noise. Qwen3-Embedding-0.6B, newer and larger, was the best single-vector model, and the rerankers, which read the new issue and each candidate together, made the order worse. None of it closed the gap.
 
-## How sure I am
+To check the result wasn't peculiar to this forge, I ran the same comparison on my notes vault, graded against its wikilinks. Counting words won there too, in the same order. I'd expected prose to favour the models, but my notes are short and full of names, much like the forge.
 
-The link rule's two settings were picked on links written before 22 September. On the links written after that, which didn't exist when the settings were chosen, it added about ten points. Re-tuned from scratch on small early slices it chooses badly, so it needs some history to tune on.
+Before any of this I aimed a model at my labels, predicting who should act on an issue and escalating when unsure. Four issues in five are labelled within a minute of being filed, so there was no decision left for a model to take. Five minutes of counting would have told me that before I built anything.
 
-The answer key only credits links someone bothered to type, so the numbers are a floor on usefulness rather than a measure of precision. Most of those links were typed by agents that search by words, which could tilt the key toward counting words; the models lost among the links I wrote myself as well, and did no better on the pairs sharing the fewest words, so I don't think the key decided it.
+So for this job the models came close but didn't earn their place, and they cost far more. Counting words runs the whole test in under a minute with nothing to download. The small models needed a few minutes to process the forge, and the largest took about seven and a half hours on my server's processor. Here the cheapest method is also the best one.
 
-The corpus is small and the largest models weren't tried, so nothing here says a big one would fail - code-trained retrieval models are the ones I'd most want to see. Every number is one run against a copy of the forge frozen on 2026-09-24. The copy has a checksum and the tool carries its own benchmark, so re-measuring takes seconds.
-
-## What I'd tell anyone trying this
-
-**Count your data before you run anything.** Two of my three candidate jobs turned out to have four usable examples each. Five minutes of counting would have shown it.
-
-**Look for an answer key you already have.** Cross-references, stars, what you archived, what you clicked. If your own past behaviour is written down somewhere, you can grade a system instead of eyeballing it and hoping.
-
-**The angle matters more than the model.** Same text, same machine: one framing failed completely and another produced something I use daily.
-
-**Write the bar down before you run the test.** It's what turns a failure into a clear no rather than a negotiation with yourself.
-
-## The limit it states itself
-
-Something that finds a related issue about two thirds of the time **cannot be read as a clearance.** Checking it, seeing nothing, and concluding the question is new converts *I didn't look* into *I looked and it was clear*, which is worse than never having looked. So it says so on every run.
+The models aren't bad at language; my issues just aren't much language. The models I'd most like to try next are ones trained on code, which have seen strings like these before.
