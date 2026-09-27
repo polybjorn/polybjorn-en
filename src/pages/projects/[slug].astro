@@ -787,29 +787,86 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
       // The switch itself keeps its slide; it is what was just pressed.
       // The controls leave the speed view, so the figure loses two rows and a
       // heading, and everything under it - caption, prose, the next heading -
-      // used to jump the moment the table was rebuilt. The figure carries that
-      // change instead: its height is measured either side of the rebuild and
-      // tweened over the fade back in, so the page below travels rather than
-      // snapping. Clipped while it runs, because the taller state overflows a
-      // height still on its way up, and the group that grows is the last one.
-      let crossing: Animation[] = [];
-      let resizing: Animation | null = null;
-      const resize = (rebuild: () => void) => {
-        const before = mchart.getBoundingClientRect().height;
+      // jumps the moment the table is rebuilt. What fixes that is folding those
+      // three elements themselves, height and margins to nothing over the same
+      // 240ms the table fades back in: the rest of the figure then reflows
+      // gradually, so the caption and the prose travel with it.
+      //
+      // Tweening the FIGURE's height was the first answer and it was worse.
+      // Everything inside a box reflows the instant the rows are hidden, so the
+      // caption snapped to its new place while only the empty space below it
+      // animated, and growing needed `overflow: clip`, which cut the arriving
+      // rows off until the box caught up. Both read as the table jumping.
+      //
+      // Each fold is measured, not guessed at: a row's own height and margins
+      // before it goes, and its natural ones after it comes back. Overflow is
+      // held hidden while a fold runs, because a grid row does not clip itself.
+      const shy = [...leaving, ...rows.filter(row => !row.dataset.secs)];
+      let folding: Animation[] = [];
+      // What is mid-fold right now. A row folding away is un-hidden while it
+      // runs, so without this a press that reverses it reads as a row that was
+      // there all along - and it would be skipped, snapping to full height
+      // instead of opening from where the interrupted fold left it.
+      const shutting = new Set<HTMLElement>();
+      const fold = (rebuild: () => void) => {
+        type Box = { height: number; top: string; bottom: string };
+        const was = new Map<HTMLElement, Box | null>();
+        for (const el of shy) {
+          if (el.hasAttribute('hidden')) {
+            was.set(el, null);
+            continue;
+          }
+          const style = window.getComputedStyle(el);
+          was.set(el, {
+            height: el.getBoundingClientRect().height,
+            top: style.marginTop,
+            bottom: style.marginBottom,
+          });
+        }
         rebuild();
-        const after = mchart.getBoundingClientRect().height;
-        if (Math.abs(after - before) < 1) return;
-        resizing?.cancel();
-        mchart.style.overflow = 'clip';
-        resizing = mchart.animate(
-          [{ height: before + 'px' }, { height: after + 'px' }],
-          { duration: 240, easing: 'ease-out' },
-        );
-        const done = resizing;
-        done.finished.then(() => {
-          if (resizing === done) mchart.style.removeProperty('overflow');
-        }).catch(() => { /* cancelled by the next press; it owns the state */ });
+        for (const running of folding) running.cancel();
+        folding = [];
+        const shut = new Set<HTMLElement>();
+        for (const el of shy) {
+          const before = was.get(el) ?? null;
+          const gone = el.hasAttribute('hidden');
+          const stood = before !== null && !shutting.has(el);
+          if (stood === !gone) continue;
+          const flat = { height: '0px', marginTop: '0px', marginBottom: '0px' };
+          el.style.overflow = 'hidden';
+          let run: Animation;
+          if (gone) {
+            // Leaving. It stays at the opacity the fade-out left it on, so it
+            // folds away invisibly rather than reappearing to do it, and the
+            // [hidden] that the rebuild wanted is set once the fold is done.
+            shut.add(el);
+            shutting.add(el);
+            el.removeAttribute('hidden');
+            run = el.animate([
+              { ...flat, height: (before?.height ?? 0) + 'px', marginTop: before?.top ?? '0px', marginBottom: before?.bottom ?? '0px', opacity: 0 },
+              { ...flat, opacity: 0 },
+            ], { duration: 240, easing: 'ease-out' });
+            run.finished.then(() => {
+              el.setAttribute('hidden', '');
+              shutting.delete(el);
+            }).catch(() => { shutting.delete(el); });
+          } else {
+            // Arriving, and the rebuild has already un-hidden it, so its
+            // natural box is readable here. It fades in with the rest.
+            const style = window.getComputedStyle(el);
+            run = el.animate([
+              { ...flat, height: (before?.height ?? 0) + 'px' },
+              { height: el.getBoundingClientRect().height + 'px', marginTop: style.marginTop, marginBottom: style.marginBottom },
+            ], { duration: 240, easing: 'ease-out' });
+          }
+          folding.push(run);
+          run.finished
+            .then(() => { el.style.removeProperty('overflow'); })
+            .catch(() => { el.style.removeProperty('overflow'); });
+        }
+        return shut;
       };
+      let crossing: Animation[] = [];
       const cross = (rebuild: () => void, settle: boolean, table: HTMLElement[]) => {
         const still = settle
           || window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -826,9 +883,12 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
           { duration: 170, easing: 'ease-in', fill: 'forwards' },
         ));
         Promise.all(crossing.map(one => one.finished)).then(() => {
-          resize(rebuild);
+          // What is folding away is deliberately left out of the fade back in:
+          // cancelling its fade-out would otherwise return it to full opacity
+          // and it would fold in plain sight.
+          const shut = fold(rebuild);
           for (const running of crossing) running.cancel();
-          crossing = table.map(part => part.animate(
+          crossing = table.filter(part => !shut.has(part)).map(part => part.animate(
             [{ opacity: 0 }, { opacity: 1 }],
             { duration: 240, easing: 'ease-out' },
           ));
