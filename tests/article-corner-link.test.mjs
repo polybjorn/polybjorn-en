@@ -29,6 +29,11 @@ const DIST = join(dirname(fileURLToPath(import.meta.url)), '..', 'dist');
  * This runs the one script that drives the corner as a classic script, then
  * scrolls. The flag test below is the control: if the harness stops working,
  * that is where it shows up.
+ *
+ * loadPage has a runModules option now that does the same eval for every inline
+ * module. This keeps its own copy on purpose: it asserts the corner is still
+ * driven by an inline script at all, and running every module would not say
+ * that.
  */
 function scrollPast(page) {
   const { window } = loadPage(page);
