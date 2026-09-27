@@ -36,8 +36,8 @@ The models I tried are all small enough to run on a laptop. Most turn each issue
 
 <figure class="mchart" role="group" aria-label="Recall at 5 by method, in four groups. Two stages: counting words plus the links already between issues reaches 67.2 percent; blending in a neural model reaches 63.8 to 65.1, and the ms-marco-MiniLM-L-6-v2 reranker 49.4. Counting words alone: term weighting with comments reaches 63.8 percent, tuned BM25 62.8. Neural models on their own: the best, SPLADE, reaches 56.7 percent, and single-vector gte-small 46.0. Controls: recency 23.1 percent, random 2.6.">
   <div class="mchart-key">
-    <span><i class="mchart-sw mchart-lex"></i>no model</span>
-    <span><i class="mchart-sw mchart-emb"></i>neural model</span>
+    <span><i class="mchart-sw mchart-lex"></i>no model, seconds to run</span>
+    <span><i class="mchart-sw mchart-emb"></i>neural model, minutes to hours</span>
     <span><i class="mchart-sw mchart-ctl"></i>baseline to beat</span>
   </div>
   <div class="mchart-group">Counting words, then a second pass</div>
