@@ -146,6 +146,30 @@ test('a finished piece that was revised keeps both dates', () => {
   }
 });
 
+test('the listing is ordered by the dates it shows', () => {
+  // The sort and the shown date used to disagree: the listing ordered by
+  // publication while a work in progress showed its latest revision, so a
+  // revised older piece would sit under a card carrying an earlier date. A
+  // reader takes a column of dates to descend, so this asserts it does, on both
+  // builds - the Norwegian listing is the same component and orders the same.
+  //
+  // TODAY'S CONTENT CANNOT TELL THE TWO SORTS APART: the one work in progress
+  // is also the newest by publication date, so both orders are descending and
+  // this passes either way. It bites the first time an older piece is revised.
+  // Checked by staging exactly that - ferd marked wip with a later updated date
+  // - where the old sort produced 09-27, 08-28, 09-28, 05-02 and this failed on
+  // it. Keep that in mind before reading a green tick here as proof.
+  for (const page of ['projects/index.html', 'no/prosjekter/index.html']) {
+    const { window } = loadPage(page);
+    const dates = [...window.document.querySelectorAll('li .card .meta')]
+      .map(m => m.textContent.match(/\d{4}-\d{2}-\d{2}/)?.[0]);
+
+    assert.ok(dates.length > 1, `${page}: fewer than two cards, so order proves nothing`);
+    assert.ok(dates.every(Boolean), `${page}: a card shows no date`);
+    assert.deepEqual(dates, [...dates].sort().reverse(), `${page}: dates are not newest first`);
+  }
+});
+
 /**
  * The separator's spacing has to survive the build.
  *
