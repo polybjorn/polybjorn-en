@@ -73,9 +73,10 @@ export function loadPage(page, {
  *
  * Astro compiles a component's `<script>` into an inline
  * `<script type="module">`, and jsdom implements no ES modules at all - it
- * parses those and never executes them. So every test written against this
- * helper up to now has been asking what a page SAYS, not what it does; the
- * article page's lightbox, for one, is never built under jsdom.
+ * parses those and never executes them. A classic inline script still runs, so
+ * the enquiry tests, whose 50KB handler is `is:inline`, have always exercised
+ * real behaviour; what nothing reached is the component scripts - the article
+ * page's lightbox, for one, is never built under jsdom.
  *
  * Eval'ing them as classic scripts is only sound while they carry no import or
  * export, so one that does throws here rather than passing quietly with nothing
