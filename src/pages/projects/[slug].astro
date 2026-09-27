@@ -876,6 +876,13 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
         }
       };
       const paint = (mode: string, settle = false) => {
+        // Pressing the view you are already on is not a change, so nothing
+        // moves: repainting it fades every number back in from nothing, which
+        // reads as the table blinking for no reason. The first paint still runs
+        // this - it is what puts the table into the state the switch claims -
+        // and a second press of the view a switch is already travelling
+        // towards is also nothing, because the mode is set before the motion.
+        if (!settle && mchart.dataset.mode === mode) return;
         for (const option of options) {
           option.setAttribute('aria-pressed', String(option.dataset.mode === mode));
         }
