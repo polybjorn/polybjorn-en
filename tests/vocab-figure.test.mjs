@@ -23,7 +23,7 @@ test('the issue reads as a sentence, with single spaces between words', () => {
     'checks: service-state cannot see a StateDirectory from a packaged unit');
   assert.equal(d.querySelector('.vocab-body').textContent,
     'checks/service-state.nix cannot see a StateDirectory= that comes from a '
-    + 'PACKAGED unit file, so the rowless-unit census #849 added asks its '
+    + 'PACKAGED unit file, so the rowless-unit census added asks its '
     + 'question of fewer units than the host has.');
 });
 
@@ -32,7 +32,7 @@ test('every word carries exactly one rarity class', () => {
   const words = [...d.querySelectorAll('.vocab-title span, .vocab-body span')];
   assert.ok(words.length > 30, `only ${words.length} words, so the figure is not intact`);
 
-  const inks = ['v-rare', 'v-mid', 'v-common', 'v-link'];
+  const inks = ['v-rare', 'v-mid', 'v-common'];
   for (const w of words) {
     const named = inks.filter(ink => w.classList.contains(ink));
     assert.equal(named.length, 1, `"${w.textContent}" carries ${named.length} inks: ${w.className}`);
