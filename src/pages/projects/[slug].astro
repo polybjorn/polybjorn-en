@@ -444,6 +444,20 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
   <script>
     const backHome = document.querySelector('.back-home')!;
     const scrollTop = document.querySelector('.to-top')!;
+
+    // The article pages exist only on polybjorn.com, so the arrow has to say
+    // /projects in the HTML - one file serves every reader. Someone who came
+    // from polybjorn.no is sent back there instead: on a static page the
+    // referrer is the only thing that says which site they were on, and a
+    // cross-origin navigation still carries the origin under the default
+    // referrer policy. An absent referrer - a bookmark, a search result, a
+    // browser that strips it - leaves the English link, which is the right
+    // answer for a reader who did not come from the Norwegian site. The origin
+    // is compared rather than matched as a prefix, so a lookalike host does not
+    // get to aim this link.
+    if (document.referrer && new URL(document.referrer).origin === 'https://polybjorn.no') {
+      backHome.setAttribute('href', 'https://polybjorn.no/prosjekter');
+    }
     window.addEventListener('scroll', () => {
       backHome.classList.toggle('hidden', window.scrollY > 60);
       scrollTop.classList.toggle('visible', window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 20);
