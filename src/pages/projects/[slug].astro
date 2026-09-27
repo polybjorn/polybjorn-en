@@ -689,7 +689,39 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
       const leaving = groups
         .filter(group => group.rows.every(row => !row.dataset.secs))
         .map(group => group.heading);
-      const table = [...rows, ...leaving];
+
+      // The order a mode puts the rows in, worked out before anything moves,
+      // so the fade can be aimed at what the switch actually changes.
+      const orderFor = (mode: string) => groups.flatMap(group => group.rows
+        .filter(row => !(mode === 'speed' && !row.dataset.secs))
+        .sort(mode === 'speed'
+          ? (one, two) => Number(one.dataset.secs ?? Infinity) - Number(two.dataset.secs ?? Infinity)
+          : (one, two) => Number(two.dataset.recall) - Number(one.dataset.recall)));
+
+      // What crosses over is not the whole table. A label reads the same in
+      // both views, so a row that keeps its place only swaps its bar and its
+      // number and its name never flickers. A row that moves fades whole -
+      // otherwise the label slides while the bar beside it is mid-fade, which
+      // is the jump the fade exists to hide. The controls and their heading
+      // leave entirely, so they go whole too.
+      const crossingParts = (mode: string) => {
+        const after = orderFor(mode);
+        const before = orderFor(mchart.dataset.mode === 'speed' ? 'speed' : 'recall');
+        const parts: HTMLElement[] = [];
+        for (const row of rows) {
+          const stays = !(mode === 'speed' && !row.dataset.secs)
+            && before.indexOf(row) === after.indexOf(row);
+          if (!stays) {
+            parts.push(row);
+            continue;
+          }
+          const bar = row.querySelector<HTMLElement>('.mchart-bar');
+          const val = row.querySelector<HTMLElement>('.mchart-val');
+          if (bar) parts.push(bar);
+          if (val) parts.push(val);
+        }
+        return [...parts, ...leaving];
+      };
 
       // 0.1s at the left of a bar, 1h at the right: a decade scale, because
       // the fastest method here is four orders off the slowest and a linear
@@ -706,7 +738,7 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
       // reader sees two clean states rather than the journey between them.
       // The switch itself keeps its slide; it is what was just pressed.
       let crossing: Animation[] = [];
-      const cross = (rebuild: () => void, settle: boolean) => {
+      const cross = (rebuild: () => void, settle: boolean, table: HTMLElement[]) => {
         const still = settle
           || window.matchMedia('(prefers-reduced-motion: reduce)').matches
           || typeof mchart.animate !== 'function';
@@ -732,10 +764,11 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
       };
 
       const paint = (mode: string, settle = false) => {
-        mchart.dataset.mode = mode;
         for (const option of options) {
           option.setAttribute('aria-pressed', String(option.dataset.mode === mode));
         }
+        const table = crossingParts(mode);
+        mchart.dataset.mode = mode;
         cross(() => {
           for (const row of rows) {
             const bar = row.querySelector<HTMLElement>('.mchart-bar');
@@ -764,7 +797,7 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
               : (one, two) => Number(two.dataset.recall) - Number(one.dataset.recall));
             for (const row of sorted) mchart.insertBefore(row, group.anchor);
           }
-        }, settle);
+        }, settle, table);
       };
 
       for (const option of options) {
