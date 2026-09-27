@@ -311,8 +311,38 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
       display: flex; align-items: baseline; gap: 0.7rem;
     }
     article :global(.mchart-pct) { min-width: 3.1rem; }
-    article :global(.mchart-cost) {
-      color: #8a8f99; min-width: 3.4rem; text-align: right;
+    /* Time gets its own panel rather than a second bar in the same track:
+       recall is a percentage and a run is anything from a fifth of a second to
+       an hour, and one geometry carrying both scales misreads both. Each step
+       across the strip is ten times the last, so a dot says which order of
+       magnitude and claims nothing finer; the hairlines are 1s, 1min and 1h.
+       The two controls carry no dot because neither builds an index. */
+    article :global(.mchart-time) {
+      position: relative; flex: 1; min-width: 74px; height: 1.15rem;
+      margin-right: 5px;
+      background-image: linear-gradient(#2a2e35, #2a2e35),
+        linear-gradient(#2a2e35, #2a2e35), linear-gradient(#2a2e35, #2a2e35);
+      background-size: 1px 62%, 1px 62%, 1px 62%;
+      background-position: 21.9% 50%, 61.0% 50%, 100% 50%;
+      background-repeat: no-repeat;
+    }
+    article :global(.mchart-dot) {
+      position: absolute; top: 50%; width: 8px; height: 8px;
+      border-radius: 50%; transform: translate(-50%, -50%);
+      /* Surface ring, so a dot landing on a hairline still reads as a dot. */
+      box-shadow: 0 0 0 2px #1e2228;
+    }
+    article :global(.mchart-scale) { margin-bottom: 0.15rem; }
+    article :global(.mchart-scale .mchart-time) { background-image: none; }
+    article :global(.mchart-scale .mchart-pct),
+    article :global(.mchart-scale .mchart-time span) {
+      font-size: 0.7rem; color: #8a8f99; letter-spacing: 0.03em;
+    }
+    article :global(.mchart-scale .mchart-time span) {
+      position: absolute; top: 50%; transform: translate(-50%, -50%);
+    }
+    article :global(.mchart-scale .mchart-time span:last-child) {
+      transform: translate(-90%, -50%);
     }
     /* The site's own three: accent blue for the method that won, the warm
        accent for every neural arm, and the muted grey the page already uses
@@ -330,6 +360,10 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
       article :global(.mchart) { grid-template-columns: 1fr max-content; column-gap: 0.5rem; }
       article :global(.mchart-row) { row-gap: 0.35rem; }
       article :global(.mchart-tipbox) { grid-column: 1 / 2; grid-row: 2 / 3; }
+      /* The scale row carries one empty cell per column it has to skip, so it
+         sheds one when the grid drops to two columns - otherwise its third
+         child wraps onto a line of its own and the axis sits under the bars. */
+      article :global(.mchart-scale > div:first-child) { display: none; }
       /* label moves above its own bar rather than squeezing a third column */
       article :global(.mchart-label) {
         grid-column: 1 / -1; text-align: left; margin-top: 0.4rem;

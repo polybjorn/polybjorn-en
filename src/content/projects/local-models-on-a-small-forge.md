@@ -40,146 +40,150 @@ The models I tried are all small enough to run on a laptop. Most turn each issue
     <span><i class="mchart-sw mchart-emb"></i>neural model</span>
     <span><i class="mchart-sw mchart-ctl"></i>baseline to beat</span>
   </div>
+  <div class="mchart-row mchart-scale">
+    <div></div><div></div>
+    <div class="mchart-val"><span class="mchart-pct">time</span><span class="mchart-time"><span style="left:21.9%">1s</span><span style="left:61.0%">1min</span><span style="left:100.0%">1h</span></span></div>
+  </div>
   <div class="mchart-group">Counting words, then a second pass</div>
   <div class="mchart-row">
     <div class="mchart-label">+ <span class="mchart-tip" tabindex="0" aria-describedby="mtip1">links already there</span></div><span class="mchart-tipbox" role="tooltip" tabindex="-1" id="mtip1">Issues the top three hits already link to are moved up.</span>
     <div class="mchart-track"><div class="mchart-bar mchart-lex" style="width:67.2%"></div></div>
-    <div class="mchart-val"><span class="mchart-pct">67.2%</span><span class="mchart-cost">&lt;1 s</span></div>
+    <div class="mchart-val"><span class="mchart-pct">67.2%</span><span class="mchart-time"><i class="mchart-dot mchart-lex" style="left:13.2%" title="0.4 s"></i></span></div>
   </div>
   <div class="mchart-row">
     <div class="mchart-label">+ <a href="https://huggingface.co/naver/splade-cocondenser-ensembledistil">SPLADE</a></div>
     <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:65.1%"></div></div>
-    <div class="mchart-val"><span class="mchart-pct">65.1%</span><span class="mchart-cost">2 min</span></div>
+    <div class="mchart-val"><span class="mchart-pct">65.1%</span><span class="mchart-time"><i class="mchart-dot mchart-emb" style="left:68.5%" title="2 min"></i></span></div>
   </div>
   <div class="mchart-row">
     <div class="mchart-label">+ <a href="https://huggingface.co/Qwen/Qwen3-Embedding-0.6B">Qwen3-Embedding</a></div>
     <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:64.0%"></div></div>
-    <div class="mchart-val"><span class="mchart-pct">64.0%</span><span class="mchart-cost">55 min</span></div>
+    <div class="mchart-val"><span class="mchart-pct">64.0%</span><span class="mchart-time"><i class="mchart-dot mchart-emb" style="left:99.2%" title="55 min"></i></span></div>
   </div>
   <div class="mchart-row">
     <div class="mchart-label">+ <a href="https://huggingface.co/lightonai/GTE-ModernColBERT-v1">GTE-ModernColBERT</a></div>
     <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:64.1%"></div></div>
-    <div class="mchart-val"><span class="mchart-pct">64.1%</span><span class="mchart-cost">3 min</span></div>
+    <div class="mchart-val"><span class="mchart-pct">64.1%</span><span class="mchart-time"><i class="mchart-dot mchart-emb" style="left:70.4%" title="3 min"></i></span></div>
   </div>
   <div class="mchart-row">
     <div class="mchart-label">+ <a href="https://huggingface.co/thenlper/gte-small">gte-small</a></div>
     <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:64.0%"></div></div>
-    <div class="mchart-val"><span class="mchart-pct">64.0%</span><span class="mchart-cost">5 min</span></div>
+    <div class="mchart-val"><span class="mchart-pct">64.0%</span><span class="mchart-time"><i class="mchart-dot mchart-emb" style="left:76.2%" title="5 min"></i></span></div>
   </div>
   <div class="mchart-row">
     <div class="mchart-label">+ <a href="https://huggingface.co/answerdotai/answerai-colbert-small-v1">answerai-colbert-small</a></div>
     <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:63.8%"></div></div>
-    <div class="mchart-val"><span class="mchart-pct">63.8%</span><span class="mchart-cost">1 min</span></div>
+    <div class="mchart-val"><span class="mchart-pct">63.8%</span><span class="mchart-time"><i class="mchart-dot mchart-emb" style="left:62.3%" title="1 min"></i></span></div>
   </div>
   <div class="mchart-row">
     <div class="mchart-label">+ <a href="https://huggingface.co/cross-encoder/ms-marco-MiniLM-L-6-v2">ms-marco-MiniLM-L-6-v2</a></div>
     <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:49.4%"></div></div>
-    <div class="mchart-val"><span class="mchart-pct">49.4%</span><span class="mchart-cost">8 min</span></div>
+    <div class="mchart-val"><span class="mchart-pct">49.4%</span><span class="mchart-time"><i class="mchart-dot mchart-emb" style="left:80.9%" title="8 min"></i></span></div>
   </div>
   <div class="mchart-group">Counting words</div>
   <div class="mchart-row">
     <div class="mchart-label"><span class="mchart-tip" tabindex="0" aria-describedby="mtip3">Counting words + comments</span></div><span class="mchart-tipbox" role="tooltip" tabindex="-1" id="mtip3">Counting words over each issue plus all its comments.</span>
     <div class="mchart-track"><div class="mchart-bar mchart-lex" style="width:63.8%"></div></div>
-    <div class="mchart-val"><span class="mchart-pct">63.8%</span><span class="mchart-cost">&lt;1 s</span></div>
+    <div class="mchart-val"><span class="mchart-pct">63.8%</span><span class="mchart-time"><i class="mchart-dot mchart-lex" style="left:15.3%" title="0.5 s"></i></span></div>
   </div>
   <div class="mchart-row">
     <div class="mchart-label"><span class="mchart-tip" tabindex="0" aria-describedby="mtip4">Stemmed</span></div><span class="mchart-tipbox" role="tooltip" tabindex="-1" id="mtip4">Counting words with comments, after cutting words to their stem so restart, restarts and restarted match (a light Porter stemmer).</span>
     <div class="mchart-track"><div class="mchart-bar mchart-lex" style="width:63.8%"></div></div>
-    <div class="mchart-val"><span class="mchart-pct">63.8%</span><span class="mchart-cost">3 s</span></div>
+    <div class="mchart-val"><span class="mchart-pct">63.8%</span><span class="mchart-time"><i class="mchart-dot mchart-lex" style="left:32.1%" title="3 s"></i></span></div>
   </div>
   <div class="mchart-row">
     <div class="mchart-label"><span class="mchart-tip" tabindex="0" aria-describedby="mtip5">BM25 + comments, tuned</span></div><span class="mchart-tipbox" role="tooltip" tabindex="-1" id="mtip5">A refined version of counting words that stops a repeated word from dominating and evens out long and short issues (BM25F). Titles weighted up and comments down.</span>
     <div class="mchart-track"><div class="mchart-bar mchart-lex" style="width:62.8%"></div></div>
-    <div class="mchart-val"><span class="mchart-pct">62.8%</span><span class="mchart-cost">&lt;1 s</span></div>
+    <div class="mchart-val"><span class="mchart-pct">62.8%</span><span class="mchart-time"><i class="mchart-dot mchart-lex" style="left:10.5%" title="0.3 s"></i></span></div>
   </div>
   <div class="mchart-row">
     <div class="mchart-label"><span class="mchart-tip" tabindex="0" aria-describedby="mtip7">Query likelihood</span></div><span class="mchart-tipbox" role="tooltip" tabindex="-1" id="mtip7">Asks how likely each old issue&#39;s words are to have produced the new one&#39;s, comments included (a Dirichlet-smoothed language model).</span>
     <div class="mchart-track"><div class="mchart-bar mchart-lex" style="width:62.5%"></div></div>
-    <div class="mchart-val"><span class="mchart-pct">62.5%</span><span class="mchart-cost">&lt;1 s</span></div>
+    <div class="mchart-val"><span class="mchart-pct">62.5%</span><span class="mchart-time"><i class="mchart-dot mchart-lex" style="left:10.5%" title="0.3 s"></i></span></div>
   </div>
   <div class="mchart-row">
     <div class="mchart-label"><span class="mchart-tip" tabindex="0" aria-describedby="mtip9">Identifiers kept whole</span></div><span class="mchart-tipbox" role="tooltip" tabindex="-1" id="mtip9">Counting words with comments, but names like checks/service-state.nix stay one word instead of four.</span>
     <div class="mchart-track"><div class="mchart-bar mchart-lex" style="width:61.9%"></div></div>
-    <div class="mchart-val"><span class="mchart-pct">61.9%</span><span class="mchart-cost">&lt;1 s</span></div>
+    <div class="mchart-val"><span class="mchart-pct">61.9%</span><span class="mchart-time"><i class="mchart-dot mchart-lex" style="left:15.3%" title="0.5 s"></i></span></div>
   </div>
   <div class="mchart-row">
     <div class="mchart-label"><span class="mchart-tip" tabindex="0" aria-describedby="mtip10">Counting words</span></div><span class="mchart-tipbox" role="tooltip" tabindex="-1" id="mtip10">Scores the words two issues share, with rare words counting more than common ones (TF-IDF). Issue text only, no comments.</span>
     <div class="mchart-track"><div class="mchart-bar mchart-lex" style="width:57.0%"></div></div>
-    <div class="mchart-val"><span class="mchart-pct">57.0%</span><span class="mchart-cost">&lt;1 s</span></div>
+    <div class="mchart-val"><span class="mchart-pct">57.0%</span><span class="mchart-time"><i class="mchart-dot mchart-lex" style="left:10.5%" title="0.3 s"></i></span></div>
   </div>
   <div class="mchart-row">
     <div class="mchart-label"><span class="mchart-tip" tabindex="0" aria-describedby="mtip11">Counting words + topics</span></div><span class="mchart-tipbox" role="tooltip" tabindex="-1" id="mtip11">Counting words, blended with a model of which words tend to appear together (LSA).</span>
     <div class="mchart-track"><div class="mchart-bar mchart-lex" style="width:56.3%"></div></div>
-    <div class="mchart-val"><span class="mchart-pct">56.3%</span><span class="mchart-cost">2 s</span></div>
+    <div class="mchart-val"><span class="mchart-pct">56.3%</span><span class="mchart-time"><i class="mchart-dot mchart-lex" style="left:29.0%" title="2 s"></i></span></div>
   </div>
   <div class="mchart-row">
     <div class="mchart-label"><span class="mchart-tip" tabindex="0" aria-describedby="mtip12">Character patterns</span></div><span class="mchart-tipbox" role="tooltip" tabindex="-1" id="mtip12">Counts short runs of letters instead of whole words, so partial matches count (character n-grams).</span>
     <div class="mchart-track"><div class="mchart-bar mchart-lex" style="width:55.0%"></div></div>
-    <div class="mchart-val"><span class="mchart-pct">55.0%</span><span class="mchart-cost">5 s</span></div>
+    <div class="mchart-val"><span class="mchart-pct">55.0%</span><span class="mchart-time"><i class="mchart-dot mchart-lex" style="left:36.5%" title="5 s"></i></span></div>
   </div>
   <div class="mchart-row">
     <div class="mchart-label"><span class="mchart-tip" tabindex="0" aria-describedby="mtip13">BM25, untuned</span></div><span class="mchart-tipbox" role="tooltip" tabindex="-1" id="mtip13">A refined version of counting words, with its textbook settings (BM25, k1 = 1.2 and b = 0.75).</span>
     <div class="mchart-track"><div class="mchart-bar mchart-lex" style="width:47.6%"></div></div>
-    <div class="mchart-val"><span class="mchart-pct">47.6%</span><span class="mchart-cost">&lt;1 s</span></div>
+    <div class="mchart-val"><span class="mchart-pct">47.6%</span><span class="mchart-time"><i class="mchart-dot mchart-lex" style="left:8.3%" title="0.2 s"></i></span></div>
   </div>
   <div class="mchart-group">Neural models on their own</div>
   <div class="mchart-row">
     <div class="mchart-label"><a href="https://huggingface.co/naver/splade-cocondenser-ensembledistil">SPLADE</a></div>
     <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:56.7%"></div></div>
-    <div class="mchart-val"><span class="mchart-pct">56.7%</span><span class="mchart-cost">2 min</span></div>
+    <div class="mchart-val"><span class="mchart-pct">56.7%</span><span class="mchart-time"><i class="mchart-dot mchart-emb" style="left:68.5%" title="2 min"></i></span></div>
   </div>
   <div class="mchart-row">
     <div class="mchart-label"><a href="https://huggingface.co/Qwen/Qwen3-Embedding-0.6B">Qwen3-Embedding-0.6B</a></div>
     <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:56.2%"></div></div>
-    <div class="mchart-val"><span class="mchart-pct">56.2%</span><span class="mchart-cost">55 min</span></div>
+    <div class="mchart-val"><span class="mchart-pct">56.2%</span><span class="mchart-time"><i class="mchart-dot mchart-emb" style="left:99.2%" title="55 min"></i></span></div>
   </div>
   <div class="mchart-row">
     <div class="mchart-label"><a href="https://huggingface.co/answerdotai/answerai-colbert-small-v1">answerai-colbert-small</a></div>
     <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:54.4%"></div></div>
-    <div class="mchart-val"><span class="mchart-pct">54.4%</span><span class="mchart-cost">1 min</span></div>
+    <div class="mchart-val"><span class="mchart-pct">54.4%</span><span class="mchart-time"><i class="mchart-dot mchart-emb" style="left:62.3%" title="1 min"></i></span></div>
   </div>
   <div class="mchart-row">
     <div class="mchart-label"><a href="https://huggingface.co/lightonai/GTE-ModernColBERT-v1">GTE-ModernColBERT</a></div>
     <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:52.6%"></div></div>
-    <div class="mchart-val"><span class="mchart-pct">52.6%</span><span class="mchart-cost">3 min</span></div>
+    <div class="mchart-val"><span class="mchart-pct">52.6%</span><span class="mchart-time"><i class="mchart-dot mchart-emb" style="left:70.4%" title="3 min"></i></span></div>
   </div>
   <div class="mchart-row">
     <div class="mchart-label"><a href="https://huggingface.co/thenlper/gte-small">gte-small</a>, <span class="mchart-tip" tabindex="0" aria-describedby="mtip21">by passage</span></div><span class="mchart-tipbox" role="tooltip" tabindex="-1" id="mtip21">Each issue and its comments split into passages, and the issue scored by its best one.</span>
     <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:51.1%"></div></div>
-    <div class="mchart-val"><span class="mchart-pct">51.1%</span><span class="mchart-cost">15 min</span></div>
+    <div class="mchart-val"><span class="mchart-pct">51.1%</span><span class="mchart-time"><i class="mchart-dot mchart-emb" style="left:86.9%" title="15 min"></i></span></div>
   </div>
   <div class="mchart-row">
     <div class="mchart-label"><a href="https://huggingface.co/thenlper/gte-small">gte-small</a></div>
     <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:46.0%"></div></div>
-    <div class="mchart-val"><span class="mchart-pct">46.0%</span><span class="mchart-cost">5 min</span></div>
+    <div class="mchart-val"><span class="mchart-pct">46.0%</span><span class="mchart-time"><i class="mchart-dot mchart-emb" style="left:76.2%" title="5 min"></i></span></div>
   </div>
   <div class="mchart-row">
     <div class="mchart-label"><a href="https://huggingface.co/intfloat/multilingual-e5-small">multilingual-e5-small</a></div>
     <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:44.0%"></div></div>
-    <div class="mchart-val"><span class="mchart-pct">44.0%</span><span class="mchart-cost">1 min</span></div>
+    <div class="mchart-val"><span class="mchart-pct">44.0%</span><span class="mchart-time"><i class="mchart-dot mchart-emb" style="left:63.7%" title="1 min"></i></span></div>
   </div>
   <div class="mchart-row">
     <div class="mchart-label"><a href="https://huggingface.co/BAAI/bge-small-en-v1.5">bge-small-en-v1.5</a></div>
     <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:43.7%"></div></div>
-    <div class="mchart-val"><span class="mchart-pct">43.7%</span><span class="mchart-cost">50 s</span></div>
+    <div class="mchart-val"><span class="mchart-pct">43.7%</span><span class="mchart-time"><i class="mchart-dot mchart-emb" style="left:58.4%" title="46 s"></i></span></div>
   </div>
   <div class="mchart-row">
     <div class="mchart-label"><a href="https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2">all-MiniLM-L6-v2</a></div>
     <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:41.0%"></div></div>
-    <div class="mchart-val"><span class="mchart-pct">41.0%</span><span class="mchart-cost">40 s</span></div>
+    <div class="mchart-val"><span class="mchart-pct">41.0%</span><span class="mchart-time"><i class="mchart-dot mchart-emb" style="left:57.6%" title="42 s"></i></span></div>
   </div>
   <div class="mchart-group">Controls</div>
   <div class="mchart-row">
     <div class="mchart-label"><span class="mchart-tip" tabindex="0" aria-describedby="mtip14">Five most recent</span></div><span class="mchart-tipbox" role="tooltip" tabindex="-1" id="mtip14">Always the five newest issues, which is what a plain issue list shows.</span>
     <div class="mchart-track"><div class="mchart-bar mchart-ctl" style="width:23.1%"></div></div>
-    <div class="mchart-val"><span class="mchart-pct">23.1%</span><span class="mchart-cost">&lt;1 s</span></div>
+    <div class="mchart-val"><span class="mchart-pct">23.1%</span><span class="mchart-time"></span></div>
   </div>
   <div class="mchart-row">
     <div class="mchart-label"><span class="mchart-tip" tabindex="0" aria-describedby="mtip15">Random</span></div><span class="mchart-tipbox" role="tooltip" tabindex="-1" id="mtip15">Five issues at random.</span>
     <div class="mchart-track"><div class="mchart-bar mchart-ctl" style="width:2.6%"></div></div>
-    <div class="mchart-val"><span class="mchart-pct">2.6%</span><span class="mchart-cost">&lt;1 s</span></div>
+    <div class="mchart-val"><span class="mchart-pct">2.6%</span><span class="mchart-time"></span></div>
   </div>
-  <figcaption class="mchart-cap">How often the issue someone actually linked shows up in the first five suggestions, and what each one takes to work through the forge once.</figcaption>
+  <figcaption class="mchart-cap">How often the issue someone actually linked shows up in the first five suggestions, and how long each one takes to work through the forge once, on a scale where every step is ten times the last.</figcaption>
 </figure>
 
 Counting words beat every model. The best one on its own, SPLADE, was seven points behind, and blending any of them into counting words added a point or two at most. What did help was structure rather than language. A decision, its follow-ups and the fix that later undid it tend to link to each other, so one good hit pulls in related issues that share few words with the new one.
