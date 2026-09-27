@@ -341,13 +341,9 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
       visibility: visible; opacity: 1; transition-delay: 0s;
     }
     article :global(.mchart-track) { background: #23272e; border-radius: 3px; height: 1.15rem; }
-    article :global(.mchart-bar) {
-      height: 100%; border-radius: 3px; min-width: 2px;
-      transition: width 0.7s cubic-bezier(0.22, 1, 0.36, 1);
-    }
-    @media (prefers-reduced-motion: reduce) {
-      article :global(.mchart-bar) { transition: none; }
-    }
+    /* No width transition: the bars change length behind a fade now, and a
+       tween running underneath it showed through as the table came back. */
+    article :global(.mchart-bar) { height: 100%; border-radius: 3px; min-width: 2px; }
     /* Left, so a number sits against the bar it belongs to - right-aligned in
        a column wider than the digits, a short value like 2.6% drifted away
        from its own bar. The width is set rather than left to stretch: the
@@ -662,6 +658,11 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
     if (mchart && mview) {
       const options = Array.from(mview.querySelectorAll<HTMLButtonElement>('button'));
       const rows = Array.from(mchart.querySelectorAll<HTMLElement>('.mchart-row[data-recall]'));
+      // Everything below the head: the rows, the group headings and the
+      // caption. This is what crosses over between the two views; the switch
+      // and the key stay put and stay visible.
+      const table = Array.from(mchart.children)
+        .filter(child => !child.classList.contains('mchart-head')) as HTMLElement[];
       // Rows are sorted inside their own group, never across: the groups are
       // the chart's argument - counting words, a model, a second pass over
       // the first - and one flat list would trade that for a glance. The
@@ -688,75 +689,35 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
         : t < 60 ? Math.round(t) + ' s'
         : t < 3600 ? Math.round(t / 60) + ' min' : (t / 3600).toFixed(1) + ' h';
 
-      // The bars ease between measures on their own, in CSS. The rows change
-      // ORDER too, and that is a jump unless something animates it: measure
-      // where each row is, let the sort happen, then play it back from where
-      // it was. Reduced motion skips the whole thing, and jsdom has no
-      // animate() at all, so both are checked rather than assumed.
-      const glide = (rearrange: () => void) => {
-        const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-          || typeof Element.prototype.animate !== 'function';
-        if (still) {
-          rearrange();
-          return;
-        }
-        const before = new Map(rows.map(row => [row, row.getBoundingClientRect().top]));
-        rearrange();
-        // Ordered by where a row ENDS UP, with a few milliseconds between
-        // each, so the chart resettles from the top down instead of twenty-odd
-        // rows crossing each other in one frame. The delay is capped: past a
-        // point a stagger stops reading as sequence and starts reading as lag.
-        const moving = rows
-          .filter(row => !row.hasAttribute('hidden'))
-          .sort((one, two) => one.getBoundingClientRect().top - two.getBoundingClientRect().top);
-        moving.forEach((row, index) => {
-          const from = before.get(row);
-          const shift = from === undefined ? 0 : from - row.getBoundingClientRect().top;
-          if (!shift) return;
-          row.animate(
-            [{ transform: 'translateY(' + shift + 'px)' }, { transform: 'none' }],
-            {
-              duration: 620,
-              delay: Math.min(index * 14, 200),
-              easing: 'cubic-bezier(0.22, 1, 0.36, 1)',
-              fill: 'backwards',
-            },
-          );
-        });
-      };
-
-      // A row that leaves the speed view used to blink out, and its heading
-      // with it. Collapsing is not a CSS transition away: [hidden] is
-      // display:none and there is nothing to interpolate, so the height is
-      // measured and animated, and the attribute goes on at the end. Running
-      // animations are cancelled first, or a fast double-switch leaves a row
-      // stuck at whatever height it was passing through.
-      const inFlight = new WeakMap<HTMLElement, Animation>();
-      const fold = (el: HTMLElement, away: boolean, settle: boolean) => {
-        const already = el.hasAttribute('hidden');
-        if (already === away) return;
-        inFlight.get(el)?.cancel();
+      // Every bar changes length, the rows change order, and two of them
+      // leave: animating all of that at once was the mess. The table fades
+      // out instead, changes while nobody is looking, and fades back - so the
+      // reader sees two clean states rather than the journey between them.
+      // The switch itself keeps its slide; it is what was just pressed.
+      let crossing: Animation[] = [];
+      const cross = (rebuild: () => void, settle: boolean) => {
         const still = settle
           || window.matchMedia('(prefers-reduced-motion: reduce)').matches
-          || typeof el.animate !== 'function';
+          || typeof mchart.animate !== 'function';
         if (still) {
-          el.toggleAttribute('hidden', away);
+          rebuild();
           return;
         }
-        if (!away) el.removeAttribute('hidden');
-        const full = el.getBoundingClientRect().height;
-        const shut = { height: '0px', opacity: 0, marginBottom: '0px' };
-        const open = { height: full + 'px', opacity: 1, marginBottom: '0.4rem' };
-        el.style.overflow = 'hidden';
-        const move = el.animate(away ? [open, shut] : [shut, open],
-          { duration: 420, easing: 'cubic-bezier(0.22, 1, 0.36, 1)' });
-        inFlight.set(el, move);
-        move.finished.then(() => {
-          el.style.overflow = '';
-          el.style.height = '';
-          if (away) el.setAttribute('hidden', '');
-          inFlight.delete(el);
-        }).catch(() => { /* cancelled by the next switch; it owns the state */ });
+        // A second press mid-fade cancels the first, or the table can be left
+        // sitting at whatever opacity that one had reached.
+        for (const running of crossing) running.cancel();
+        crossing = table.map(part => part.animate(
+          [{ opacity: 1 }, { opacity: 0 }],
+          { duration: 170, easing: 'ease-in', fill: 'forwards' },
+        ));
+        Promise.all(crossing.map(one => one.finished)).then(() => {
+          rebuild();
+          for (const running of crossing) running.cancel();
+          crossing = table.map(part => part.animate(
+            [{ opacity: 0 }, { opacity: 1 }],
+            { duration: 240, easing: 'ease-out' },
+          ));
+        }).catch(() => { /* cancelled by the next press; it owns the state */ });
       };
 
       const paint = (mode: string, settle = false) => {
@@ -764,44 +725,35 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
         for (const option of options) {
           option.setAttribute('aria-pressed', String(option.dataset.mode === mode));
         }
-        for (const row of rows) {
-          const bar = row.querySelector<HTMLElement>('.mchart-bar');
-          const val = row.querySelector<HTMLElement>('.mchart-val');
-          if (!bar || !val) continue;
-          const secs = row.dataset.secs;
-          // The two controls sort the list and stop: no index to build, so no
-          // run time, and a row reading "-" is a row asking to be read for
-          // nothing. They leave the speed view, and their heading with them.
-          fold(row, mode === 'speed' && !secs, settle);
-          if (mode === 'speed') {
-            if (!secs) continue;
-            bar.style.width = ((Math.log10(Number(secs)) - LOW) / SPAN * 100).toFixed(1) + '%';
-            val.textContent = say(Number(secs));
-          } else {
-            bar.style.width = row.dataset.recall + '%';
-            val.textContent = row.dataset.recall + '%';
+        cross(() => {
+          for (const row of rows) {
+            const bar = row.querySelector<HTMLElement>('.mchart-bar');
+            const val = row.querySelector<HTMLElement>('.mchart-val');
+            if (!bar || !val) continue;
+            const secs = row.dataset.secs;
+            // The two controls sort the list and stop: no index to build, so
+            // no run time, and a row reading "-" is a row asking to be read
+            // for nothing. They leave the speed view, heading and all.
+            row.toggleAttribute('hidden', mode === 'speed' && !secs);
+            if (mode === 'speed') {
+              if (!secs) continue;
+              bar.style.width = ((Math.log10(Number(secs)) - LOW) / SPAN * 100).toFixed(1) + '%';
+              val.textContent = say(Number(secs));
+            } else {
+              bar.style.width = row.dataset.recall + '%';
+              val.textContent = row.dataset.recall + '%';
+            }
           }
-          // A number that swaps in one frame while its bar is still travelling
-          // is the part that read as messy; fading it in lets the bar lead.
-          if (typeof val.animate === 'function') {
-            val.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 560, easing: 'ease-out' });
-          }
-        }
-        // Nothing animates on load. The written order already matches what
-        // sorting by quality produces, so the first pass moves nothing - but
-        // if a future edit puts a row out of order, this keeps the correction
-        // silent rather than playing it at the reader as the page settles.
-        (settle ? (rearrange: () => void) => rearrange() : glide)(() => {
           for (const group of groups) {
-            fold(group.heading,
-              group.rows.every(row => !row.dataset.secs) && mode === 'speed', settle);
+            group.heading.toggleAttribute('hidden',
+              mode === 'speed' && group.rows.every(row => !row.dataset.secs));
             const sorted = group.rows.slice();
             sorted.sort(mode === 'speed'
               ? (one, two) => Number(one.dataset.secs ?? Infinity) - Number(two.dataset.secs ?? Infinity)
               : (one, two) => Number(two.dataset.recall) - Number(one.dataset.recall));
             for (const row of sorted) mchart.insertBefore(row, group.anchor);
           }
-        });
+        }, settle);
       };
 
       for (const option of options) {
