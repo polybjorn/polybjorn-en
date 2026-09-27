@@ -232,11 +232,23 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
       color: #8a8f99; font-size: 0.85rem; margin-top: 0.7rem; line-height: 1.5;
       text-align: center;
     }
+    /* One line over the chart: what the colours mean on the left, the view
+       control on the right. They wrap to their own lines on a narrow screen
+       and both centre there, which is where the key sat before the buttons
+       existed. Without JS the buttons never appear, and :has puts the key
+       back in the middle rather than leaving it hanging at the left. */
+    article :global(.mchart-head) {
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 0.5rem 1rem; margin-bottom: 0.9rem;
+    }
+    article :global(.mchart-head:has(.mchart-modes[hidden]) .mchart-key) {
+      margin-inline: auto;
+    }
     article :global(.mchart-key) {
       display: flex; flex-wrap: wrap; gap: 0.35rem 1rem;
-      color: #b5bac3; font-size: 0.85rem; margin-bottom: 0.9rem;
-      /* Centred over the whole figure rather than left-aligned against the
-         label column, which put it above the labels instead of the bars. */
+      color: #b5bac3; font-size: 0.85rem;
+      /* Centred when it is alone; beside the buttons it sits left, which is
+         what the head's space-between gives it. */
       justify-content: center;
     }
     article :global(.mchart-key span) { display: inline-flex; align-items: center; gap: 0.4rem; }
@@ -274,7 +286,7 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
       color: #dde1e7; font-size: 0.75rem; text-transform: uppercase;
       letter-spacing: 0.06em; margin: 1rem 0 0.4rem; text-align: center;
     }
-    article :global(.mchart-key + .mchart-group) { margin-top: 0; }
+    article :global(.mchart-head + .mchart-group) { margin-top: 0; }
     /* Focus as well as hover, because a tap on a phone focuses the span and
        never hovers it. The box is a direct child of the row so it can sit in
        the bar column: an absolutely positioned grid child takes its grid area
@@ -319,9 +331,7 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
        control that does nothing.
        [hidden] alone will not hide either: .mchart-row and .mchart-modes set
        display, and a display rule beats the attribute. */
-    article :global(.mchart-modes) {
-      display: flex; justify-content: center; gap: 0.4rem; margin-bottom: 0.7rem;
-    }
+    article :global(.mchart-modes) { display: flex; gap: 0.4rem; }
     article :global(.mchart-modes[hidden]),
     article :global(.mchart-row[hidden]) { display: none; }
     article :global(.mchart-mode) {
@@ -372,6 +382,9 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
          sheds one when the grid drops to two columns - otherwise its third
          child wraps onto a line of its own and the axis sits under the bars. */
       article :global(.mchart-ticks > div:first-child) { display: none; }
+      /* Stacked rather than pushed apart, so neither lands against an edge. */
+      article :global(.mchart-head) { justify-content: center; }
+      article :global(.mchart-head .mchart-key) { margin-inline: auto; }
       /* label moves above its own bar rather than squeezing a third column */
       article :global(.mchart-label) {
         grid-column: 1 / -1; text-align: left; margin-top: 0.4rem;
