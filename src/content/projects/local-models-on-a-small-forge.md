@@ -197,7 +197,7 @@ The likeliest reason is what my issues are made of. They're full of exact names,
       <span><i class="vocab-sw sw-link"></i>hidden link</span>
     </div>
   </div>
-  <figcaption class="vocab-cap">One issue, each word shaded by how many of the forge&#39;s 489 issues it appears in. The rare ones carry the meaning, and they&#39;re mostly exact names a model trained on English has rarely seen. Rarity is counted across this forge, not across English, which is why an ordinary word like &quot;fewer&quot; counts as rare here.</figcaption>
+  <figcaption class="vocab-cap">Counted across this forge&#39;s 489 issues, not across English - so &quot;fewer&quot; is rare here.</figcaption>
 </figure>
 
 Where a method had settings to tune, I tuned them on older links and checked them on newer ones, so the results aren't just fitted to the answers. The answer key only counts links someone bothered to write, so a useful suggestion can still score as a miss, and the real numbers are probably a little higher. Most of those links were written by the AI coding agents I run, which search by keyword and might favour counting words, but the models lost on the links I wrote myself too.
