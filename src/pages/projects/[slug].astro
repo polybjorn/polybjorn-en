@@ -759,7 +759,11 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
 
       const paint = (mode: string, settle = false) => {
         mchart.dataset.mode = mode;
-        mcurrent.textContent = mode === 'speed' ? 'speed' : 'quality';
+        // Read off the chosen option rather than spelled again here: the
+        // markup is where these words live, and a second copy is how the
+        // closed control ended up lower case while its own menu was not.
+        const chosen = options.find(option => option.dataset.mode === mode);
+        if (chosen?.textContent) mcurrent.textContent = chosen.textContent;
         for (const option of options) {
           option.setAttribute('aria-pressed', String(option.dataset.mode === mode));
         }
