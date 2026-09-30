@@ -1,0 +1,28 @@
+# Target exclusions for the `static` gate in .forgejo/workflows/ci.yml.
+#
+# THIS FILE REPLACES semgrep's built-in list rather than adding to it. Measured
+# on 1.178.0: a five-file fixture where the built-in list skipped three went to
+# four scanned once a .semgrepignore holding ONE unrelated pattern existed. So
+# every directory that should stay out has to be named here, and deleting a line
+# below puts that directory back in scope rather than restoring a default.
+#
+# THE POINT OF THE FILE IS THE TWO LINES THAT ARE NOT IN IT: `tests/` and
+# `test/`. bjorn/polybjorn-en#130 measured the gate scanning 25 of 52 tracked
+# .js/.mjs/.ts files, and the 27 it missed were the whole test suite, out
+# because of the built-in list rather than because anyone decided that. Cost of
+# bringing them in, measured with the real p/javascript and p/typescript before
+# this was written: 0 findings.
+#
+# The rest is the built-in list as probed on 1.178.0 rather than read off the
+# docs. `__tests__/`, `spec/`, `specs/`, `testing/`, `coverage/`, `out/`,
+# `target/`, `third_party/`, `bower_components/`, `.next/`, `.nuxt/`, `.cache/`
+# and `env/` are NOT in it, and neither is any `*.test.*` or `*_test.*` FILE
+# pattern - which is why lifting two directory lines is the whole change.
+node_modules/
+vendor/
+dist/
+build/
+.venv/
+.tox/
+.npm/
+*.min.js
