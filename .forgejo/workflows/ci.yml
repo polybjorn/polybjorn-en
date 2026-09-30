@@ -128,11 +128,17 @@ jobs:
           token: ${{ github.token }}
       - uses: https://git-ci.pebblecove.xyz:8447/bjorn/ci-actions/semgrep-scan@v1
         with:
-          # These two rather than `default` (1073 rules): 50 tracked files are
+          # These two rather than `default` (1073 rules): 54 tracked files are
           # .js, .mjs or .ts, and `default`'s python half would scan none of
           # them. semgrep does not parse .astro, so the 25 .astro files are out
           # of scope and the script blocks inside them go unscanned - the real
           # gap in this gate's coverage.
+          #
+          # ALL 54 ARE SCANNED, which needed the repo's .semgrepignore and did
+          # not use to be true: semgrep's built-in ignore list drops `tests/`,
+          # so this gate read 25 of the 54 and the whole test suite was out.
+          # bjorn/polybjorn-en#130 measured it. Read the count off the job's own
+          # `Ran N rules on M files` line rather than off this comment.
           rulesets: javascript typescript
           # Every finding, not only what a change introduces, which is where
           # bjorn/media-tools landed after #33 and #34. `new` needs a baseline
