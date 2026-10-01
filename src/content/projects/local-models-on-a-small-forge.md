@@ -59,12 +59,12 @@ The models I tried are all small enough to run on a laptop. Most turn each issue
     <div class="mchart-val">65.1%</div>
   </div>
   <div class="mchart-row" data-recall="64.1" data-secs="161">
-    <div class="mchart-label">+ <a href="https://huggingface.co/lightonai/GTE-ModernColBERT-v1">GTE-ModernColBERT</a></div>
+    <div class="mchart-label">+ <a href="https://huggingface.co/lightonai/GTE-ModernColBERT-v1"><span class="mchart-long">GTE-ModernColBERT</span><span class="mchart-short">ModernColBERT</span></a></div>
     <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:64.1%"></div></div>
     <div class="mchart-val">64.1%</div>
   </div>
   <div class="mchart-row" data-recall="64.0" data-secs="3294">
-    <div class="mchart-label">+ <a href="https://huggingface.co/Qwen/Qwen3-Embedding-0.6B">Qwen3-Embedding</a></div>
+    <div class="mchart-label">+ <a href="https://huggingface.co/Qwen/Qwen3-Embedding-0.6B"><span class="mchart-long">Qwen3-Embedding</span><span class="mchart-short">Qwen3-Embed</span></a></div>
     <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:64.0%"></div></div>
     <div class="mchart-val">64.0%</div>
   </div>
@@ -74,18 +74,18 @@ The models I tried are all small enough to run on a laptop. Most turn each issue
     <div class="mchart-val">64.0%</div>
   </div>
   <div class="mchart-row" data-recall="63.8" data-secs="69">
-    <div class="mchart-label">+ <a href="https://huggingface.co/answerdotai/answerai-colbert-small-v1">answerai-colbert-small</a></div>
+    <div class="mchart-label">+ <a href="https://huggingface.co/answerdotai/answerai-colbert-small-v1"><span class="mchart-long">answerai-colbert-small</span><span class="mchart-short">answerai-colbert</span></a></div>
     <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:63.8%"></div></div>
     <div class="mchart-val">63.8%</div>
   </div>
   <div class="mchart-row" data-recall="49.4" data-secs="485">
-    <div class="mchart-label">+ <a href="https://huggingface.co/cross-encoder/ms-marco-MiniLM-L-6-v2">ms-marco-MiniLM-L-6-v2</a></div>
+    <div class="mchart-label">+ <a href="https://huggingface.co/cross-encoder/ms-marco-MiniLM-L-6-v2"><span class="mchart-long">ms-marco-MiniLM-L-6-v2</span><span class="mchart-short">ms-marco-MiniLM</span></a></div>
     <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:49.4%"></div></div>
     <div class="mchart-val">49.4%</div>
   </div>
   <div class="mchart-group">Counting words</div>
   <div class="mchart-row" data-recall="63.8" data-secs="0.5">
-    <div class="mchart-label"><span class="mchart-tip" tabindex="0" aria-describedby="mtip3">Counting words + comments</span></div><span class="mchart-tipbox" role="tooltip" tabindex="-1" id="mtip3">Counting words over each issue plus all its comments.</span>
+    <div class="mchart-label"><span class="mchart-tip" tabindex="0" aria-describedby="mtip3"><span class="mchart-long">Counting words + comments</span><span class="mchart-short">With comments</span></span></div><span class="mchart-tipbox" role="tooltip" tabindex="-1" id="mtip3">Counting words over each issue plus all its comments.</span>
     <div class="mchart-track"><div class="mchart-bar mchart-lex" style="width:63.8%"></div></div>
     <div class="mchart-val">63.8%</div>
   </div>
@@ -95,7 +95,7 @@ The models I tried are all small enough to run on a laptop. Most turn each issue
     <div class="mchart-val">63.8%</div>
   </div>
   <div class="mchart-row" data-recall="62.8" data-secs="0.3">
-    <div class="mchart-label"><span class="mchart-tip" tabindex="0" aria-describedby="mtip5">BM25 + comments, tuned</span></div><span class="mchart-tipbox" role="tooltip" tabindex="-1" id="mtip5">A refined version of counting words that stops a repeated word from dominating and evens out long and short issues (BM25F). Titles weighted up and comments down.</span>
+    <div class="mchart-label"><span class="mchart-tip" tabindex="0" aria-describedby="mtip5"><span class="mchart-long">BM25 + comments, tuned</span><span class="mchart-short">BM25, tuned</span></span></div><span class="mchart-tipbox" role="tooltip" tabindex="-1" id="mtip5">A refined version of counting words that stops a repeated word from dominating and evens out long and short issues (BM25F). Titles weighted up and comments down.</span>
     <div class="mchart-track"><div class="mchart-bar mchart-lex" style="width:62.8%"></div></div>
     <div class="mchart-val">62.8%</div>
   </div>
@@ -105,7 +105,7 @@ The models I tried are all small enough to run on a laptop. Most turn each issue
     <div class="mchart-val">62.5%</div>
   </div>
   <div class="mchart-row" data-recall="61.9" data-secs="0.5">
-    <div class="mchart-label"><span class="mchart-tip" tabindex="0" aria-describedby="mtip9">Identifiers kept whole</span></div><span class="mchart-tipbox" role="tooltip" tabindex="-1" id="mtip9">Counting words with comments, but names like checks/service-state.nix stay one word instead of four.</span>
+    <div class="mchart-label"><span class="mchart-tip" tabindex="0" aria-describedby="mtip9"><span class="mchart-long">Identifiers kept whole</span><span class="mchart-short">Whole identifiers</span></span></div><span class="mchart-tipbox" role="tooltip" tabindex="-1" id="mtip9">Counting words with comments, but names like checks/service-state.nix stay one word instead of four.</span>
     <div class="mchart-track"><div class="mchart-bar mchart-lex" style="width:61.9%"></div></div>
     <div class="mchart-val">61.9%</div>
   </div>
@@ -115,7 +115,7 @@ The models I tried are all small enough to run on a laptop. Most turn each issue
     <div class="mchart-val">57.0%</div>
   </div>
   <div class="mchart-row" data-recall="56.3" data-secs="2.1">
-    <div class="mchart-label"><span class="mchart-tip" tabindex="0" aria-describedby="mtip11">Counting words + topics</span></div><span class="mchart-tipbox" role="tooltip" tabindex="-1" id="mtip11">Counting words, blended with a model of which words tend to appear together (LSA).</span>
+    <div class="mchart-label"><span class="mchart-tip" tabindex="0" aria-describedby="mtip11"><span class="mchart-long">Counting words + topics</span><span class="mchart-short">With topics</span></span></div><span class="mchart-tipbox" role="tooltip" tabindex="-1" id="mtip11">Counting words, blended with a model of which words tend to appear together (LSA).</span>
     <div class="mchart-track"><div class="mchart-bar mchart-lex" style="width:56.3%"></div></div>
     <div class="mchart-val">56.3%</div>
   </div>
@@ -136,17 +136,17 @@ The models I tried are all small enough to run on a laptop. Most turn each issue
     <div class="mchart-val">56.7%</div>
   </div>
   <div class="mchart-row" data-recall="56.2" data-secs="3294">
-    <div class="mchart-label"><a href="https://huggingface.co/Qwen/Qwen3-Embedding-0.6B">Qwen3-Embedding-0.6B</a></div>
+    <div class="mchart-label"><a href="https://huggingface.co/Qwen/Qwen3-Embedding-0.6B"><span class="mchart-long">Qwen3-Embedding-0.6B</span><span class="mchart-short">Qwen3-Embed</span></a></div>
     <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:56.2%"></div></div>
     <div class="mchart-val">56.2%</div>
   </div>
   <div class="mchart-row" data-recall="54.4" data-secs="69">
-    <div class="mchart-label"><a href="https://huggingface.co/answerdotai/answerai-colbert-small-v1">answerai-colbert-small</a></div>
+    <div class="mchart-label"><a href="https://huggingface.co/answerdotai/answerai-colbert-small-v1"><span class="mchart-long">answerai-colbert-small</span><span class="mchart-short">answerai-colbert</span></a></div>
     <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:54.4%"></div></div>
     <div class="mchart-val">54.4%</div>
   </div>
   <div class="mchart-row" data-recall="52.6" data-secs="161">
-    <div class="mchart-label"><a href="https://huggingface.co/lightonai/GTE-ModernColBERT-v1">GTE-ModernColBERT</a></div>
+    <div class="mchart-label"><a href="https://huggingface.co/lightonai/GTE-ModernColBERT-v1"><span class="mchart-long">GTE-ModernColBERT</span><span class="mchart-short">ModernColBERT</span></a></div>
     <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:52.6%"></div></div>
     <div class="mchart-val">52.6%</div>
   </div>
@@ -161,17 +161,17 @@ The models I tried are all small enough to run on a laptop. Most turn each issue
     <div class="mchart-val">46.0%</div>
   </div>
   <div class="mchart-row" data-recall="44.0" data-secs="80">
-    <div class="mchart-label"><a href="https://huggingface.co/intfloat/multilingual-e5-small">multilingual-e5-small</a></div>
+    <div class="mchart-label"><a href="https://huggingface.co/intfloat/multilingual-e5-small"><span class="mchart-long">multilingual-e5-small</span><span class="mchart-short">e5-small</span></a></div>
     <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:44.0%"></div></div>
     <div class="mchart-val">44.0%</div>
   </div>
   <div class="mchart-row" data-recall="43.7" data-secs="46">
-    <div class="mchart-label"><a href="https://huggingface.co/BAAI/bge-small-en-v1.5">bge-small-en-v1.5</a></div>
+    <div class="mchart-label"><a href="https://huggingface.co/BAAI/bge-small-en-v1.5"><span class="mchart-long">bge-small-en-v1.5</span><span class="mchart-short">bge-small</span></a></div>
     <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:43.7%"></div></div>
     <div class="mchart-val">43.7%</div>
   </div>
   <div class="mchart-row" data-recall="41.0" data-secs="42">
-    <div class="mchart-label"><a href="https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2">all-MiniLM-L6-v2</a></div>
+    <div class="mchart-label"><a href="https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2"><span class="mchart-long">all-MiniLM-L6-v2</span><span class="mchart-short">all-MiniLM</span></a></div>
     <div class="mchart-track"><div class="mchart-bar mchart-emb" style="width:41.0%"></div></div>
     <div class="mchart-val">41.0%</div>
   </div>
