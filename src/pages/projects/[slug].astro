@@ -953,6 +953,13 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
           animate, animationDuration: 600,
         });
         ringed.show();
+        // rough-notation redraws on every resize whose measured box differs by
+        // a rounded pixel, and text a browser lays out at a new subpixel offset
+        // does, so a window drag made the ring twitch in size until it settled.
+        // The svg sits in the number's own cell and moves with it, so those
+        // redraws have nothing to correct; the one real change in size, the
+        // smaller type below 560px, redraws below.
+        (ringed as unknown as { detachListeners(): void }).detachListeners();
         // Decorative, and hidden from a screen reader on purpose: the rows are
         // already sorted by the measure and the number itself is read out, so an
         // unnamed graphic here would only add a stop.
@@ -1069,6 +1076,12 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
         seen?.disconnect();
         drawing = window.setTimeout(() => ring(mode, true), TRAVEL);
       };
+
+      // Same query as the stylesheet's narrow layout, where the number's type
+      // gets smaller and the ring drawn for the old size would hang loose.
+      matchMedia('(max-width: 560px)').addEventListener('change', () => {
+        if (ringed) ring(mchart.dataset.mode ?? 'recall', false);
+      });
 
       for (const option of options) {
         option.addEventListener('click', () => paint(option.dataset.mode ?? 'recall'));
