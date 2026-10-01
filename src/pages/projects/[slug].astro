@@ -436,13 +436,24 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
     article :global(.mchart-lex) { background: #6aaeee; }
     article :global(.mchart-emb) { background: #e8b775; }
     article :global(.mchart-ctl) { background: #8a8f99; }
+    /* The short name is a phone-width spelling of the long one, shown in its
+       place so a label fits beside its bar; the link and its target stay. */
+    article :global(.mchart-short) { display: none; }
     /* 560, not 480: kept from the two-number layout. The rows are back to one
        number, but the axis labels and the button row both read better stacked
        before the bars get narrow. */
     @media (max-width: 560px) {
-      article :global(.mchart) { grid-template-columns: 1fr max-content; column-gap: 0.5rem; }
-      article :global(.mchart-row) { row-gap: 0.35rem; }
-      article :global(.mchart-tipbox) { grid-column: 1 / 2; grid-row: 2 / 3; }
+      /* Label, bar and number on one line, as on a wide screen. The label
+         column takes what the longest short name needs, up to 40% of the
+         figure, and a prose label that runs past that wraps inside its cell
+         rather than pushing the row onto two. */
+      article :global(.mchart) {
+        grid-template-columns: fit-content(40%) minmax(0, 1fr) max-content;
+        column-gap: 0.5rem;
+      }
+      article :global(.mchart-long) { display: none; }
+      article :global(.mchart-short) { display: inline; }
+      article :global(.mchart-tipbox) { grid-column: 1 / -1; grid-row: 1 / 2; }
       /* Two centred lines rather than two columns: neither has room to sit
          on its own alignment line at this width. */
       article :global(.mchart-head) { grid-template-columns: 1fr; }
@@ -458,11 +469,10 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
       article :global(.mchart-head .mchart-key) {
         flex-wrap: wrap; justify-content: center;
       }
-      /* label moves above its own bar rather than squeezing a third column */
       article :global(.mchart-label) {
-        grid-column: 1 / -1; text-align: left; margin-top: 0.4rem;
-        white-space: normal;
+        font-size: 0.8rem; line-height: 1.2; white-space: normal;
       }
+      article :global(.mchart-val) { width: auto; min-width: 2.6rem; font-size: 0.8rem; }
     }
     /* The vocabulary figure, in markup for the reasons .mchart gives above. It
        was a 720px SVG with its line breaks baked in, which a 327px phone scaled
