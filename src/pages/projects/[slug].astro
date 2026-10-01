@@ -370,6 +370,11 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
     article :global(.mchart-val) {
       font-size: 0.85rem; font-variant-numeric: tabular-nums; color: #dde1e7;
       width: 3rem; justify-self: start;
+      /* The ring is an absolutely placed svg beside the number, measured once
+         and redrawn only 400ms after a resize settles. Placed against the row,
+         it slid off the number for the whole of a window drag; placed against
+         this cell, it moves with the number because nothing inside moves. */
+      position: relative;
     }
     /* Two segments and a thumb that slides between them, because there is one
        question - which measure the bars are showing - and two answers. A
@@ -456,7 +461,13 @@ const fmt = (d: Date) => d.toISOString().slice(0, 10);
       article :global(.mchart-tipbox) { grid-column: 1 / -1; grid-row: 1 / 2; }
       /* Two centred lines rather than two columns: neither has room to sit
          on its own alignment line at this width. */
-      article :global(.mchart-head) { grid-template-columns: 1fr; }
+      /* The control, the key and the first heading are three centred lines
+         of different widths, so they need air between them to read as three
+         things rather than one block. */
+      article :global(.mchart-head) {
+        grid-template-columns: 1fr; row-gap: 0.85rem; margin-bottom: 1.6rem;
+      }
+      article :global(.mchart-group) { margin: 1.5rem 0 0.6rem; }
       article :global(.mchart-head .mchart-key),
       article :global(.mchart-head:has(.mchart-modes[hidden]) .mchart-key),
       article :global(.mchart-modes) { grid-column: 1 / -1; justify-self: center; }
