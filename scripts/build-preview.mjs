@@ -5,7 +5,8 @@
  * The base path has to be baked into the build, and it has to match the path
  * the publisher will put it on, or the page renders with every asset missing.
  * Rather than asking someone to type the same slug twice, this derives it the
- * way `site-preview` does and hands back the publish command.
+ * way `site-preview` does and hands back the publish command. The publisher
+ * reads the branch from the checkout it runs in, so the command carries none.
  *
  *   npm run preview:build              # base from the current branch
  *   BRANCH=herd/other npm run preview:build
@@ -43,4 +44,4 @@ for (const args of [
   if (run.status !== 0) process.exit(run.status ?? 1);
 }
 
-console.log(`\npreview:build: publish it with\n  site-preview publish ${SITE} dist ${branch}`);
+console.log(`\npreview:build: publish it with\n  site-preview publish ${SITE} dist`);

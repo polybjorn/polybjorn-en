@@ -81,8 +81,9 @@ site-preview publish polybjorn-en dist
 ```
 
 `preview:build` derives the base path from the current branch, the same way the
-publisher derives the directory it will land in, and prints the publish command
-with the branch filled in. `BRANCH=herd/other` overrides it.
+publisher derives the directory it will land in, and prints the publish command.
+`site-preview publish` takes no branch: it reads it from the checkout, so a
+`BRANCH=herd/other` override only lines up when published from that branch.
 
 Two halves make it work. Astro's `base` covers what Astro emits, including the
 font URLs compiled into the CSS, and `scripts/prepare-preview.mjs` prefixes what
